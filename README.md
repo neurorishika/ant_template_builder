@@ -47,3 +47,17 @@ poetry run python scripts/resample.py --help
 You can also generate mirrored images by using the `-m' flag. This will generate mirrored images in the 'resampled_data' folder.
 
 ### 6. Run the registration script
+
+The bash script for running the registration is in the `group_registration` folder. To run the script, navigate to the `group_registration` folder and run the following command:
+
+```
+./run_registration.sh
+```
+
+Once the registration is complete, the final results will be in the 'results/obiroi_brain_YYYYMMDD_HHMM' folder, all intermediate information will be inside the 'affine' and  'syn' subfolders. The final template will be in the 'results/obiroi_brain_YYYYMMDD_HHMM/complete_template.nii.gz' file. Note that this template will be in the same orientation and resolution as the input images. To generate videos or a higher resolution template, please see the next section.
+
+### (Optional) Generate a video of the final template
+
+### (Optional) Generate a higher resolution template
+
+### (Optional) Register a new brain to the template
