@@ -154,8 +154,6 @@ cython_debug/
 # Ignore all files in folder named 'raw_data'
 raw_data/*
 
-# Ignore all files in folder named 'clean_data'
-cleaned_data/*
-
-# Ignore all *.nii.gz files in all subfolders
+# Ignore all NIFTI1 files in all subfolders
+**/*.nii
 **/*.nii.gz
