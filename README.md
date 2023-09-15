@@ -1,5 +1,7 @@
 # Kronauer Lab - Ooceraea biroi CNS Brain Template 2023
 
+![ants](https://www.rockefeller.edu/research/uploads/www.rockefeller.edu/sites/8/2017/12/clonal_ants7-2400x800.png)
+
 This repository contains the protocol to generate a 3D template of the brain of the ant *Ooceraea biroi* (Clonal Raider Ant) from anti-Synapsin1 stained confocal stacks of the ant brain (α-SYN A647 marker) imaged at the [Kronauer Lab](https://www.rockefeller.edu/research/2280-kronauer-laboratory/) at the [Rockefeller University](https://www.rockefeller.edu/). The brains were imaged at 0.13 μm x 0.13 μm x 0.29 μm.
 
 ## Protocol for generating the template
@@ -18,7 +20,7 @@ git clone https://github.com/neurorishika/ant_template_builder.git
 
 ### 3. Place the pre-processed images in the `cleaned_data` folder
 
-The pre-processed images should be in the `.nii.gz` format. The code assumes that the images are in the same orientation, please use [Fiji](https://imagej.net/Fiji/Downloads) to reorient the images if they are not in the same orientation.
+The pre-processed images should be in the `.nii.gz` format. The code assumes that the images are in the same orientation, please use [Fiji](https://imagej.net/Fiji/Downloads) to reorient the images if they are not in the same orientation. You can export to Nifti format from Fiji by using the [Nifti Plugin](https://imagej.nih.gov/ij/plugins/nifti.html). 
 
 ### 4. Install poetry and build the environment
 
@@ -30,16 +32,18 @@ poetry install
 
 ### 5. Run the resampling script
 
-To run the resampling script, run the following command in the terminal:
+To run the resampling script, run the following command in the terminal (make sure you are in the `ant_template_builder` folder).
 
 ```
-poetry run python resample.py
+poetry run python scripts/resample.py
 ```
 
 By default, the target resolution is an isotropic resolution of 0.8 μm. You can use "--help" to see the options for the script, including the option to change the target resolution to a different value (potentially anisotropic). The script will generate the resampled images in the `resampled_data` folder.
 
 ```
-poetry run python resample.py --help
+poetry run python scripts/resample.py --help
 ```
 
+You can also generate mirrored images by using the `-m' flag. This will generate mirrored images in the 'resampled_data' folder.
 
+### 6. Run the registration script
