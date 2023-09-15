@@ -1,0 +1,25 @@
+[tool.poetry]
+name = "ant-template-builder"
+version = "0.1.0"
+description = "Code to build an O. biroi standard brain template using Synorf stained Confocal Stacks of Adult CNS"
+authors = ["Rishika Mohanta"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.10,<3.13"
+pytest = "^7.4.2"
+jupyter = "^1.0.0"
+nibabel = "^5.1.0"
+ipykernel = "^6.25.2"
+nilearn = "^0.10.1"
+scipy = "^1.11.2"
+matplotlib = "^3.8.0"
+ipywidgets = "^8.1.1"
+argparse = "^1.4.0"
+tqdm = "^4.66.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
