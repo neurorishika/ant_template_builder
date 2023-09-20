@@ -157,3 +157,7 @@ raw_data/*
 # Ignore all NIFTI1 files in all subfolders
 **/*.nii
 **/*.nii.gz
+
+# Ignore all subfolders in folder named 'results'
+results/*/
+

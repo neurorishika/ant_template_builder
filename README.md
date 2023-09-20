@@ -30,6 +30,21 @@ The pre-processed images should be in the `.nii.gz` format. The code assumes tha
 poetry install
 ```
 
+### (Optional) Run the mirroring script
+
+If you want to generate mirrored images in order to symmetrize the template, you can run the mirroring script. To run the mirroring script, run the following command in the terminal (make sure you are in the `ant_template_builder` folder).
+
+```
+poetry run python scripts/generate_mirror.py
+```
+
+By default, the script will look for data (*.nii.gz files) in the `cleaned_data` folder and generate mirrored images in the same folder. You can use "--help" to see the options for the script, including the option to change the input and output folders.
+
+```
+poetry run python scripts/generate_mirror.py --help
+```
+
+
 ### 5. Run the resampling script
 
 To run the resampling script, run the following command in the terminal (make sure you are in the `ant_template_builder` folder).
@@ -58,6 +73,6 @@ Once the registration is complete, the final results will be in the 'results/obi
 
 ### (Optional) Generate a video of the final template
 
-### (Optional) Generate a higher resolution template
+### (Optional) Generate a higher resolution template from a lower resolution template
 
 ### (Optional) Register a new brain to the template

@@ -7,7 +7,6 @@ import glob # file handling
 from scipy.ndimage import zoom # image processing
 import gc # garbage collection
 import argparse # command line arguments
-from tqdm import tqdm # progress bar
 
 # clear output
 os.system('cls' if os.name == 'nt' else 'clear')
@@ -25,7 +24,7 @@ parser = argparse.ArgumentParser(description='Resample confocal stacks to a targ
 parser.add_argument('-i','--input_dir', type=str, help='path to input directory (must contain .nii.gz files; default: ./cleaned_data)', default="./cleaned_data", nargs='?')
 parser.add_argument('-o','--output_dir', type=str, help='path to output directory (default: ./resampled_data)', default="./resampled_data", nargs='?')
 parser.add_argument('-v','--target_voxel_size', type=str, help='target voxel size in microns (e.g. 0.8x0.8x0.8)', default="0.8x0.8x0.8", nargs='?')
-parser.add_argument('-m','--mirror', type=bool, help='generate mirrored images (default: False)', default=False, nargs='?')
+# parser.add_argument('-m','--mirror', type=bool, help='generate mirrored images (default: False)', default=False, nargs='?')
 
 args = parser.parse_args()
 
@@ -49,7 +48,7 @@ input_dir = args.input_dir
 assert os.path.isdir(input_dir), "Input directory does not exist."
 
 # check if input directory has required files
-data_files = glob.glob(os.path.join(input_dir, "*.nii.gz"))
+data_files = list(glob.glob(os.path.join(input_dir, "*.nii.gz")))
 assert len(data_files) > 0, "Input directory does not contain any files."
 
 # create output directory if it does not exist
@@ -61,11 +60,25 @@ output_files = glob.glob(os.path.join(input_dir, "*.nii.gz"))
 # append '_resampled' to output files
 output_files = [os.path.join(output_dir, os.path.basename(f).replace('.nii.gz', f'_resampled_{original_target_voxel_size}.nii.gz')) for f in output_files]
 
+# def generate_mirror_name(x):
+#     """
+#     INPUT FORMAT: x = 'path/to/IDENTIFIER_resampled_0.8x0.8x0.8.nii.gz'
+#     OUTPUT FORMAT: 'path/to/IDENTIFIER_resampled_mirror_0.8x0.8x0.8.nii.gz'
+#     """
+#     x = x.split('_')
+#     x = x[0:-1] + ['mirror'] + x[-1:]
+#     return '_'.join(x)
+
 # check if output files already exist
 for f in output_files:
     if os.path.isfile(f):
         print(f"Output file {f} already exists. Will be overwritten.")
         os.remove(f)
+    # check if mirrored output files already exist
+    # if args.mirror:
+    #     if os.path.isfile(generate_mirror_name(f)):
+    #         print(f"Output file {generate_mirror_name(f)} already exists. Will be overwritten.")
+    #         os.remove(generate_mirror_name(f))
 
 # generate mirrored images
 generate_mirror = args.mirror
@@ -151,26 +164,26 @@ for index in range(len(data_files)):
     nb.save(resampled_data, output_files[index])
     print("Resampled data saved.")
 
-    # generate mirrored images
-    if generate_mirror:
-        print("Generating mirrored image")
-        resampled_data_array = np.flip(resampled_data_array, axis=0)
+    # # generate mirrored images
+    # if generate_mirror:
+    #     print("Generating mirrored image")
+    #     resampled_data_array = np.flip(resampled_data_array, axis=0)
         
-        new_affine_m = np.copy(full_data.affine)
-        new_affine_m = new_affine_m @ np.diag(np.append(new_pixel_dims, 1.0))
-        # apply flip to affine
-        new_affine_m[0, :] = -new_affine_m[0, :]
+    #     new_affine_m = np.copy(full_data.affine)
+    #     new_affine_m = new_affine_m @ np.diag(np.append(new_pixel_dims, 1.0))
+    #     # apply flip to affine
+    #     new_affine_m[0, :] = -new_affine_m[0, :]
 
-        print(f"Saving mirrored data to {output_files[index].replace('.nii.gz', '_mirror.nii.gz')}...", end='')
-        resampled_data = nb.Nifti1Image(resampled_data_array, new_affine, new_header)
-        nb.save(resampled_data, output_files[index].replace('.nii.gz', '_mirror.nii.gz'))
-        print("Mirrored data saved.")
+    #     print(f"Saving mirrored data to {generate_mirror_name(output_files[index])}...", end='')
+    #     resampled_data = nb.Nifti1Image(resampled_data_array, new_affine, new_header)
+    #     nb.save(resampled_data, generate_mirror_name(output_files[index]))
+    #     print("Mirrored data saved.")
 
     ## clean up
     print("Cleaning up...", end='')
 
     # initialize garbage collection
-    del resampled_data_array, data_array, resampled_data, full_data, new_affine, new_header, new_image_dims, new_pixel_dims, pixel_dims, resampling_factor, target_resolution, data_files
+    del resampled_data_array, data_array, resampled_data, full_data, new_affine, new_header, new_image_dims, new_pixel_dims, pixel_dims, resampling_factor, image_dims, target_resolution
 
     # force garbage collection
     gc.collect()
