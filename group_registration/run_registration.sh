@@ -6,7 +6,11 @@
 DATE=$(date +"%Y%m%d_%H%M")
 
 # Setup a identifier (with wildcards) for the images to be registered (e.g. synA647_*.nii.gz)
-ID=synA647_*_1.5x1.5x1.5.nii.gz
+ID=TEST_*.nii.gz
+
+# Setup the number of threads to be used
+THREADS_AFFINE=8
+THREADS_SYN=2
 
 # Create a directory for the template building in the current directory
 # FORMAT: obiroi_brain_<DATE>
@@ -32,7 +36,7 @@ cp ../resampled_data/$ID ./
 ## STEP 3: Run the registration
 
 # Run the initial affine registration
-./ANTs/Scripts/buildtemplateparallel.sh -d 3 -m 1x0x0 -i 10 -o affine_ -c 2 -j 8 $ID > stdout-affline-template.txt 2>stderr-affline-template.txt
+./ANTs/Scripts/buildtemplateparallel.sh -d 3 -m 1x0x0 -i 10 -o affine_ -c 2 -j $THREADS_AFFINE $ID > stdout-affline-template.txt 2>stderr-affline-template.txt
 
 # Move all generated files to the affine subdirectory
 # Things to move: affine_* stdout-affline-template.txt, stderr-affline-template.txt, *.cfg, job*.* and GR* folders
@@ -48,7 +52,7 @@ cp obiroi_brain_$DATE/affine/affine_template.nii.gz ./affine_template.nii.gz
 cp obiroi_brain_$DATE/affine/affine_template.nii.gz obiroi_brain_$DATE/affine_template.nii.gz
 
 # Run the syn registration
-./ANTs/Scripts/buildtemplateparallel.sh -d 3 -i 10 -m 60x180x40x16 -t GR -c 2 -j 8 -o complete_ -z affine_template.nii.gz $ID > stdout-syn-template.txt 2>stderr-syn-template.txt
+./ANTs/Scripts/buildtemplateparallel.sh -d 3 -i 10 -m 60x180x40x16 -t GR -c 2 -j $THREADS_SYN -o complete_ -z affine_template.nii.gz $ID > stdout-syn-template.txt 2>stderr-syn-template.txt
 
 # Move all generated files to the syn subdirectory
 # Things to move: complete_* stdout-syn-template.txt, stderr-syn-template.txt, *.cfg, job*.* and GR* folders

@@ -7,6 +7,7 @@ import glob # file handling
 from scipy.ndimage import zoom # image processing
 import gc # garbage collection
 import argparse # command line arguments
+import time # timing
 
 # clear output
 os.system('cls' if os.name == 'nt' else 'clear')
@@ -24,7 +25,6 @@ parser = argparse.ArgumentParser(description='Resample confocal stacks to a targ
 parser.add_argument('-i','--input_dir', type=str, help='path to input directory (must contain .nii.gz files; default: ./cleaned_data)', default="./cleaned_data", nargs='?')
 parser.add_argument('-o','--output_dir', type=str, help='path to output directory (default: ./resampled_data)', default="./resampled_data", nargs='?')
 parser.add_argument('-v','--target_voxel_size', type=str, help='target voxel size in microns (e.g. 0.8x0.8x0.8)', default="0.8x0.8x0.8", nargs='?')
-# parser.add_argument('-m','--mirror', type=bool, help='generate mirrored images (default: False)', default=False, nargs='?')
 
 args = parser.parse_args()
 
@@ -49,6 +49,10 @@ assert os.path.isdir(input_dir), "Input directory does not exist."
 
 # check if input directory has required files
 data_files = list(glob.glob(os.path.join(input_dir, "*.nii.gz")))
+
+# remove all files that have '_mirror' in their name
+data_files = [i for i in data_files if '_mirror' not in i]
+
 assert len(data_files) > 0, "Input directory does not contain any files."
 
 # create output directory if it does not exist
@@ -56,41 +60,39 @@ output_dir = args.output_dir
 if not os.path.isdir(output_dir):
     os.makedirs(output_dir)
 
-output_files = glob.glob(os.path.join(input_dir, "*.nii.gz"))
+output_files = list(glob.glob(os.path.join(input_dir, "*.nii.gz")))
+
+# remove all files that have '_mirror' in their name
+output_files = [i for i in output_files if '_mirror' not in i]
+
 # append '_resampled' to output files
 output_files = [os.path.join(output_dir, os.path.basename(f).replace('.nii.gz', f'_resampled_{original_target_voxel_size}.nii.gz')) for f in output_files]
-
-# def generate_mirror_name(x):
-#     """
-#     INPUT FORMAT: x = 'path/to/IDENTIFIER_resampled_0.8x0.8x0.8.nii.gz'
-#     OUTPUT FORMAT: 'path/to/IDENTIFIER_resampled_mirror_0.8x0.8x0.8.nii.gz'
-#     """
-#     x = x.split('_')
-#     x = x[0:-1] + ['mirror'] + x[-1:]
-#     return '_'.join(x)
 
 # check if output files already exist
 for f in output_files:
     if os.path.isfile(f):
         print(f"Output file {f} already exists. Will be overwritten.")
         os.remove(f)
-    # check if mirrored output files already exist
-    # if args.mirror:
-    #     if os.path.isfile(generate_mirror_name(f)):
-    #         print(f"Output file {generate_mirror_name(f)} already exists. Will be overwritten.")
-    #         os.remove(generate_mirror_name(f))
 
-# generate mirrored images
-generate_mirror = args.mirror
 
+estimated_timestring = "Estimating time to completion..."
 
 # resample each file
 for index in range(len(data_files)):
+
+    if index == 0:
+        start_time = time.time()
+    else:
+        time_per_file = (time.time() - start_time) / index
+        estimated_time = time_per_file * (len(data_files) - index)
+        estimated_timestring = "Estimated time to completion: {}h {}m {}s".format(int(estimated_time // 3600), int(estimated_time // 60), int(estimated_time % 60))
 
     # print progress
     print(f"Resampling file {index+1} of {len(data_files)}")
     print("="*len(f"Resampling file {index+1} of {len(data_files)}"))
           
+    # print estimated time to completion
+    print(estimated_timestring)
 
     full_data = nb.load(data_files[index])
     print(f"Data file: {data_files[index]}")
@@ -114,79 +116,91 @@ for index in range(len(data_files)):
     resampling_factor = np.append(resampling_factor, 1)
     print(f"Resampling factor: {resampling_factor[0]:.2f} x {resampling_factor[1]:.2f} x {resampling_factor[2]:.2f}")
 
-    # get data in dtype in float32
-    print("Loading data...", end='')
-    data_array = full_data.get_fdata(dtype=np.float32)
-    print("Data loaded.")
-
-    # resample data using scipy bilinear interpolation
-    print("Resampling data...", end='')
-    resampled_data_array = zoom(data_array, resampling_factor, order=1)
-    print("Data resampled.")
-
-    # uncache data array
-    print("Uncaching data...", end='')
-    full_data.uncache()
-    print("Data uncached.")
-
-    # get new image dimensions
-    new_image_dims = resampled_data_array.shape[0:3]
+    # get new image dimension
+    new_image_dims = np.round(np.multiply(image_dims, resampling_factor)).astype(np.int)
     print(f"New image dimensions: {new_image_dims[0]} x {new_image_dims[1]} pixels x {new_image_dims[2]} slices, {np.prod(new_image_dims)} voxels")
 
-    # get new pixel dimensions
-    new_pixel_dims = np.multiply(pixel_dims, np.divide(image_dims, new_image_dims))
-    print(f"New pixel dimensions: {new_pixel_dims[0]:.2f} μm x {new_pixel_dims[1]:.2f} μm x {new_pixel_dims[2]:.2f} μm")
+    print("Resampling data")
 
-    # normalize data to [0, 1]
+    # print log file location
+    print("Log file: {}".format(output_files[index][:-7] + '_out.log'))
+    print("Error file: {}".format(output_files[index][:-7] + '_err.log'))
+
+    # resample data using ANTs
+    os.system('ResampleImage 3 {} {} {}x{}x{} 0 0 5 >{}_out.log 2>{}_err.log'.format(data_files[index], output_files[index], target_resolution[0], target_resolution[1], target_resolution[2], output_files[index][:-7], output_files[index][:-7]))
+
     print("Normalizing intensity")
-    resampled_data_array = (resampled_data_array - np.min(resampled_data_array)) / (np.max(resampled_data_array) - np.min(resampled_data_array))
 
-    # convert to int16
-    print("Converting to uint16")
-    resampled_data_array = (resampled_data_array * 65535).astype(np.uint16)
 
-    # define as nifti object
+    # print log file location
+    print("Log file: {}".format(output_files[index][:-7] + '_norm_out.log'))
+    print("Error file: {}".format(output_files[index][:-7] + '_norm_err.log'))
 
-    # new affine
-    new_affine = np.copy(full_data.affine)
-    # modify affine to reflect new pixel dimensions
-    new_affine = new_affine @ np.diag(np.append(new_pixel_dims, 1.0))
+    # Use ImageMath to Normalize Intensity
+    os.system('ImageMath 3 {} Normalize {} >{}_norm_out.log 2>{}_norm_err.log'.format(output_files[index], output_files[index], output_files[index][:-7], output_files[index][:-7]))
+    
+    # # get data in dtype in float32
+    # print("Loading data...", end='')
+    # data_array = full_data.get_fdata(dtype=np.float32)
+    # print("Data loaded.")
 
-    # new header
-    new_header = full_data.header.copy()
-    # modify header to reflect new dimensions
-    new_header['pixdim'][1:4] = new_pixel_dims
-    new_header['dim'][1:4] = new_image_dims
+    # # resample data using scipy bilinear interpolation
+    # print("Resampling data...", end='')
+    # resampled_data_array = zoom(data_array, resampling_factor, order=1)
+    # print("Data resampled.")
 
-    # save resampled data
-    print(f"Saving resampled data to {output_files[index]}...", end='')
-    resampled_data = nb.Nifti1Image(resampled_data_array, new_affine, new_header)
-    nb.save(resampled_data, output_files[index])
-    print("Resampled data saved.")
+    # # uncache data array
+    # print("Uncaching data...", end='')
+    # full_data.uncache()
+    # print("Data uncached.")
 
-    # # generate mirrored images
-    # if generate_mirror:
-    #     print("Generating mirrored image")
-    #     resampled_data_array = np.flip(resampled_data_array, axis=0)
-        
-    #     new_affine_m = np.copy(full_data.affine)
-    #     new_affine_m = new_affine_m @ np.diag(np.append(new_pixel_dims, 1.0))
-    #     # apply flip to affine
-    #     new_affine_m[0, :] = -new_affine_m[0, :]
+    # # get new image dimensions
+    # new_image_dims = resampled_data_array.shape[0:3]
+    # print(f"New image dimensions: {new_image_dims[0]} x {new_image_dims[1]} pixels x {new_image_dims[2]} slices, {np.prod(new_image_dims)} voxels")
 
-    #     print(f"Saving mirrored data to {generate_mirror_name(output_files[index])}...", end='')
-    #     resampled_data = nb.Nifti1Image(resampled_data_array, new_affine, new_header)
-    #     nb.save(resampled_data, generate_mirror_name(output_files[index]))
-    #     print("Mirrored data saved.")
+    # # get new pixel dimensions
+    # new_pixel_dims = np.multiply(pixel_dims, np.divide(image_dims, new_image_dims))
+    # print(f"New pixel dimensions: {new_pixel_dims[0]:.2f} μm x {new_pixel_dims[1]:.2f} μm x {new_pixel_dims[2]:.2f} μm")
 
-    ## clean up
-    print("Cleaning up...", end='')
+    # # normalize data to [0, 1]
+    # print("Normalizing intensity")
+    # resampled_data_array = (resampled_data_array - np.min(resampled_data_array)) / (np.max(resampled_data_array) - np.min(resampled_data_array))
 
-    # initialize garbage collection
-    del resampled_data_array, data_array, resampled_data, full_data, new_affine, new_header, new_image_dims, new_pixel_dims, pixel_dims, resampling_factor, image_dims, target_resolution
+    # # convert to int16
+    # print("Converting to uint16")
+    # resampled_data_array = (resampled_data_array * 65535).astype(np.uint16)
 
-    # force garbage collection
-    gc.collect()
+    # # define as nifti object
+
+    # # new affine
+    # new_affine = np.copy(full_data.affine)
+    # # modify affine to reflect new pixel dimensions
+    # new_affine = new_affine @ np.diag(np.append(new_pixel_dims, 1.0))
+
+    # # new header
+    # new_header = full_data.header.copy()
+    # # modify header to reflect new dimensions
+    # new_header['pixdim'][1:4] = new_pixel_dims
+    # new_header['dim'][1:4] = new_image_dims
+
+    # # save resampled data
+    # print(f"Saving resampled data to {output_files[index]}...", end='')
+    # resampled_data = nb.Nifti1Image(resampled_data_array, new_affine, new_header)
+    # nb.save(resampled_data, output_files[index])
+    # print("Resampled data saved.")
+
+    # # uncache resampled data
+    # print("Uncaching resampled data...", end='')
+    # resampled_data.uncache()
+
+    # ## clean up
+    # print("Cleaning up...", end='')
+
+    # # initialize garbage collection
+    # del resampled_data_array, data_array, resampled_data, full_data, new_affine, new_header, new_image_dims, new_pixel_dims, pixel_dims, resampling_factor, image_dims, target_resolution
+
+    # # force garbage collection
+    # gc.collect()
 
     print("Done.")
 

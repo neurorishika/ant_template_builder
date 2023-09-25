@@ -38,11 +38,12 @@ If you want to generate mirrored images in order to symmetrize the template, you
 poetry run python scripts/generate_mirror.py
 ```
 
-By default, the script will look for data (*.nii.gz files) in the `cleaned_data` folder and generate mirrored images in the same folder. You can use "--help" to see the options for the script, including the option to change the input and output folders.
+By default, the script will look for data (*.nii.gz files) in the `cleaned_data` folder and generate mirrored images in the same folder. You can use "--help" to see the options for the script, including the option to change the input and output folders. Also it will replace any mirrored images that already exist in the output folder unless the -skip flag is set as True.
 
 ```
 poetry run python scripts/generate_mirror.py --help
 ```
+
 
 
 ### 5. Run the resampling script
