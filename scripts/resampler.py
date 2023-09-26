@@ -104,8 +104,8 @@ for index in range(len(data_files)):
     target_resolution = np.array(target_voxel_size)
     print(f"Target resolution: {target_resolution[0]} μm x {target_resolution[1]} μm x {target_resolution[2]} μm")
 
-    # convert to mm
-    target_resolution = target_resolution / 1000
+    # # convert to mm
+    # target_resolution = target_resolution / 1000
     
     # # get resampling factor for each dimension
     # resampling_factor = np.divide(pixel_dims, target_resolution)
@@ -126,15 +126,15 @@ for index in range(len(data_files)):
     # resample data using ANTs
     os.system('ResampleImage 3 {} {} {}x{}x{} 0 0 5 >{}_out.log 2>{}_err.log'.format(data_files[index], output_files[index], target_resolution[0], target_resolution[1], target_resolution[2], output_files[index][:-5], output_files[index][:-5]))
 
-    print("Normalizing intensity")
+    # print("Normalizing intensity")
 
 
-    # print log file location
-    print("Log file: {}".format(output_files[index][:-5] + '_norm_out.log'))
-    print("Error file: {}".format(output_files[index][:-5] + '_norm_err.log'))
+    # # print log file location
+    # print("Log file: {}".format(output_files[index][:-5] + '_norm_out.log'))
+    # print("Error file: {}".format(output_files[index][:-5] + '_norm_err.log'))
 
-    # Use ImageMath to Normalize Intensity
-    os.system('ImageMath 3 {} Normalize {} >{}_norm_out.log 2>{}_norm_err.log'.format(output_files[index], output_files[index], output_files[index][:-5], output_files[index][:-5]))
+    # # Use ImageMath to Normalize Intensity
+    # os.system('ImageMath 3 {} Normalize {} >{}_norm_out.log 2>{}_norm_err.log'.format(output_files[index], output_files[index], output_files[index][:-5], output_files[index][:-5]))
     
     # # get data in dtype in float32
     # print("Loading data...", end='')

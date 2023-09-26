@@ -13,8 +13,8 @@ THREADS_AFFINE=8
 THREADS_SYN=2
 
 # Setup the number of iterations to be used
-ITERATIONS_AFFINE=10
-ITERATIONS_SYN=10
+ITERATIONS_AFFINE=4
+ITERATIONS_SYN=4
 
 # Create a directory for the template building in the current directory
 # FORMAT: obiroi_brain_<DATE>
@@ -56,7 +56,7 @@ cp obiroi_brain_$DATE/affine/affine_template.nii.gz ./affine_template.nii.gz
 cp obiroi_brain_$DATE/affine/affine_template.nii.gz obiroi_brain_$DATE/affine_template.nii.gz
 
 # Run the syn registration
-./ANTs/Scripts/buildtemplateparallel.sh -d 3 -i $ITERATIONS_SYN -m 60x180x40x16 -t GR -s CC -z affine_template.nii.gz -c 2 -j $THREADS_SYN -o complete_  $ID > stdout-syn-template.txt 2>stderr-syn-template.txt
+./ANTs/Scripts/buildtemplateparallel.sh -d 3 -i $ITERATIONS_SYN -m 30x90x20x8 -t GR -s CC -z affine_template.nii.gz -c 2 -j $THREADS_SYN -o complete_  $ID > stdout-syn-template.txt 2>stderr-syn-template.txt
 
 # Move all generated files to the syn subdirectory
 # Things to move: complete_* stdout-syn-template.txt, stderr-syn-template.txt, *.cfg, job*.* and GR* folders
