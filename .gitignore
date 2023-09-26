@@ -158,6 +158,9 @@ raw_data/*
 **/*.nii
 **/*.nii.gz
 
+# Ignore all NRRD files in all subfolders
+**/*.nrrd
+
 # Ignore all subfolders in folder named 'results'
 results/*/
 

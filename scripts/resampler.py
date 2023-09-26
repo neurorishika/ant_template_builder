@@ -2,10 +2,10 @@
 
 import os # file handling
 import numpy as np # linear algebra
-import nibabel as nb # neuroimaging file handling
+# import nibabel as nb # neuroimaging file handling
 import glob # file handling
-from scipy.ndimage import zoom # image processing
-import gc # garbage collection
+# from scipy.ndimage import zoom # image processing
+# import gc # garbage collection
 import argparse # command line arguments
 import time # timing
 
@@ -22,7 +22,7 @@ print(start_string)
 
 # parse command line arguments
 parser = argparse.ArgumentParser(description='Resample confocal stacks to a target voxel size.')
-parser.add_argument('-i','--input_dir', type=str, help='path to input directory (must contain .nii.gz files; default: ./cleaned_data)', default="./cleaned_data", nargs='?')
+parser.add_argument('-i','--input_dir', type=str, help='path to input directory (must contain .nrrd files; default: ./cleaned_data)', default="./cleaned_data", nargs='?')
 parser.add_argument('-o','--output_dir', type=str, help='path to output directory (default: ./resampled_data)', default="./resampled_data", nargs='?')
 parser.add_argument('-v','--target_voxel_size', type=str, help='target voxel size in microns (e.g. 0.8x0.8x0.8)', default="0.8x0.8x0.8", nargs='?')
 
@@ -48,7 +48,7 @@ input_dir = args.input_dir
 assert os.path.isdir(input_dir), "Input directory does not exist."
 
 # check if input directory has required files
-data_files = list(glob.glob(os.path.join(input_dir, "*.nii.gz")))
+data_files = list(glob.glob(os.path.join(input_dir, "*.nrrd")))
 
 # remove all files that have '_mirror' in their name
 data_files = [i for i in data_files if '_mirror' not in i]
@@ -60,13 +60,13 @@ output_dir = args.output_dir
 if not os.path.isdir(output_dir):
     os.makedirs(output_dir)
 
-output_files = list(glob.glob(os.path.join(input_dir, "*.nii.gz")))
+output_files = list(glob.glob(os.path.join(input_dir, "*.nrrd")))
 
 # remove all files that have '_mirror' in their name
 output_files = [i for i in output_files if '_mirror' not in i]
 
 # append '_resampled' to output files
-output_files = [os.path.join(output_dir, os.path.basename(f).replace('.nii.gz', f'_resampled_{original_target_voxel_size}.nii.gz')) for f in output_files]
+output_files = [os.path.join(output_dir, os.path.basename(f).replace('.nrrd', f'_resampled_{original_target_voxel_size}.nrrd')) for f in output_files]
 
 # check if output files already exist
 for f in output_files:
@@ -94,31 +94,34 @@ for index in range(len(data_files)):
     # print estimated time to completion
     print(estimated_timestring)
 
-    full_data = nb.load(data_files[index])
-    print(f"Data file: {data_files[index]}")
+    # full_data = nb.load(data_files[index])
+    # print(f"Data file: {data_files[index]}")
 
-    # get pixel dimensions in microns (x, y, z)
-    assert full_data.header.get_xyzt_units()[0] == 'micron', "Pixel dimensions are not in microns"
-    pixel_dims = full_data.header['pixdim'][1:4]
-    print(f"Pixel dimensions: {pixel_dims[0]} μm x {pixel_dims[1]} μm x {pixel_dims[2]} μm")
+    # # get pixel dimensions in microns (x, y, z)
+    # assert full_data.header.get_xyzt_units()[0] == 'micron', "Pixel dimensions are not in microns"
+    # pixel_dims = full_data.header['pixdim'][1:4]
+    # print(f"Pixel dimensions: {pixel_dims[0]} μm x {pixel_dims[1]} μm x {pixel_dims[2]} μm")
 
-    # get image dims (x, y, z)
-    image_dims = full_data.header['dim'][1:4]
-    print(f"Image dimensions: {image_dims[0]} x {image_dims[1]} pixels x {image_dims[2]} slices, {np.prod(image_dims)} voxels")
+    # # get image dims (x, y, z)
+    # image_dims = full_data.header['dim'][1:4]
+    # print(f"Image dimensions: {image_dims[0]} x {image_dims[1]} pixels x {image_dims[2]} slices, {np.prod(image_dims)} voxels")
 
     # target resolution in microns (x, y, z)
     target_resolution = np.array(target_voxel_size)
     print(f"Target resolution: {target_resolution[0]} μm x {target_resolution[1]} μm x {target_resolution[2]} μm")
 
-    # get resampling factor for each dimension
-    resampling_factor = np.divide(pixel_dims, target_resolution)
-    # add a singleton dimension to account for the channel dimension
-    resampling_factor = np.append(resampling_factor, 1)
-    print(f"Resampling factor: {resampling_factor[0]:.2f} x {resampling_factor[1]:.2f} x {resampling_factor[2]:.2f}")
+    # convert to mm
+    target_resolution = target_resolution / 1000
+    
+    # # get resampling factor for each dimension
+    # resampling_factor = np.divide(pixel_dims, target_resolution)
+    # # add a singleton dimension to account for the channel dimension
+    # resampling_factor = np.append(resampling_factor, 1)
+    # print(f"Resampling factor: {resampling_factor[0]:.2f} x {resampling_factor[1]:.2f} x {resampling_factor[2]:.2f}")
 
-    # get new image dimension
-    new_image_dims = np.round(np.multiply(image_dims, resampling_factor)).astype(np.int)
-    print(f"New image dimensions: {new_image_dims[0]} x {new_image_dims[1]} pixels x {new_image_dims[2]} slices, {np.prod(new_image_dims)} voxels")
+    # # get new image dimension
+    # new_image_dims = np.round(np.multiply(image_dims, resampling_factor)).astype(np.int)
+    # print(f"New image dimensions: {new_image_dims[0]} x {new_image_dims[1]} pixels x {new_image_dims[2]} slices, {np.prod(new_image_dims)} voxels")
 
     print("Resampling data")
 
