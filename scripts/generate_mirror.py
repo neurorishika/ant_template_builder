@@ -21,7 +21,7 @@ print(start_string)
 
 # parse command line arguments
 parser = argparse.ArgumentParser(description='Generate mirrored images.')
-parser.add_argument('-i','--input_dir', type=str, help='path to input directory (must contain .nii.gz files; default: ./cleaned_data)', default="./cleaned_data", nargs='?')
+parser.add_argument('-i','--input_dir', type=str, help='path to input directory (must contain .nrrd files; default: ./cleaned_data)', default="./cleaned_data", nargs='?')
 parser.add_argument('-o','--output_dir', type=str, help='path to output directory (default: ./cleaned_data)', default="./cleaned_data", nargs='?')
 parser.add_argument('-skip','--skip_existing', type=bool, help='skip existing files (default: False)', default=False, nargs='?')
 args = parser.parse_args()
@@ -32,7 +32,7 @@ input_dir = args.input_dir
 assert os.path.isdir(input_dir), "Input directory does not exist."
 
 # check if input directory has required files
-data_files = list(glob.glob(os.path.join(input_dir, "*.nii.gz")))
+data_files = list(glob.glob(os.path.join(input_dir, "*.nrrd")))
 
 # remove all files that have '_mirror' in their name
 data_files = [i for i in data_files if '_mirror' not in i]
@@ -47,12 +47,12 @@ if not os.path.isdir(output_dir):
 # function to generate mirrored file name
 def generate_mirror_name(x,output_dir=args.output_dir):
     """
-    INPUT FORMAT: x = 'path/to/IDENTIFIER.nii.gz'
-    OUTPUT FORMAT: '<output_dir>/IDENTIFIER_mirror.nii.gz'
+    INPUT FORMAT: x = 'path/to/IDENTIFIER.nrrd'
+    OUTPUT FORMAT: '<output_dir>/IDENTIFIER_mirror.nrrd'
     Note: IDENTIFIER can include underscores and dots.
     """
-    x = x.split('.nii.gz')[0]
-    x = x + '_mirror.nii.gz'
+    x = x.split('.nrrd')[0]
+    x = x + '_mirror.nrrd'
     # change output directory
     x = os.path.join(output_dir, os.path.basename(x))
     return x

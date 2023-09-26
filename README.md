@@ -77,3 +77,48 @@ Once the registration is complete, the final results will be in the 'results/obi
 ### (Optional) Generate a higher resolution template from a lower resolution template
 
 ### (Optional) Register a new brain to the template
+
+
+## Setup on RU HPC Cluster
+
+### 1. Get an account on the HPC cluster
+
+Contact the [HPC team](https://hpc.rockefeller.edu/contact) to get an account on the HPC cluster. They will give you the instructions to connect to the cluster via ssh.
+
+### 2. Access the HPC cluster via ssh and setup Spack
+
+Once you have an account on the HPC cluster, you can access the cluster via ssh. You can use the following command to access the cluster:
+
+```
+ssh -l <username> login<node>-hpc.rockefeller.edu
+```
+
+Once you are logged in, you can setup Spack by adding the following lines to your `.bashrc` file:
+
+```
+# Spack
+SPACK_RELEASE=spack_2020b
+source /ru-auth/local/home/ruitsoft/soft/spackrc/spackrc.sh
+```
+
+Latest instructions for setting up Spack can be found [here](https://hpcguide.rockefeller.edu/guides/spack.html)
+
+Restart your terminal and run the following command to initialize Spack:
+
+```
+lmodinit
+```
+
+Load the modules needed for building ANTs:
+
+```
+module load gcc/9.3.0
+module load cmake/3.18.2
+```
+
+Note: You can cross-reference the modules available on the HPC cluster using ```module avail gcc``` and ```module avail cmake``` with the suggested versions for compiling ANTs as mentioned [here](https://github.com/ANTsX/ANTs/wiki/Compiling-ANTs-on-Linux-and-Mac-OS), and choose the most appropriate version.
+
+### 3. Rest of the setup
+
+Follow the instructions from step 2 in the previous section to complete the setup. It is preferred to setup the repository in the scratch folder on the HPC cluster for the lab. For the Kronauer lab, the scratch folder is located at `/rugpfs/fs0/kron_lab/scratch/<username>`.
+
