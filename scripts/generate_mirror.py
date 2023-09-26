@@ -22,7 +22,7 @@ print(start_string)
 # parse command line arguments
 parser = argparse.ArgumentParser(description='Generate mirrored images.')
 parser.add_argument('-i','--input_dir', type=str, help='path to input directory (must contain .nrrd files; default: ./cleaned_data)', default="./cleaned_data", nargs='?')
-parser.add_argument('-o','--output_dir', type=str, help='path to output directory (default: ./cleaned_data)', default="./cleaned_data", nargs='?')
+parser.add_argument('-o','--output_dir', type=str, help='path to output directory (default: same as input)', default="", nargs='?')
 parser.add_argument('-skip','--skip_existing', type=bool, help='skip existing files (default: False)', default=False, nargs='?')
 args = parser.parse_args()
 
@@ -30,6 +30,8 @@ args = parser.parse_args()
 input_dir = args.input_dir
 # check if input directory exists
 assert os.path.isdir(input_dir), "Input directory does not exist."
+
+print("Input directory: {}".format(input_dir))
 
 # check if input directory has required files
 data_files = list(glob.glob(os.path.join(input_dir, "*.nrrd")))
@@ -41,11 +43,17 @@ assert len(data_files) > 0, "Input directory does not contain any files."
 
 # create output directory if it does not exist
 output_dir = args.output_dir
-if not os.path.isdir(output_dir):
-    os.makedirs(output_dir)
+
+if output_dir == "":
+    output_dir = input_dir
+else:
+    if not os.path.isdir(output_dir):
+        os.makedirs(output_dir)
+
+print("Output directory: {}".format(output_dir))
 
 # function to generate mirrored file name
-def generate_mirror_name(x,output_dir=args.output_dir):
+def generate_mirror_name(x,output_dir=output_dir):
     """
     INPUT FORMAT: x = 'path/to/IDENTIFIER.nrrd'
     OUTPUT FORMAT: '<output_dir>/IDENTIFIER_mirror.nrrd'
@@ -89,33 +97,14 @@ for input_file, output_file in zip(data_files, output_files):
     # generate mirrored file using ANTs
     os.system('PermuteFlipImageOrientationAxes 3 {} {} 0 1 2 1 0 0 >{}_out.log 2>{}_err.log'.format(input_file, output_file, output_file[:-7], output_file[:-7]))
 
-    # # load file
-    # print("Loading file...", end='')
-    # img = nb.load(input_file)
-    # data = img.get_fdata(dtype=np.float32)
-    # print("File loaded.")
 
-    # # mirror data
-    # mirrored_data = np.flip(data, axis=0)
+# Remove all empty log files
+print("Removing empty log files...")
 
-    # # generate new affine matrix
-    # new_affine = np.copy(img.affine)
-    # new_affine[0, :] = -new_affine[0, :]
-    
-    # # generate new image
-    # mirrored_img = nb.Nifti1Image(mirrored_data, new_affine, img.header)
-
-    # # save new image
-    # print("Saving file...", end='')
-    # nb.save(mirrored_img, output_file)
-    # print("File saved.")
-
-    # # clear variables
-    # del img, data, mirrored_data, mirrored_img
-
-    # # run garbage collection
-    # gc.collect()
-
-print("Done.")
+for file in os.listdir(output_dir):
+    if file.endswith("_out.log") or file.endswith("_err.log"):
+        if os.stat(os.path.join(output_dir, file)).st_size == 0:
+            os.remove(os.path.join(output_dir, file))
+print("Done. Exiting...")
 
     

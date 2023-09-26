@@ -6,7 +6,7 @@
 DATE=$(date +"%Y%m%d_%H%M")
 
 # Setup a identifier (with wildcards) for the images to be registered (e.g. synA647_*.nii.gz)
-ID=TEST_*.nii.gz
+ID=synA647_*.nrrd
 
 # Setup the number of threads to be used
 THREADS_AFFINE=8

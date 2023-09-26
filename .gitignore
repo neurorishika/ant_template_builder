@@ -164,3 +164,8 @@ raw_data/*
 # Ignore all subfolders in folder named 'results'
 results/*/
 
+# ignore all files in group_registration folder except for the run_registration.sh file
+group_registration/*
+group_registration/*/
+!group_registration/run_registration.sh
+!group_registration/ANTs/

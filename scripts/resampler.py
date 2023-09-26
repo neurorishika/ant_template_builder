@@ -126,21 +126,21 @@ for index in range(len(data_files)):
     print("Resampling data")
 
     # print log file location
-    print("Log file: {}".format(output_files[index][:-7] + '_out.log'))
-    print("Error file: {}".format(output_files[index][:-7] + '_err.log'))
+    print("Log file: {}".format(output_files[index][:-5] + '_out.log'))
+    print("Error file: {}".format(output_files[index][:-5] + '_err.log'))
 
     # resample data using ANTs
-    os.system('ResampleImage 3 {} {} {}x{}x{} 0 0 5 >{}_out.log 2>{}_err.log'.format(data_files[index], output_files[index], target_resolution[0], target_resolution[1], target_resolution[2], output_files[index][:-7], output_files[index][:-7]))
+    os.system('ResampleImage 3 {} {} {}x{}x{} 0 0 5 >{}_out.log 2>{}_err.log'.format(data_files[index], output_files[index], target_resolution[0], target_resolution[1], target_resolution[2], output_files[index][:-5], output_files[index][:-5]))
 
     print("Normalizing intensity")
 
 
     # print log file location
-    print("Log file: {}".format(output_files[index][:-7] + '_norm_out.log'))
-    print("Error file: {}".format(output_files[index][:-7] + '_norm_err.log'))
+    print("Log file: {}".format(output_files[index][:-5] + '_norm_out.log'))
+    print("Error file: {}".format(output_files[index][:-5] + '_norm_err.log'))
 
     # Use ImageMath to Normalize Intensity
-    os.system('ImageMath 3 {} Normalize {} >{}_norm_out.log 2>{}_norm_err.log'.format(output_files[index], output_files[index], output_files[index][:-7], output_files[index][:-7]))
+    os.system('ImageMath 3 {} Normalize {} >{}_norm_out.log 2>{}_norm_err.log'.format(output_files[index], output_files[index], output_files[index][:-5], output_files[index][:-5]))
     
     # # get data in dtype in float32
     # print("Loading data...", end='')
@@ -210,7 +210,16 @@ for index in range(len(data_files)):
     # clear output
     os.system('cls' if os.name == 'nt' else 'clear')
 
-print("All files resampled.")
+# Remove all empty log files
+
+print("Removing empty log files...")
+
+for file in os.listdir(output_dir):
+    if file.endswith("_out.log") or file.endswith("_err.log"):
+        if os.stat(os.path.join(output_dir, file)).st_size == 0:
+            os.remove(os.path.join(output_dir, file))
+
+print("All files resampled. Exiting...")
 
 
 
