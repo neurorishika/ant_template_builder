@@ -124,7 +124,7 @@ for index in range(len(data_files)):
     print("Error file: {}".format(output_files[index][:-5] + '_err.log'))
 
     # resample data using ANTs
-    os.system('ResampleImage 3 {} {} {}x{}x{} 0 0 5 >{}_out.log 2>{}_err.log'.format(data_files[index], output_files[index], target_resolution[0], target_resolution[1], target_resolution[2], output_files[index][:-5], output_files[index][:-5]))
+    os.system('ResampleImage 3 {} {} {}x{}x{} 0 0 6 >{}_out.log 2>{}_err.log'.format(data_files[index], output_files[index], target_resolution[0], target_resolution[1], target_resolution[2], output_files[index][:-5], output_files[index][:-5]))
 
     # print("Normalizing intensity")
 
