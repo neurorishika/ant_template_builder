@@ -50,9 +50,6 @@ assert os.path.isdir(input_dir), "Input directory does not exist."
 # check if input directory has required files
 data_files = list(glob.glob(os.path.join(input_dir, "*.nrrd")))
 
-# remove all files that have '_mirror' in their name
-data_files = [i for i in data_files if '_mirror' not in i]
-
 assert len(data_files) > 0, "Input directory does not contain any files."
 
 # create output directory if it does not exist
@@ -61,9 +58,6 @@ if not os.path.isdir(output_dir):
     os.makedirs(output_dir)
 
 output_files = list(glob.glob(os.path.join(input_dir, "*.nrrd")))
-
-# remove all files that have '_mirror' in their name
-output_files = [i for i in output_files if '_mirror' not in i]
 
 # append '_resampled' to output files
 output_files = [os.path.join(output_dir, os.path.basename(f).replace('.nrrd', f'_resampled_{original_target_voxel_size}.nrrd')) for f in output_files]
