@@ -7,6 +7,7 @@ import glob # file handling
 from scipy.ndimage import zoom # image processing
 import gc # garbage collection
 import argparse # command line arguments
+from joblib import Parallel, delayed # parallel processing
 
 # clear output
 os.system('cls' if os.name == 'nt' else 'clear')
@@ -24,6 +25,7 @@ parser = argparse.ArgumentParser(description='Generate mirrored images.')
 parser.add_argument('-i','--input_dir', type=str, help='path to input directory (must contain .nrrd files; default: ./cleaned_data)', default="./cleaned_data", nargs='?')
 parser.add_argument('-o','--output_dir', type=str, help='path to output directory (default: same as input)', default="", nargs='?')
 parser.add_argument('-skip','--skip_existing', type=bool, help='skip existing files (default: False)', default=False, nargs='?')
+parser.add_argument('-n','--num_workers', type=int, help='number of workers (default: 1)', default=1, nargs='?')
 args = parser.parse_args()
 
 # check if input directory is valid
@@ -80,22 +82,44 @@ for file in output_files:
             print("WARNING: Output file {} already exists and will be overwritten.".format(file))
             os.remove(file)
 
-iterator = 1
-# iterate over files
-for input_file, output_file in zip(data_files, output_files):
-    # check if file is in skip list
-    if output_file in skip_list:
-        continue
+# check if skip list is empty
+if len(skip_list) > 0:
+    print("WARNING: {} files will be skipped.".format(len(skip_list)))
 
-    print("Processing file: {} ({} of {})".format(input_file, iterator, len(data_files)-len(skip_list)))
-    iterator += 1
+# remove all files in skip list from output files and equivalent files in data_files
+indices_to_remove = []
+for index, file in enumerate(output_files):
+    if file in skip_list:
+        indices_to_remove.append(index)
+output_files = [i for j, i in enumerate(output_files) if j not in indices_to_remove]
+input_files = [i for j, i in enumerate(data_files) if j not in indices_to_remove]
 
+# define function to run ANTs
+def runAntsFlip(input_file,output_file,index):
+    """
+    Run ANTs PermuteFlipImageOrientationAxes on input_file and save output to output_file.
+    """
+    print("Processing file: {} ({} of {})".format(input_file, index, len(input_files)))
     # print log file location
-    print("Log file: {}".format(output_file[:-7] + '_out.log'))
-    print("Error file: {}".format(output_file[:-7] + '_err.log'))
+    print("Log file: {}".format(output_file[:-5] + '_out.log'))
+    print("Error file: {}".format(output_file[:-5] + '_err.log'))
 
     # generate mirrored file using ANTs
-    os.system('PermuteFlipImageOrientationAxes 3 {} {} 0 1 2 1 0 0 >{}_out.log 2>{}_err.log'.format(input_file, output_file, output_file[:-7], output_file[:-7]))
+    os.system('PermuteFlipImageOrientationAxes 3 {} {} 0 1 2 1 0 0 >{}_out.log 2>{}_err.log'.format(input_file, output_file, output_file[:-5], output_file[:-5]))
+
+if args.num_workers == 1:
+    # iterate over files
+    for iterator, (input_file, output_file) in enumerate(zip(data_files, output_files)):
+        # run ANTs
+        runAntsFlip(input_file, output_file, iterator)
+elif args.num_workers > 1:
+    # check if number of workers is valid
+    assert args.num_workers < len(data_files), "Number of workers must be less than number of files."
+    assert args.num_workers <= os.cpu_count(), "Number of workers must be less than or equal to number of cores."
+    # run ANTs in parallel
+    Parallel(n_jobs=args.num_workers)(delayed(runAntsFlip)(input_file, output_file, iterator) for iterator, (input_file, output_file) in enumerate(zip(data_files, output_files)))
+else:
+    raise ValueError("Number of workers must be a positive integer.")
 
 
 # Remove all empty log files
