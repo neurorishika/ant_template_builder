@@ -49,7 +49,7 @@ mv affine_* obiroi_brain_$DATE/affine
 mv stdout-affline-template.txt obiroi_brain_$DATE/affine
 mv stderr-affline-template.txt obiroi_brain_$DATE/affine
 mv *.cfg obiroi_brain_$DATE/affine
-mv GR* obiroi_brain_$DATE/affine
+mv RA* obiroi_brain_$DATE/affine
 
 # Copy the affine template from the affine registration to the current directory ./ and run directory
 cp obiroi_brain_$DATE/affine/affine_template.nii.gz ./affine_template.nii.gz
