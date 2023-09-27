@@ -20,7 +20,7 @@ git clone https://github.com/neurorishika/ant_template_builder.git
 
 ### 3. Place the pre-processed images in the `cleaned_data` folder
 
-The pre-processed images should be in the `.nii.gz` format. The code assumes that the images are in the same orientation, please use [Fiji](https://imagej.net/Fiji/Downloads) to reorient the images if they are not in the same orientation. You can export to Nifti format from Fiji by using the [Nifti Plugin](https://imagej.nih.gov/ij/plugins/nifti.html). 
+The pre-processed images should be in the `.nrrd` format. NRRD stands for Nearly Raw Raster Data, and is a file format designed to store and visualize medical image data. The images should be in the same orientation. Please use [Fiji](https://imagej.net/Fiji/Downloads) to reorient the images if they are not in the same orientation. Also preferably the images should be 8-bit. This is not necessary but recommended.
 
 ### 4. Install poetry and build the environment
 
@@ -38,7 +38,7 @@ If you want to generate mirrored images in order to symmetrize the template, you
 poetry run python scripts/generate_mirror.py
 ```
 
-By default, the script will look for data (*.nii.gz files) in the `cleaned_data` folder and generate mirrored images in the same folder. You can use "--help" to see the options for the script, including the option to change the input and output folders. Also it will replace any mirrored images that already exist in the output folder unless the -skip flag is set as True.
+By default, the script will look for data (*.nrrd files) in the `cleaned_data` folder and generate mirrored images in the same folder. You can use "--help" to see the options for the script, including the option to change the input and output folders. Also it will replace any mirrored images that already exist in the output folder unless the -skip flag is set as True.
 
 ```
 poetry run python scripts/generate_mirror.py --help
@@ -51,13 +51,13 @@ poetry run python scripts/generate_mirror.py --help
 To run the resampling script, run the following command in the terminal (make sure you are in the `ant_template_builder` folder).
 
 ```
-poetry run python scripts/resample.py
+poetry run python scripts/resampler.py
 ```
 
 By default, the target resolution is an isotropic resolution of 0.8 μm. You can use "--help" to see the options for the script, including the option to change the target resolution to a different value (potentially anisotropic). The script will generate the resampled images in the `resampled_data` folder.
 
 ```
-poetry run python scripts/resample.py --help
+poetry run python scripts/resampler.py --help
 ```
 
 You can also generate mirrored images by using the `-m' flag. This will generate mirrored images in the 'resampled_data' folder.
@@ -70,7 +70,7 @@ The bash script for running the registration is in the `group_registration` fold
 ./run_registration.sh
 ```
 
-Once the registration is complete, the final results will be in the 'results/obiroi_brain_YYYYMMDD_HHMM' folder, all intermediate information will be inside the 'affine' and  'syn' subfolders. The final template will be in the 'results/obiroi_brain_YYYYMMDD_HHMM/complete_template.nii.gz' file. Note that this template will be in the same orientation and resolution as the input images. To generate videos or a higher resolution template, please see the next section.
+Once the registration is complete, the final results will be in the 'results/obiroi_brain_YYYYMMDD_HHMM' folder, all intermediate information will be inside the 'affine' and  'syn' subfolders. The final template will be in the 'results/obiroi_brain_YYYYMMDD_HHMM/complete_template.nrrd' file. Note that this template will be in the same orientation and resolution as the input images. To generate videos or a higher resolution template, please see the next section.
 
 ### (Optional) Generate a video of the final template
 
