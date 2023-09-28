@@ -79,11 +79,3 @@ rm *.nii.gz
 
 # Move the run directory to the results directory
 mv obiroi_brain_$DATE ../results
-
-
-
-
-
-
-
-

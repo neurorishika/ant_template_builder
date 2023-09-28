@@ -85,7 +85,7 @@ Once the registration is complete, the final results will be in the 'results/obi
 
 Contact the [HPC team](https://hpc.rockefeller.edu/contact) to get an account on the HPC cluster. They will give you the instructions to connect to the cluster via ssh.
 
-### 2. Access the HPC cluster via ssh and setup Spack
+### 2. Access the HPC cluster via ssh and setup Spack and Conda
 
 Once you have an account on the HPC cluster, you can access the cluster via ssh. You can use the following command to access the cluster:
 
@@ -118,7 +118,26 @@ module load cmake/3.18.2
 
 Note: You can cross-reference the modules available on the HPC cluster using ```module avail gcc``` and ```module avail cmake``` with the suggested versions for compiling ANTs as mentioned [here](https://github.com/ANTsX/ANTs/wiki/Compiling-ANTs-on-Linux-and-Mac-OS), and choose the most appropriate version.
 
+Then follow the instructions [here](https://hpcguide.rockefeller.edu/guides/conda.html) to setup Conda. Once you have setup Conda, you can create a new environment for running the ANTs software by running the following command:
+
+```
+conda create -n ants python=3.9
+```
+
 ### 3. Rest of the setup
 
 Follow the instructions from step 2 in the previous section to complete the setup. It is preferred to setup the repository in the scratch folder on the HPC cluster for the lab. For the Kronauer lab, the scratch folder is located at `/rugpfs/fs0/kron_lab/scratch/<username>`.
+
+An easy way to deal with scratch is to use a symlink to the scratch folder from your home directory. To do this, run the following command:
+
+```
+ln -s /rugpfs/fs0/kron_lab/scratch/<username> ~/scratch
+```
+
+Then you can navigate to the scratch folder by using the following command:
+
+```
+cd ~/scratch
+```
+
 

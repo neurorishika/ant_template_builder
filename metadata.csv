@@ -1,12 +1,12 @@
 Raw Name,Clean Name,Rotation Applied,Flip Vertical,Egocentric Leaning
 200724_L3_synA647_Airyscan Processing_Stitch.czi,synA647_LL_L3_200724.nii.gz,-81.3,0,Left
-200724_L4_synA647_Airyscan Processing_Stitch.czi,synA647_LL_L4_200724i.nii.gz,70.6,1,Left
+200724_L4_synA647_Airyscan Processing_Stitch.czi,synA647_LL_L4_200724i.nii.gz,70.6,1,Sym
 200724_L8_synA647_Airyscan Processing_Stitch.czi,synA647_LL_L8_200724.nii.gz,-70.6,0,Sym
 200727_L12_synA647_Airyscan Processing_Stitch.czi,synA647_LL_L12_200727.nii.gz,61,"1		",Left
 DFB01_Airyscan Processing_Stitch.czi,synA647_DF_B01.nii.gz,0,"0		",Left
 DFB03_A_Airyscan Processing_Stitch.czi,synA647_DF_B03_A.nii.gz,4.8,"0	",Right
-DFB03_D_Airyscan Processing_Stitch.czi,synA647_DF_B03_D.nii.gz,0,0,Right
-DFB04_B_Airyscan Processing_Stitch.czi,synA647_DF_B04_B.nii.gz,0,0,
+DFB03_D_Airyscan Processing_Stitch.czi,synA647_DF_B03_D.nii.gz,0,0,Left
+DFB04_B_Airyscan Processing_Stitch.czi,synA647_DF_B04_B.nii.gz,0,0,Right
 DFB05_C_Airyscan Processing_Stitch.czi,synA647_DF_B05_C.nii.gz,0,0,Right
 DFB16_Airyscan Processing_Stitch.czi,synA647_DF_B16.nii.gz,0,0,Left
 LL_200916_B19_Airyscan Processing_Stitch.czi,synA647_LL_B19_200916.nii.gz,28.1,"0	",Right
