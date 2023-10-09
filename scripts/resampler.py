@@ -13,7 +13,7 @@ os.system('cls' if os.name == 'nt' else 'clear')
 start_string = 'Kronauer Lab - Microscopy Image Processing Pipeline\n'
 start_string += "="*(len(start_string)-1) + '\n'
 start_string += 'Confocal Resampler by Rishika Mohanta\n'
-start_string += 'Version 1.0.0\n'
+start_string += 'Version 1.1.0\n'
 
 print(start_string)
 

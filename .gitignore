@@ -174,3 +174,7 @@ group_registration/*/
 **/*.avi
 **/*.mp4
 
+# Ignore all tar files in all subfolders
+**/*.tar.gz
+**/*.tgz
+**/*.tar

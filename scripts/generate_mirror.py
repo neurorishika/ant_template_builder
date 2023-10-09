@@ -25,7 +25,7 @@ print(start_string)
 parser = argparse.ArgumentParser(description='Generate mirrored images.')
 parser.add_argument('-i','--input_dir', type=str, help='path to input directory (must contain .nrrd files; default: ./cleaned_data/all_data/)', default="./cleaned_data/all_data/", nargs='?')
 parser.add_argument('-o','--output_dir', type=str, help='path to output directory; default: ./cleaned_data/', default="./cleaned_data/", nargs='?')
-parser.add_argument('-skip','--skip_existing', type=bool, help='skip existing files (default: False)', default=False, nargs='?')
+parser.add_argument('-skip','--skip_existing', type=bool, help='skip existing files (default: True)', default=True, nargs='?')
 parser.add_argument('-n','--num_workers', type=int, help='number of workers (default: 1)', default=1, nargs='?')
 parser.add_argument('-s','--symmetric', type=bool, help='symmetric template (default: False)', default=False, nargs='?')
 parser.add_argument('-meta','--metadata', type=str, help='path to metadata file (default: ./metadata.csv)', default="./metadata.csv", nargs='?')
@@ -134,17 +134,17 @@ for file in skip_list:
     # check if input file exists
     assert os.path.isfile(input_file), "Input file {} does not exist.".format(input_file)
     # check if output file exists, if true, check if skip_existing is True, if true, skip file, else overwrite file
-    if os.path.isfile(file):
+    if os.path.isfile(output_dir+'/'+os.path.basename(input_file)):
         if skip_existing:
-            print("Skipping {} as it already exists.".format(file))
+            print("Skipping {} as it already exists.".format(output_dir+'/'+os.path.basename(input_file)))
             continue
         else:
-            print("WARNING: Overwriting {} as it already exists.".format(file))
+            print("WARNING: Overwriting {} as it already exists.".format(output_dir+'/'+os.path.basename(input_file)))
             # delete file
             os.remove(file)
     # copy file
-    print("Copying {} to {}".format(input_file, output_dir))
-    os.system('cp {} {}'.format(input_file, output_dir)) 
+    print("Copying {} to {}".format(input_file, output_dir+'/'+os.path.basename(input_file)))
+    os.system('cp {} {}'.format(input_file, output_dir+'/'+os.path.basename(input_file)))
 
 # remove all files in skip list from output files and equivalent files in data_files
 indices_to_remove = []
