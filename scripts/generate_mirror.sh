@@ -1,4 +1,4 @@
-# bash script to run generate_mirror.py using sbatch and poetry
+# bash script to run generate_mirror.py using sbatch and poetry on the rockefeller cluster
 
 #!/bin/bash
 # get timestamp
@@ -7,7 +7,7 @@ timestamp=$(date +%Y%m%d_%H%M%S)
 sbatch <<EOT
 #!/bin/bash
 
-# Set sbatch options
+# Set sbatch options on node node062 (bigmem)
 #SBATCH --job-name=generate_mirror
 #SBATCH --output="generate_mirror"${timestamp}".out"
 #SBATCH --error="generate_mirror"${timestamp}".err"
@@ -16,6 +16,7 @@ sbatch <<EOT
 #SBATCH --ntasks=${1:-5}
 #SBATCH --tasks-per-node=${1:-5}
 #SBATCH --cpus-per-task=1
+#SBATCH --nodelist=node062
 
 # Run generate_mirror.py
 poetry run python generate_mirror.py -n ${1:-5} -s ${2:-False} -l ${3:-left}
