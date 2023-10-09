@@ -16,6 +16,7 @@ ipywidgets = "^8.1.1"
 argparse = "^1.4.0"
 tqdm = "^4.66.1"
 antspyx = "^0.4.2"
+numpy = "^1.26.0"
 
 
 [build-system]
