@@ -177,7 +177,7 @@ def runAntsFlip(input_file,output_file,index):
 
 if args.num_workers == 1:
     # iterate over files
-    for iterator, (input_file, output_file) in enumerate(zip(data_files, output_files)):
+    for iterator, (input_file, output_file) in enumerate(zip(input_files, output_files)):
         # run ANTs
         runAntsFlip(input_file, output_file, iterator)
 elif args.num_workers > 1:
