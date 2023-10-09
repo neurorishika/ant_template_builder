@@ -2,6 +2,7 @@
 
 import os # file handling
 import numpy as np # linear algebra
+import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)
 import nibabel as nb # neuroimaging file handling
 import glob # file handling
 from scipy.ndimage import zoom # image processing
@@ -16,16 +17,19 @@ os.system('cls' if os.name == 'nt' else 'clear')
 start_string = 'Kronauer Lab - Microscopy Image Processing Pipeline\n'
 start_string += "="*(len(start_string)-1) + '\n'
 start_string += 'Confocal Mirror Generator by Rishika Mohanta\n'
-start_string += 'Version 1.0.0\n'
+start_string += 'Version 1.1.0\n'
 
 print(start_string)
 
 # parse command line arguments
 parser = argparse.ArgumentParser(description='Generate mirrored images.')
-parser.add_argument('-i','--input_dir', type=str, help='path to input directory (must contain .nrrd files; default: ./cleaned_data)', default="./cleaned_data", nargs='?')
-parser.add_argument('-o','--output_dir', type=str, help='path to output directory (default: same as input)', default="", nargs='?')
+parser.add_argument('-i','--input_dir', type=str, help='path to input directory (must contain .nrrd files; default: ./cleaned_data/all_data/)', default="./cleaned_data/all_data/", nargs='?')
+parser.add_argument('-o','--output_dir', type=str, help='path to output directory; default: ./cleaned_data/', default="./cleaned_data/", nargs='?')
 parser.add_argument('-skip','--skip_existing', type=bool, help='skip existing files (default: False)', default=False, nargs='?')
 parser.add_argument('-n','--num_workers', type=int, help='number of workers (default: 1)', default=1, nargs='?')
+parser.add_argument('-s','--symmetric', type=bool, help='symmetric template (default: False)', default=False, nargs='?')
+parser.add_argument('-meta','--metadata', type=str, help='path to metadata file (default: ./metadata.csv)', default="./metadata.csv", nargs='?')
+parser.add_argument('-lr','--left_or_right', type=str, help='left or right (default: left)', default="left", nargs='?')
 args = parser.parse_args()
 
 # check if input directory is valid
@@ -53,6 +57,24 @@ else:
         os.makedirs(output_dir)
 
 print("Output directory: {}".format(output_dir))
+
+# check if metadata file exists
+metadata_file = args.metadata
+assert os.path.isfile(metadata_file), "Metadata file does not exist."
+
+# read metadata file
+metadata = pd.read_csv(metadata_file)
+
+# Keep only the columns we need (Clean name and Egocentric Leaning)
+metadata = metadata[['Clean Name', 'Egocentric Leaning']]
+
+# convert to map dictionary
+metadata = metadata.set_index('Clean Name').to_dict()['Egocentric Leaning']
+print("Metadata file: {}".format(metadata_file))
+
+# check if symmetric template is required
+symmetric = args.symmetric
+left_or_right = args.left_or_right
 
 # function to generate mirrored file name
 def generate_mirror_name(x,output_dir=output_dir):
@@ -82,9 +104,47 @@ for file in output_files:
             print("WARNING: Output file {} already exists and will be overwritten.".format(file))
             os.remove(file)
 
+# if symmetric template is not required, add sfiles in the same leaning direction as left_or_right and sym leaning brains to skip list
+
+if not symmetric:
+    # loop over all input files
+    for index, file in enumerate(data_files):
+        # get clean name (with extension)
+        clean_name = os.path.basename(file)
+        # get leaning direction
+        leaning_direction = metadata[clean_name]
+        # check if leaning direction is same as left_or_right or sym
+        if leaning_direction == left_or_right or leaning_direction == 'sym':
+            skip_list.append(output_files[index])
+            print("WARNING: Output file {} will be skipped as it is already {} leaning.".format(output_files[index], leaning_direction))
+        
+
 # check if skip list is empty
 if len(skip_list) > 0:
     print("WARNING: {} files will be skipped.".format(len(skip_list)))
+
+# copy skipped files to output directory
+for file in skip_list:
+    # find index of file in output_files
+    index = output_files.index(file)
+    # get input file name
+    input_file = data_files[index]
+    # get output directory
+    output_dir = os.path.dirname(file)
+    # check if input file exists
+    assert os.path.isfile(input_file), "Input file {} does not exist.".format(input_file)
+    # check if output file exists, if true, check if skip_existing is True, if true, skip file, else overwrite file
+    if os.path.isfile(file):
+        if skip_existing:
+            print("Skipping {} as it already exists.".format(file))
+            continue
+        else:
+            print("WARNING: Overwriting {} as it already exists.".format(file))
+            # delete file
+            os.remove(file)
+    # copy file
+    print("Copying {} to {}".format(input_file, output_dir))
+    os.system('cp {} {}'.format(input_file, output_dir)) 
 
 # remove all files in skip list from output files and equivalent files in data_files
 indices_to_remove = []
@@ -93,6 +153,11 @@ for index, file in enumerate(output_files):
         indices_to_remove.append(index)
 output_files = [i for j, i in enumerate(output_files) if j not in indices_to_remove]
 input_files = [i for j, i in enumerate(data_files) if j not in indices_to_remove]
+
+# Print number of files to process and their names
+print("Number of files to process: {}".format(len(input_files)))
+for index, file in enumerate(input_files):
+    print("File {}: {} -> {}".format(index, file, output_files[index]))
 
 # define function to run ANTs
 def runAntsFlip(input_file,output_file,index):
@@ -106,6 +171,9 @@ def runAntsFlip(input_file,output_file,index):
 
     # generate mirrored file using ANTs
     os.system('PermuteFlipImageOrientationAxes 3 {} {} 0 1 2 1 0 0 >{}_out.log 2>{}_err.log'.format(input_file, output_file, output_file[:-5], output_file[:-5]))
+
+    # check if output file exists
+    assert os.path.isfile(output_file), "ERROR: Output file {} does not exist. Check log files for more information.".format(output_file)
 
 if args.num_workers == 1:
     # iterate over files

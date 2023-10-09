@@ -121,10 +121,19 @@ Note: You can cross-reference the modules available on the HPC cluster using ```
 Then follow the instructions [here](https://hpcguide.rockefeller.edu/guides/conda.html) to setup Conda. Once you have setup Conda, you can create a new environment for running the ANTs software by running the following command:
 
 ```
-conda create -n ants python=3.9
+conda create -n ants python
+conda activate ants
 ```
 
-### 3. Rest of the setup
+Then you can install poetry by running the following command:
+
+```
+curl -sSL https://install.python-poetry.org | python3 -
+```
+
+Newer instructions for installing poetry can be found [here](https://python-poetry.org/docs/#installation).
+
+### 3. Setup the Pipeline
 
 Follow the instructions from step 2 in the previous section to complete the setup. It is preferred to setup the repository in the scratch folder on the HPC cluster for the lab. For the Kronauer lab, the scratch folder is located at `/rugpfs/fs0/kron_lab/scratch/<username>`.
 
@@ -138,6 +147,18 @@ Then you can navigate to the scratch folder by using the following command:
 
 ```
 cd ~/scratch
+```
+
+Then you can clone the repository by running the following command:
+
+```
+git clone https://github.com/neurorishika/ant_template_builder.git 
+```
+
+Go inside the `ant_template_builder` folder and run the following command to build the environment:
+
+```
+poetry install
 ```
 
 
