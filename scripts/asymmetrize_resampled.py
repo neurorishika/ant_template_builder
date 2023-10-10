@@ -58,6 +58,8 @@ else:
     if not os.path.isdir(backup_dir):
         os.makedirs(backup_dir)
 
+print("Backup directory: {}".format(backup_dir))
+
 # check if metadata file exists
 metadata_file = args.metadata
 assert os.path.isfile(metadata_file), "Metadata file does not exist."
@@ -99,18 +101,18 @@ for data_file in data_files:
         # check if mirror file
         if is_mirror:
             # move to backup directory
-            os.rename(data_file, os.path.join(args.backup_dir, os.path.basename(data_file)))
+            os.rename(data_file, os.path.join(backup_dir, os.path.basename(data_file)))
         else:
             # move to output directory
-            os.rename(data_file, os.path.join(args.output_dir, os.path.basename(data_file)))
+            os.rename(data_file, os.path.join(output_dir, os.path.basename(data_file)))
     else:
         # check if mirror file
         if is_mirror:
             # move to output directory
-            os.rename(data_file, os.path.join(args.output_dir, os.path.basename(data_file)))
+            os.rename(data_file, os.path.join(output_dir, os.path.basename(data_file)))
         else:
             # move to backup directory
-            os.rename(data_file, os.path.join(args.backup_dir, os.path.basename(data_file)))
+            os.rename(data_file, os.path.join(backup_dir, os.path.basename(data_file)))
 
 # print end string
 end_string = 'Done processing all files. Exiting...\n'
