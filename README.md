@@ -85,7 +85,7 @@ Once the registration is complete, the final results will be in the 'results/obi
 
 Contact the [HPC team](https://hpc.rockefeller.edu/contact) to get an account on the HPC cluster. They will give you the instructions to connect to the cluster via ssh.
 
-### 2. Access the HPC cluster via ssh and setup Spack and Conda
+### 2. Access the HPC cluster via ssh and setup Spack, ANTs and Conda
 
 Once you have an account on the HPC cluster, you can access the cluster via ssh. You can use the following command to access the cluster:
 
@@ -112,11 +112,13 @@ lmodinit
 Load the modules needed for building ANTs:
 
 ```
-module load gcc/9.3.0
-module load cmake/3.18.2
+module load gcc/10.2.0-h4gobj
+module load cmake/3.17.3-3rjy3k
 ```
 
 Note: You can cross-reference the modules available on the HPC cluster using ```module avail gcc``` and ```module avail cmake``` with the suggested versions for compiling ANTs as mentioned [here](https://github.com/ANTsX/ANTs/wiki/Compiling-ANTs-on-Linux-and-Mac-OS), and choose the most appropriate version.
+
+Install ANTs using the instructions [here](https://github.com/ANTsX/ANTs/wiki/Compiling-ANTs-on-Linux-and-Mac-OS). When configuring using CMake, make sure to have BUILD_ALL_ANTS_APPS and BUILD_SHARED_LIBS as ON.
 
 Then follow the instructions [here](https://hpcguide.rockefeller.edu/guides/conda.html) to setup Conda. Once you have setup Conda, you can create a new environment for running the ANTs software by running the following command:
 

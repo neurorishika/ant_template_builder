@@ -2,10 +2,7 @@
 
 import os # file handling
 import numpy as np # linear algebra
-# import nibabel as nb # neuroimaging file handling
 import glob # file handling
-# from scipy.ndimage import zoom # image processing
-# import gc # garbage collection
 import argparse # command line arguments
 import time # timing
 

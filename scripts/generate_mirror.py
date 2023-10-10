@@ -1,12 +1,8 @@
 # a script to mirror confocal stacks
 
 import os # file handling
-import numpy as np # linear algebra
 import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)
-import nibabel as nb # neuroimaging file handling
 import glob # file handling
-from scipy.ndimage import zoom # image processing
-import gc # garbage collection
 import argparse # command line arguments
 from joblib import Parallel, delayed # parallel processing
 
