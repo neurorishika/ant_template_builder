@@ -30,7 +30,7 @@ The pre-processed images should be in the `.nrrd` format. NRRD stands for Nearly
 poetry install
 ```
 
-### (Optional) Run the mirroring script
+### Run the mirroring script
 
 If you want to generate mirrored images in order to symmetrize the template, you can run the mirroring script. To run the mirroring script, run the following command in the terminal (make sure you are in the `ant_template_builder` folder).
 
@@ -44,7 +44,7 @@ By default, the script will look for data (*.nrrd files) in the `cleaned_data` f
 poetry run python scripts/generate_mirror.py --help
 ```
 
-
+By default, the script will mirror all *.nrrd files in the input folder. However, the ant brain has a notable asymmetry in the mushroom body. Therefore, it is recommended to mirror only the brains that are oriented in one direction. You can do this by having a metadata.csv (as in this repository) file. The metadata file must have two columns: `Clean Name` and `Egocentric Leaning` where the first is name of the file, and the second has values of `left`,`right` or `sym` (symmetric). The script will only mirror the brains that have `left` or `right` in the `Egocentric Leaning` column depending on the -lr flag. Ideally, mirror and resample ALL the brains (unless disk space is an issue) and then use the asymmetrize_resampled.py script to filter it down to the brains that are oriented in one direction.
 
 ### 5. Run the resampling script
 
@@ -61,6 +61,23 @@ poetry run python scripts/resampler.py --help
 ```
 
 You can also generate mirrored images by using the `-m' flag. This will generate mirrored images in the 'resampled_data' folder.
+
+### 6. (Optional) Run the asymmetrize script
+
+To run the asymmetrize script, run the following command in the terminal (make sure you are in the `ant_template_builder` folder).
+
+```
+poetry run python scripts/asymmetrize_resampled.py
+```
+
+By default, the script will look for data (*.nrrd files) in the `resampled_data` folder and generate asymmetrized images in the same folder. It will also backup the original images in the backup folder. You can use "--help" to see the options for the script, including the option to change the input, output and backup folders. This requires the metadata.csv file described above to be present and linked using the -m flag.
+
+```
+poetry run python scripts/asymmetrize_resampled.py --help
+```
+
+Note: By default, the asymmetrize script will keep the symmetric brains in their original orientation. However this can reduce the final template quality. We therefore have an additional flag -q or --quality_affine that will copy all the symmetric brains into a diff_folder which will NOT be used for creating the initial affine template, but used for the final diffemorphic template. This will improve the quality of the final template. If quality affine is set to True, the metadata file must also include a column called 'Skip Affine' with values of 0 or 1. If the value is 1, the brain will be skipped for affine registration. This is useful for brains that of a poor quality and should not be used for affine registration (this is excluding the symmetric brains which are automatically skipped for affine registration).
+
 
 ### 6. Run the registration script
 

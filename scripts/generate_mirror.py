@@ -23,7 +23,7 @@ parser.add_argument('-i','--input_dir', type=str, help='path to input directory 
 parser.add_argument('-o','--output_dir', type=str, help='path to output directory; default: ./cleaned_data/', default="./cleaned_data/", nargs='?')
 parser.add_argument('-skip','--skip_existing', type=bool, help='skip existing files (default: True)', default=True, nargs='?')
 parser.add_argument('-n','--num_workers', type=int, help='number of workers (default: 1)', default=1, nargs='?')
-parser.add_argument('-s','--symmetric', type=bool, help='symmetric template (default: False)', default=False, nargs='?')
+parser.add_argument('-s','--symmetric', type=bool, help='symmetric template (default: False)', default=True, nargs='?')
 parser.add_argument('-meta','--metadata', type=str, help='path to metadata file (default: ./metadata.csv)', default="./metadata.csv", nargs='?')
 parser.add_argument('-lr','--left_or_right', type=str, help='left or right (default: left)', default="left", nargs='?')
 args = parser.parse_args()
