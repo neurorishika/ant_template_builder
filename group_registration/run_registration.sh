@@ -9,8 +9,8 @@ DATE=$(date +"%Y%m%d_%H%M")
 ID=synA647_*.nrrd
 
 # Setup the number of threads to be used
-THREADS_AFFINE=8
-THREADS_SYN=2
+THREADS_AFFINE=56
+THREADS_SYN=56
 
 # Setup the number of iterations to be used
 ITERATIONS_AFFINE=4
