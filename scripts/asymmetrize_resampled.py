@@ -142,15 +142,7 @@ for data_file in data_files:
                 # move to backup directory
                 os.rename(data_file, os.path.join(backup_dir, os.path.basename(data_file)))
     else:
-        if egocentric_leaning == left_or_right:
-            # check if mirror file
-            if is_mirror:
-                # move to backup directory
-                os.rename(data_file, os.path.join(backup_dir, os.path.basename(data_file)))
-            else:
-                # move to output directory
-                os.rename(data_file, os.path.join(output_dir, os.path.basename(data_file)))
-        elif egocentric_leaning == 'sym' or manually_skipped_this == True:
+        if egocentric_leaning == 'sym' or manually_skipped_this == True:
             # move to diff directory if not mirror file else move to backup directory
             if is_mirror:
                 # move to backup directory
@@ -158,6 +150,14 @@ for data_file in data_files:
             else:
                 # move to diff directory
                 os.rename(data_file, os.path.join(diff_dir, os.path.basename(data_file)))
+        elif egocentric_leaning == left_or_right:
+            # check if mirror file
+            if is_mirror:
+                # move to backup directory
+                os.rename(data_file, os.path.join(backup_dir, os.path.basename(data_file)))
+            else:
+                # move to output directory
+                os.rename(data_file, os.path.join(output_dir, os.path.basename(data_file)))
         else:
             # check if mirror file
             if is_mirror:
