@@ -23,6 +23,7 @@ parser.add_argument('-i','--input_dir', type=str, help='path to input directory 
 parser.add_argument('-o','--output_dir', type=str, help='path to output directory (default: ./resampled_data)', default="./resampled_data", nargs='?')
 parser.add_argument('-v','--target_voxel_size', type=str, help='target voxel size in microns (e.g. 0.8x0.8x0.8)', default="0.8x0.8x0.8", nargs='?')
 parser.add_argument('-n','--num_workers', type=int, help='number of workers to use (default: 1)', default=1, nargs='?')
+parser.add_argument('-t','--type', type=str, help='type of resampling (spacing or size; default: spacing)', default="spacing", nargs='?')
 args = parser.parse_args()
 
 # check if target voxel size is valid
@@ -65,6 +66,10 @@ for f in output_files:
         print(f"Output file {f} already exists. Will be overwritten.")
         os.remove(f)
 
+# check type of resampling
+resampling_type = args.type
+assert resampling_type in ['spacing', 'size'], "Resampling type must be 'spacing' or 'size'."
+
 # define a function to resample a file
 def resample_file(index):
     # print progress
@@ -79,8 +84,10 @@ def resample_file(index):
     print("Error file: {}".format(output_files[index][:-5] + '_err.log'))
 
     # resample data using ANTs
-    # os.system('ResampleImage 3 {} {} {}x{}x{} 0 0 6 >{}_out.log 2>{}_err.log'.format(data_files[index], output_files[index], target_resolution[0], target_resolution[1], target_resolution[2], output_files[index][:-5], output_files[index][:-5]))
-    os.system('ResampleImageBySpacing 3 {} {} {} {} {}'.format(data_files[index], output_files[index], target_resolution[0], target_resolution[1], target_resolution[2]))   
+    if resampling_type == 'size':
+        os.system('ResampleImage 3 {} {} {}x{}x{} 0 0 6 >{}_out.log 2>{}_err.log'.format(data_files[index], output_files[index], target_resolution[0], target_resolution[1], target_resolution[2], output_files[index][:-5], output_files[index][:-5]))
+    if resampling_type == 'spacing':
+        os.system('ResampleImageBySpacing 3 {} {} {} {} {}'.format(data_files[index], output_files[index], target_resolution[0], target_resolution[1], target_resolution[2]))   
 
 if args.num_workers == 1:
     # resample each file sequentially

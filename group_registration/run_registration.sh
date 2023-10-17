@@ -13,8 +13,8 @@ THREADS_AFFINE=56
 THREADS_SYN=56
 
 # Setup the number of iterations to be used
-ITERATIONS_AFFINE=4
-ITERATIONS_SYN=4
+ITERATIONS_AFFINE=5
+ITERATIONS_SYN=8
 
 # Create a directory for the template building in the current directory
 # FORMAT: obiroi_brain_<DATE>
