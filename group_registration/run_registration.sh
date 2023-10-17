@@ -13,7 +13,7 @@ THREADS_AFFINE=56
 THREADS_SYN=56
 
 # Setup the number of iterations to be used
-ITERATIONS_AFFINE=5
+ITERATIONS_AFFINE=8
 ITERATIONS_SYN=8
 
 # Create a directory for the template building in the current directory
@@ -82,6 +82,7 @@ cp obiroi_brain_$DATE/syn/complete_template.nii.gz obiroi_brain_$DATE/complete_t
 # Delete the intermediate files
 rm affine_template.nii.gz
 rm *.nii.gz
+rm *.nrrd
 
 # Move the run directory to the results directory
 mv obiroi_brain_$DATE ../results
