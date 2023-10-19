@@ -87,7 +87,7 @@ def resample_file(index):
     if resampling_type == 'size':
         os.system('ResampleImage 3 {} {} {}x{}x{} 0 0 6 >{}_out.log 2>{}_err.log'.format(data_files[index], output_files[index], target_resolution[0], target_resolution[1], target_resolution[2], output_files[index][:-5], output_files[index][:-5]))
     if resampling_type == 'spacing':
-        os.system('ResampleImageBySpacing 3 {} {} {} {} {} 0 0 0'.format(data_files[index], output_files[index], target_resolution[0], target_resolution[1], target_resolution[2]))   
+        os.system('ResampleImageBySpacing 3 {} {} {} {} {} 0 0 0 >{}_out.log 2>{}_err.log'.format(data_files[index], output_files[index], target_resolution[0], target_resolution[1], target_resolution[2], output_files[index][:-5], output_files[index][:-5]))   
 
 if args.num_workers == 1:
     # resample each file sequentially
