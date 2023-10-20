@@ -244,7 +244,7 @@ class MainWindow(QtWidgets.QMainWindow):
         registration_command = "antsRegistrationSyNQuick.sh -d 3 -f "+template_file+" -m "+input_file+" -o "+output_prefix+" -n "+num_threads+" -t "+registration_type+" -j "+histogram_matching+" -y "+reproducibility 
 
         # verify ANTs is installed
-        if os.system("antsRegistrationSyNQuick.sh -h") != 0:
+        if os.system("antsRegistrationSyNQuick.sh -h", stdout=open(os.devnull, 'wb')) != 0:
             QtWidgets.QMessageBox.warning(self, "Warning", "ANTs is not installed. Please install ANTs and try again.")
             return
         
