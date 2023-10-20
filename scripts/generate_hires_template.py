@@ -100,6 +100,8 @@ nii_files = list(glob.glob(os.path.join(input_dir, "syn", "*.nii.gz")))
 
 # create function to get original name
 def get_original_name(file):
+    # get basename
+    file = os.path.basename(file)
     # remove everything after _resampled
     original_name = file.split("_resampled")[0]
     # remove "complete_" from the beginning
