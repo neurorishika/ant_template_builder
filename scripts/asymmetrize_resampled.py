@@ -102,13 +102,14 @@ if quality_affine:
 else:
     print("Keeping only {} or symmetric brains.".format(left_or_right))
 
-# create diff directory if it does not exist
-diff_dir = args.diff_dir
+if quality_affine:
+    # create diff directory if it does not exist
+    diff_dir = args.diff_dir
 
-if diff_dir == "":
-    diff_dir = os.path.join(input_dir, "diff")
-if not os.path.isdir(diff_dir):
-    os.makedirs(diff_dir)
+    if diff_dir == "":
+        diff_dir = os.path.join(input_dir, "diff")
+    if not os.path.isdir(diff_dir):
+        os.makedirs(diff_dir)
     
 
 # loop through all files
