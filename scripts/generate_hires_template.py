@@ -112,8 +112,10 @@ def get_original_name(file):
 
 # create function to get basefile names
 def get_basefile_name(file):
+    # get basename
+    file = os.path.basename(file)
     # remove the words "Warp", "InverseWarp", "deformed", "repaired"
-    basefile = file.replace("Warp", "").replace("InverseWarp", "").replace("deformed", "").replace("repaired", "")
+    basefile = file.replace("InverseWarp", "").replace("Warp", "").replace("deformed", "").replace("repaired", "")
     return basefile
 
 # get list of all basefile names
