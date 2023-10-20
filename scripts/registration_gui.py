@@ -259,11 +259,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         if "antsRegistrationSyNQuick" not in output:
             QtWidgets.QMessageBox.warning(self, "Warning", "ANTs is not installed. Please install ANTs and try again.")
-            os.remove("ants_verification.txt") 
             return
-        
-        # delete the output file
-        os.remove("ants_verification.txt")
 
         # run the registration command in new thread and display the output in the terminal
         self.terminal.append(registration_command)
