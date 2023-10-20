@@ -30,6 +30,28 @@ The pre-processed images should be in the `.nrrd` format. NRRD stands for Nearly
 poetry install
 ```
 
+### 5. Install PyQT5
+
+To run the GUI for Registration, you will need to install the PyQT5 library. First, make sure all the dependencies are installed by running the following command:
+
+```
+sudo apt-get update
+sudo apt-get install '^libxcb.*-dev' libx11-xcb-dev libglu1-mesa-dev libxrender-dev libxi-dev libxkbcommon-dev libxkbcommon-x11-dev libfontconfig1-dev 
+sudo apt-get install ffmpeg libsm6 libxext6
+```
+
+Next open the environment by running the following command:
+
+```
+poetry shell
+```
+
+Install the PyQT5 library by running the following command:
+
+```
+pip install pyqt5
+```
+
 ### Run the mirroring script
 
 If you want to generate mirrored images in order to symmetrize the template, you can run the mirroring script. To run the mirroring script, run the following command in the terminal (make sure you are in the `ant_template_builder` folder).
