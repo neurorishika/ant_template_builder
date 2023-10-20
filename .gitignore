@@ -168,6 +168,7 @@ results/*/
 group_registration/*
 group_registration/*/
 !group_registration/run_registration.sh
+!group_registration/run_second_stage_registration.sh
 !group_registration/ANTs/
 
 # Ignore all AVI and MP4 files in all subfolders
