@@ -219,10 +219,13 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # check number of threads
         self.check_num_threads()
-        
+
         # get the number of threads
         num_threads = self.num_threads
 
+        # check registration type
+        self.set_registration_type()
+        
         # get the registration type
         registration_type = self.registration_type
         # map it to the correct string
