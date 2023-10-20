@@ -64,6 +64,7 @@ metadata_original = metadata[['Clean Name', 'Refinement Inclusion']]
 inclusion = metadata_original.set_index('Clean Name').to_dict()['Refinement Inclusion']
 # convert values to boolean
 inclusion = {key: bool(value) for key, value in inclusion.items()}
+print("Inclusion dictionary: {}".format(inclusion))
 
 print("Metadata file: {}".format(metadata_file))
 
