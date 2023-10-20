@@ -243,24 +243,6 @@ class MainWindow(QtWidgets.QMainWindow):
         # create the registration command
         registration_command = "antsRegistrationSyNQuick.sh -d 3 -f "+template_file+" -m "+input_file+" -o "+output_prefix+" -n "+num_threads+" -t "+registration_type+" -j "+histogram_matching+" -y "+reproducibility 
 
-        # verify ANTs is installed by running the help command and streaming the output to the terminal
-        self.terminal.append("Verifying ANTs is installed...")
-        self.terminal.append("")
-
-        # run the help command
-        os.system("antsRegistrationSyNQuick.sh -h > ants_verification.txt")
-
-        # read the output file
-        with open("ants_verification.txt", "r") as f:
-            output = f.read()
-
-        self.terminal.append(output)
-        self.terminal.append("")
-
-        if "antsRegistrationSyNQuick" not in output:
-            QtWidgets.QMessageBox.warning(self, "Warning", "ANTs is not installed. Please install ANTs and try again.")
-            return
-
         # run the registration command in new thread and display the output in the terminal
         self.terminal.append(registration_command)
         self.terminal.append("Running registration...")
