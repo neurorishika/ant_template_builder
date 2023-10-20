@@ -81,10 +81,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.registration_type_rigid.setChecked(False)
         self.registration_type_rigid.toggled.connect(self.set_registration_type)
         self.registration_type_rigid_affine = QtWidgets.QRadioButton("Rigid + Affine")
-        self.registration_type_rigid_affine.setChecked(True)
+        self.registration_type_rigid_affine.setChecked(False)
         self.registration_type_rigid_affine.toggled.connect(self.set_registration_type)
         self.registration_type_rigid_affine_deformable = QtWidgets.QRadioButton("Rigid + Affine + Deformable")
-        self.registration_type_rigid_affine_deformable.setChecked(False)
+        self.registration_type_rigid_affine_deformable.setChecked(True)
         self.registration_type_rigid_affine_deformable.toggled.connect(self.set_registration_type)
         self.registration_type_row.addWidget(self.registration_type_label)
         self.registration_type_row.addWidget(self.registration_type_rigid)
@@ -217,6 +217,9 @@ class MainWindow(QtWidgets.QMainWindow):
             QtWidgets.QMessageBox.warning(self, "Warning", "Files with the same prefix already exist. Please change the output directory or the input file.")
             return
 
+        # check number of threads
+        self.check_num_threads()
+        
         # get the number of threads
         num_threads = self.num_threads
 
