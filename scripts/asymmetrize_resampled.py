@@ -25,7 +25,8 @@ parser.add_argument('-b','--backup_dir', type=str, help='path to backup director
 parser.add_argument('-m','--diff_dir', type=str, help='path to diff directory (default: <input_dir>/diff/)', default="", nargs='?')
 parser.add_argument('-meta','--metadata', type=str, help='path to metadata file (default: ./metadata.csv)', default="./metadata.csv", nargs='?')
 parser.add_argument('-lr','--left_or_right', type=str, help='left or right (default: left)', default="left", nargs='?')
-parser.add_argument('-q','--quality_affine', type=bool, help='whether to use quality affine (default: True)', default=True, nargs='?')
+parser.add_argument('-q','--quality_affine', type=bool, help='whether to use quality affine (default: False)', default=False, nargs='?')
+parser.add_argument('-s','--skip_affine', type=bool, help='whether to remove manually skipped files from metadata (default: True)', default=True, nargs='?')
 args = parser.parse_args()
 
 # check if input directory is valid
@@ -75,11 +76,14 @@ metadata = metadata_original.set_index('Clean Name').to_dict()['Egocentric Leani
 manually_skipped = metadata_original.set_index('Clean Name').to_dict()['Skip Affine']
 print("Metadata file: {}".format(metadata_file))
 
+# check if skip affine is valid
+assert type(args.skip_affine) == bool, "Skip affine must be either True or False."
+
 # make sure manually skipped is integer 0 or 1
 for key in manually_skipped:
     assert manually_skipped[key] in [0,1], "Manually skipped must be 0 or 1."
     # convert to boolean
-    manually_skipped[key] = bool(manually_skipped[key])
+    manually_skipped[key] = bool(manually_skipped[key]) if args.skip_affine else False
 
 # get left or right
 left_or_right = args.left_or_right
