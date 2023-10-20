@@ -86,6 +86,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.registration_type_rigid_affine_deformable = QtWidgets.QRadioButton("Rigid + Affine + Deformable")
         self.registration_type_rigid_affine_deformable.setChecked(True)
         self.registration_type_rigid_affine_deformable.toggled.connect(self.set_registration_type)
+        self.registration_type = "rigid+affine+deformable" # default registration type
         self.registration_type_row.addWidget(self.registration_type_label)
         self.registration_type_row.addWidget(self.registration_type_rigid)
         self.registration_type_row.addWidget(self.registration_type_rigid_affine)
@@ -223,9 +224,6 @@ class MainWindow(QtWidgets.QMainWindow):
         # get the number of threads
         num_threads = self.num_threads
 
-        # check registration type
-        self.set_registration_type()
-        
         # get the registration type
         registration_type = self.registration_type
         # map it to the correct string
