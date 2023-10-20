@@ -248,6 +248,18 @@ class MainWindow(QtWidgets.QMainWindow):
         self.terminal.append("Running registration...")
         self.terminal.append("")
 
+        # disable all the buttons
+        self.run_button.setEnabled(False)
+        self.template_browse.setEnabled(False)
+        self.input_browse.setEnabled(False)
+        self.output_browse.setEnabled(False)
+        self.registration_type_rigid.setEnabled(False)
+        self.registration_type_rigid_affine.setEnabled(False)
+        self.registration_type_rigid_affine_deformable.setEnabled(False)
+        self.num_threads_textbox.setEnabled(False)
+        self.histogram_matching_checkbox.setEnabled(False)
+        self.reproducibility_checkbox.setEnabled(False)
+
         # create a new thread to run the registration command
         self.registration_thread = QtCore.QThread()
         self.registration_worker = RegistrationWorker(registration_command)
@@ -258,6 +270,24 @@ class MainWindow(QtWidgets.QMainWindow):
         self.registration_thread.finished.connect(self.registration_thread.deleteLater)
         self.registration_worker.progress.connect(self.update_terminal)
         self.registration_thread.start()
+
+        # when the thread is finished, print a message and enable the run button
+        self.registration_thread.finished.connect(self.registration_finished)
+
+    # function to print a message when the registration is finished
+    def registration_finished(self):
+        self.terminal.append("")
+        self.terminal.append("Registration finished.")
+        self.run_button.setEnabled(True)
+        self.template_browse.setEnabled(True)
+        self.input_browse.setEnabled(True)
+        self.output_browse.setEnabled(True)
+        self.registration_type_rigid.setEnabled(True)
+        self.registration_type_rigid_affine.setEnabled(True)
+        self.registration_type_rigid_affine_deformable.setEnabled(True)
+        self.num_threads_textbox.setEnabled(True)
+        self.histogram_matching_checkbox.setEnabled(True)
+        self.reproducibility_checkbox.setEnabled(True)
 
     # function to update the terminal
     def update_terminal(self, text):
