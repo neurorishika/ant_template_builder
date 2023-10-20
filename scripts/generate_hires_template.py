@@ -29,8 +29,8 @@ parser.add_argument('-n','--num_workers', type=int, help='number of workers to u
 parser.add_argument('-t','--keep_temp', type=bool, help='keep temporary files (default: False)', default=False, nargs='?')
 args = parser.parse_args()
 
-# get timestamp MMDDYY_HHMM
-timestamp = datetime.datetime.now().strftime('%m%d%y_%H%M')
+# get timestamp YYYYMMDD_HHMM
+timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M')
 
 ## ARGUMENT VERIFICATION
 
@@ -73,6 +73,15 @@ assert os.path.isdir(clean_database_dir), "Clean database directory does not exi
 
 # check if input directory is valid
 input_dir = args.input_dir
+
+# if input directory is not specified, use latest directory in results/
+if input_dir == "":
+    # get list of all directories in results/
+    directory_list = list(glob.glob(os.path.join("results", "*")))
+    directory_list = [d for d in directory_list if os.path.isdir(d)]
+    # get latest directory
+    input_dir = max(directory_list, key=os.path.getctime)
+
 # check if input directory exists
 assert os.path.isdir(input_dir), "Input directory does not exist."
 
