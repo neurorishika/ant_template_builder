@@ -7,7 +7,7 @@ license = "MIT"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = ">=3.10,<3.13"
+python = ">=3.9,<3.13"
 jupyter = "^1.0.0"
 ipykernel = "^6.25.2"
 scipy = "^1.11.2"
@@ -15,8 +15,8 @@ matplotlib = "^3.8.0"
 ipywidgets = "^8.1.1"
 argparse = "^1.4.0"
 tqdm = "^4.66.1"
-antspyx = "^0.4.2"
 numpy = "^1.26.0"
+pyqt5 = "^5.15.10"
 
 
 [build-system]
