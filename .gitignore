@@ -169,6 +169,7 @@ group_registration/*
 group_registration/*/
 !group_registration/run_template_builder.sh
 !group_registration/run_template_refinement.sh
+!group_registration/make_executable.sh
 !group_registration/ANTs/
 
 # Ignore all AVI and MP4 files in all subfolders
