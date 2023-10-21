@@ -294,6 +294,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.num_threads_textbox.setEnabled(False)
         self.histogram_matching_checkbox.setEnabled(False)
         self.reproducibility_checkbox.setEnabled(False)
+        self.flip_brain_checkbox.setEnabled(False)
 
         # create a new thread to run the registration command
         self.registration_thread = QtCore.QThread()
@@ -311,8 +312,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     # function to print a message when the registration is finished
     def registration_finished(self):
-        self.terminal.append("")
-        self.terminal.append("Registration finished.")
+        # enable all the buttons
         self.run_button.setEnabled(True)
         self.template_browse.setEnabled(True)
         self.input_browse.setEnabled(True)
@@ -323,6 +323,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.num_threads_textbox.setEnabled(True)
         self.histogram_matching_checkbox.setEnabled(True)
         self.reproducibility_checkbox.setEnabled(True)
+        self.flip_brain_checkbox.setEnabled(True)
+
+        # pop up a message box
+        QtWidgets.QMessageBox.information(self, "Registration Finished", "Registration finished check the output directory for the registered file: <input_filename>_registered_Warped.nii.gz")
 
     # function to update the terminal
     def update_terminal(self, text):
@@ -344,6 +348,8 @@ class RegistrationWorker(QtCore.QObject):
             os.system(self.flip_brain_command)
         # run the registration command
         os.system(self.registration_command)
+        self.progress.emit("")
+        self.progress.emit("Registration finished.")
         # emit the finished signal
         self.finished.emit()
 
