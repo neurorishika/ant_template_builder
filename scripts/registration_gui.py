@@ -9,6 +9,7 @@
 #   - number of threads to use (max is the number of cores on the machine) (Label + Textbox) (Row 5) Default is 1
 #   - checkbox to use histogram matching (Row 5) Default is unchecked
 #   - checkbox for reproducibility (use the same random seed) (Row 5) Default is checked
+#   - checkbox for whether to flip the brain before registration (Row 5) Default is unchecked
 #   - button to run the registration (Row 6)
 #   - text terminal to display the progress of the registration (Row 7)
 
@@ -24,11 +25,23 @@ import os
 import glob
 from PyQt5 import QtWidgets, QtCore, QtGui
 
+about_message ="""
+Welcome to the Kronauer Lab Template Registration Toolkit!
+==========================================================
+This program uses ANTs to register a brain to a template. 
+Please make sure that ANTs is installed and the ANTs executables 
+are in the PATH environment variable. 
+Follow the instructions at our GitHub repository to setup everything:
+https://github.com/neurorishika/ant_template_builder
+
+Version: 1.0, October 2023. Developed by Rishika Mohanta.
+"""
+
 # create the GUI class
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Registration GUI")
+        self.setWindowTitle("Kronauer Lab Template Registration Kit")
         self.resize(500, 500)
         
         # create the main widget
@@ -128,6 +141,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # show the window
         self.show()
+
+        # as the program starts, show a message to the user about the program using QtMessageBox
+        QtWidgets.QMessageBox.information(self, "About", about_message)
 
     # function to verify no spaces in the file names or directory names
     def verify_no_spaces(self, filename):
