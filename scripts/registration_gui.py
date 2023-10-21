@@ -106,7 +106,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.registration_type_row.addWidget(self.registration_type_rigid_affine_deformable)
         self.main_layout.addLayout(self.registration_type_row)
 
-        # create the row 5 layout (histogram matching, reproducibility, number of threads)
+        # create the row 5 layout (histogram matching, reproducibility, number of threads, flip brain)
         self.num_threads_row = QtWidgets.QHBoxLayout()
         self.num_threads_label = QtWidgets.QLabel("Number of Threads:")
         self.num_threads_textbox = QtWidgets.QLineEdit()
@@ -123,6 +123,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.reproducibility_checkbox = QtWidgets.QCheckBox("Reproducibility")
         self.reproducibility_checkbox.setChecked(True)
         self.num_threads_row.addWidget(self.reproducibility_checkbox)
+
+        self.flip_brain_checkbox = QtWidgets.QCheckBox("Mirror before Registration")
+        self.flip_brain_checkbox.setChecked(False)
+        self.num_threads_row.addWidget(self.flip_brain_checkbox)
 
         self.main_layout.addLayout(self.num_threads_row)
 
@@ -256,11 +260,26 @@ class MainWindow(QtWidgets.QMainWindow):
         # get the reproducibility option
         reproducibility = "1" if self.reproducibility_checkbox.isChecked() else "0"
 
-        # create the registration command
-        registration_command = "antsRegistrationSyNQuick.sh -d 3 -f "+template_file+" -m "+input_file+" -o "+output_prefix+" -n "+num_threads+" -t "+registration_type+" -j "+histogram_matching+" -y "+reproducibility 
+        # get the flip brain option
+        flip_brain = self.flip_brain_checkbox.isChecked()
+
+        # create the flip brain command
+        if flip_brain:
+            # define flipped command
+            flipped_input_file = os.path.splitext(input_file)[0]+"_flipped"+os.path.splitext(input_file)[1]
+            flip_brain_command = "PermuteFlipImageOrientationAxes 3 {} {} 0 1 2 1 0 0".format(input_file, flipped_input_file)
+            self.terminal.append(flip_brain_command)
+            # create the registration command
+            registration_command = "antsRegistrationSyNQuick.sh -d 3 -f "+template_file+" -m "+flipped_input_file+" -o "+output_prefix+" -n "+num_threads+" -t "+registration_type+" -j "+histogram_matching+" -y "+reproducibility
+            self.terminal.append(registration_command)
+        else:
+            # define flipped command
+            flip_brain_command = ""
+            # create the registration command
+            registration_command = "antsRegistrationSyNQuick.sh -d 3 -f "+template_file+" -m "+input_file+" -o "+output_prefix+" -n "+num_threads+" -t "+registration_type+" -j "+histogram_matching+" -y "+reproducibility
+            self.terminal.append(registration_command)
 
         # run the registration command in new thread and display the output in the terminal
-        self.terminal.append(registration_command)
         self.terminal.append("Running registration...")
         self.terminal.append("")
 
@@ -278,7 +297,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # create a new thread to run the registration command
         self.registration_thread = QtCore.QThread()
-        self.registration_worker = RegistrationWorker(registration_command)
+        self.registration_worker = RegistrationWorker(registration_command, flip_brain_command)
         self.registration_worker.moveToThread(self.registration_thread)
         self.registration_thread.started.connect(self.registration_worker.run_registration)
         self.registration_worker.finished.connect(self.registration_thread.quit)
@@ -314,11 +333,15 @@ class RegistrationWorker(QtCore.QObject):
     finished = QtCore.pyqtSignal()
     progress = QtCore.pyqtSignal(str)
 
-    def __init__(self, registration_command):
+    def __init__(self, registration_command, flip_brain_command):
         super().__init__()
         self.registration_command = registration_command
+        self.flip_brain_command = flip_brain_command
 
     def run_registration(self):
+        if self.flip_brain_command != "":
+            # run the flip brain command
+            os.system(self.flip_brain_command)
         # run the registration command
         os.system(self.registration_command)
         # emit the finished signal
