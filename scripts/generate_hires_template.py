@@ -98,6 +98,9 @@ assert os.path.isfile(os.path.join(input_dir, "complete_template.nii.gz")), "Inp
 # get list of all *.nii.gz files in syn directory
 nii_files = list(glob.glob(os.path.join(input_dir, "syn", "*.nii.gz")))
 
+# remove complete_template.nii.gz file
+nii_files = [file for file in nii_files if not file.endswith("complete_template.nii.gz")]
+
 # create function to get original name
 def get_original_name(file):
     # get basename
@@ -126,8 +129,8 @@ basefiles = list(set(basefiles))
 
 # for every basefile, make sure there is a Warp file
 for basefile in basefiles:
-    assert os.path.isfile(os.path.join(input_dir, "syn", basefile[:-7] + "Warp.nii.gz")), f"Input directory does not contain {basefile}Warp.nii.gz file."
-    print(f"Found {basefile}Warp.nii.gz file.")
+    assert os.path.isfile(os.path.join(input_dir, "syn", basefile[:-7] + "Warp.nii.gz")), f"Input directory does not contain {basefile[:-7]}Warp.nii.gz file."
+    print(f"Found {basefile[:-7]}Warp.nii.gz file.")
 
 # for every basefile, make sure there is an Affine.txt.gz or Affine.txt file
 for basefile in basefiles:
