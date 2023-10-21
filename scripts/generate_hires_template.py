@@ -119,7 +119,7 @@ def get_basefile_name(file):
     file = os.path.basename(file)
     # remove the words "Warp", "InverseWarp", "deformed", "repaired"
     basefile = file.replace("InverseWarp", "").replace("Warp", "").replace("deformed", "").replace("repaired", "")
-    return basefile
+    return basefile[:-7]
 
 # get list of all basefile names
 basefiles = [get_basefile_name(file) for file in nii_files]
@@ -129,16 +129,16 @@ basefiles = list(set(basefiles))
 
 # for every basefile, make sure there is a Warp file
 for basefile in basefiles:
-    assert os.path.isfile(os.path.join(input_dir, "syn", basefile[:-7] + "Warp.nii.gz")), f"Input directory does not contain {basefile[:-7]}Warp.nii.gz file."
-    print(f"Found {basefile[:-7]}Warp.nii.gz file.")
+    assert os.path.isfile(os.path.join(input_dir, "syn", basefile + "Warp.nii.gz")), f"Input directory does not contain {basefile}Warp.nii.gz file."
+    print(f"Found {basefile}Warp.nii.gz file.")
 
 # for every basefile, make sure there is an Affine.txt.gz or Affine.txt file
 for basefile in basefiles:
-    assert os.path.isfile(os.path.join(input_dir, "syn", basefile[:-7] + "Affine.txt.gz")) or os.path.isfile(os.path.join(input_dir, "syn", basefile[:-7] + "Affine.txt")), f"Input directory does not contain {basefile}Affine.txt.gz or {basefile}Affine.txt file."
+    assert os.path.isfile(os.path.join(input_dir, "syn", basefile + "Affine.txt.gz")) or os.path.isfile(os.path.join(input_dir, "syn", basefile + "Affine.txt")), f"Input directory does not contain {basefile}Affine.txt.gz or {basefile}Affine.txt file."
     # if there is an Affine.txt.gz file, convert it to Affine.txt
-    if os.path.isfile(os.path.join(input_dir, "syn", basefile[:-7] + "Affine.txt.gz")):
-        os.system(f"gunzip {os.path.join(input_dir, 'syn', basefile[:-7] + 'Affine.txt.gz')}")
-        assert os.path.isfile(os.path.join(input_dir, "syn", basefile[:-7] + "Affine.txt")), f"Input directory does not contain {basefile}Affine.txt file as expected. Please check if the file was correctly unzipped."
+    if os.path.isfile(os.path.join(input_dir, "syn", basefile + "Affine.txt.gz")):
+        os.system(f"gunzip {os.path.join(input_dir, 'syn', basefile + 'Affine.txt.gz')}")
+        assert os.path.isfile(os.path.join(input_dir, "syn", basefile + "Affine.txt")), f"Input directory does not contain {basefile}Affine.txt file as expected. Please check if the file was correctly unzipped."
     print(f"Found {basefile}Affine.txt file.")
 
 # get a list of all original files
@@ -212,7 +212,7 @@ def warp_file(index):
     print(f"Error file: {err_file}")
 
     # warp data using ANTs
-    os.system(f"WarpImageMultiTransform 3 {original_file} {warped_file} -R {upsampled_template_file} {basefile[:-7]}Warp.nii.gz {basefile[:-7]}Affine.txt > {log_file} 2> {err_file}")
+    os.system(f"WarpImageMultiTransform 3 {original_file} {warped_file} -R {upsampled_template_file} {basefile}Warp.nii.gz {basefile}Affine.txt > {log_file} 2> {err_file}")
 
     
 if args.num_workers == 1:
