@@ -98,6 +98,8 @@ assert os.path.isfile(os.path.join(input_dir, "complete_template.nii.gz")), "Inp
 # get list of all *.nii.gz files in syn directory
 nii_files = list(glob.glob(os.path.join(input_dir, "syn", "*.nii.gz")))
 
+# remove any files that start with complete_template
+nii_files = [file for file in nii_files if not os.path.basename(file).startswith("complete_template")]
 
 # create function to get original name
 def get_original_name(file):
