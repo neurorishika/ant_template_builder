@@ -34,6 +34,8 @@ REFINED_TEMPLATE=$(ls -t ../refined_templates/refined_template_*.nii.gz | head -
 
 # copy the latest refined template to the current directory
 cp $REFINED_TEMPLATE ./obiroi_brain_reg_refined_$DATE/refined_template.nii.gz
+cp $REFINED_TEMPLATE ./refined_template.nii.gz
+
 
 ## STEP 3: Run the registration
 
