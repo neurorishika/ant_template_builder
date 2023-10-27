@@ -161,13 +161,20 @@ def runAntsFlip(input_file,output_file,index):
     Run ANTs PermuteFlipImageOrientationAxes on input_file and save output to output_file.
     """
     print("Processing file: {} ({} of {})".format(input_file, index, len(input_files)))
+    
+    mirror_file = output_file[:-5] + '_mirror.mat'
+
     # print log file location
     print("Log file: {}".format(output_file[:-5] + '_out.log'))
     print("Error file: {}".format(output_file[:-5] + '_err.log'))
 
-    # generate mirrored file using ANTs
-    os.system('PermuteFlipImageOrientationAxes 3 {} {} 0 1 2 1 0 0 >{}_out.log 2>{}_err.log'.format(input_file, output_file, output_file[:-5], output_file[:-5]))
-
+    # # generate mirrored file using ANTs
+    # os.system('PermuteFlipImageOrientationAxes 3 {} {} 0 1 2 1 0 0 >{}_out.log 2>{}_err.log'.format(input_file, output_file, output_file[:-5], output_file[:-5]))
+    
+    # generate mirrored file using ImageMath
+    os.system('ImageMath 3 {} ReflectionMatrix {} 0 >{}_out.log 2>{}_err.log'.format(mirror_file, input_file, mirror_file[:-4], mirror_file[:-4]))
+    os.system('antsApplyTransforms -d 3 -i {} -o {} -t {} -r {} >{}_out.log 2>{}_err.log'.format(input_file, output_file, mirror_file, input_file, output_file[:-5], output_file[:-5]))
+    
     # check if output file exists
     assert os.path.isfile(output_file), "ERROR: Output file {} does not exist. Check log files for more information.".format(output_file)
 
