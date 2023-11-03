@@ -161,6 +161,9 @@ raw_data/*
 # Ignore all NRRD files in all subfolders
 **/*.nrrd
 
+# Ignore all mat files in all subfolders
+**/*.mat
+
 # Ignore all subfolders in folder named 'results'
 results/*/
 
