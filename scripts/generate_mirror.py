@@ -162,7 +162,7 @@ def runAntsFlip(input_file,output_file,index):
     """
     print("Processing file: {} ({} of {})".format(input_file, index, len(input_files)))
     
-    mirror_file = output_file[:-5] + '_mirror.mat'
+    mirror_file = output_file[:-5] + '.mat'
 
     # print log file location
     print("Log file: {}".format(output_file[:-5] + '_out.log'))
