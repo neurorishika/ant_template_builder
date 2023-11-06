@@ -161,7 +161,7 @@ class MainWindow(QtWidgets.QMainWindow):
     # function to browse for the template file
     def browse_template(self):
         # open a file dialog
-        filename = QtWidgets.QFileDialog.getOpenFileName(self, 'Open Template File', os.getcwd(), 'Image Files (*.nii *.nii.gz *.nrrd)')[0]
+        filename = QtWidgets.QFileDialog.getOpenFileName(self, 'Open Template File', os.getcwd(), 'Image Files (*.nii.gz *.nrrd)')[0]
         # make sure there are no spaces in the filename and alert the user to change it if there are
         if self.verify_no_spaces(filename) is False:
             return
@@ -171,7 +171,7 @@ class MainWindow(QtWidgets.QMainWindow):
     # function to browse for the input file
     def browse_input(self):
         # open a file dialog
-        filename = QtWidgets.QFileDialog.getOpenFileName(self, 'Open Input File', os.getcwd(), 'Image Files (*.nii *.nii.gz *.nrrd)')[0]
+        filename = QtWidgets.QFileDialog.getOpenFileName(self, 'Open Input File', os.getcwd(), 'Image Files (*.nii.gz *.nrrd)')[0]
         # make sure there are no spaces in the filename and alert the user to change it if there are
         if self.verify_no_spaces(filename) is False:
             return
@@ -267,8 +267,11 @@ class MainWindow(QtWidgets.QMainWindow):
         if flip_brain:
             # define flipped command
             flipped_input_file = os.path.splitext(input_file)[0]+"_flipped"+os.path.splitext(input_file)[1]
-            flip_brain_command = "PermuteFlipImageOrientationAxes 3 {} {} 0 1 2 1 0 0".format(input_file, flipped_input_file)
-            self.terminal.append(flip_brain_command)
+            mirror_file = input_file[:-5] if input_file.endswith(".nrrd") else input_file[:-7] + '.mat'
+            flip_brain_command1 = "ImageMath 3 {} ReflectionMatrix {} 0 >{}_out.log 2>{}_err.log".format(mirror_file, input_file, mirror_file[:-4], mirror_file[:-4])
+            flip_brain_command2 = "antsApplyTransforms -d 3 -i {} -o {} -t {} -r {} >{}_out.log 2>{}_err.log".format(input_file, flipped_input_file, mirror_file, input_file, flipped_input_file[:-5], flipped_input_file[:-5])
+            self.terminal.append(flip_brain_command1)
+            self.terminal.append(flip_brain_command2)
             # create the registration command
             registration_command = "antsRegistrationSyNQuick.sh -d 3 -f "+template_file+" -m "+flipped_input_file+" -o "+output_prefix+" -n "+num_threads+" -t "+registration_type+" -j "+histogram_matching+" -y "+reproducibility
             self.terminal.append(registration_command)
@@ -298,7 +301,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # create a new thread to run the registration command
         self.registration_thread = QtCore.QThread()
-        self.registration_worker = RegistrationWorker(registration_command, flip_brain_command)
+        self.registration_worker = RegistrationWorker(registration_command, flip_brain_command1, flip_brain_command2)
         self.registration_worker.moveToThread(self.registration_thread)
         self.registration_thread.started.connect(self.registration_worker.run_registration)
         self.registration_worker.finished.connect(self.registration_thread.quit)
@@ -337,15 +340,17 @@ class RegistrationWorker(QtCore.QObject):
     finished = QtCore.pyqtSignal()
     progress = QtCore.pyqtSignal(str)
 
-    def __init__(self, registration_command, flip_brain_command):
+    def __init__(self, registration_command, flip_brain_command1, flip_brain_command2):
         super().__init__()
         self.registration_command = registration_command
-        self.flip_brain_command = flip_brain_command
+        self.flip_brain_command1 = flip_brain_command1
+        self.flip_brain_command2 = flip_brain_command2
 
     def run_registration(self):
         if self.flip_brain_command != "":
             # run the flip brain command
-            os.system(self.flip_brain_command)
+            os.system(self.flip_brain_command1)
+            os.system(self.flip_brain_command2)
         # run the registration command
         os.system(self.registration_command)
         self.progress.emit("")
