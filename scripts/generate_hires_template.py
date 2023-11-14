@@ -103,6 +103,9 @@ nii_files = [os.path.join(input_dir, "syn", file) for file in nii_files if file.
 # remove any files that start with complete_template
 nii_files = [file for file in nii_files if not os.path.basename(file).startswith("complete_template")]
 
+# remove duplicates
+nii_files = list(set(nii_files))
+
 # create function to get original name
 def get_original_name(file):
     # get basename
@@ -145,6 +148,9 @@ for basefile in basefiles:
 
 # get a list of all original files
 original_files = [get_original_name(file) for file in nii_files]
+
+# remove duplicates
+original_files = list(set(original_files))
 
 # check if each original file exists in clean database directory
 for original_file in original_files:
