@@ -77,7 +77,7 @@ input_dir = args.input_dir
 # if input directory is not specified, use latest directory in results/
 if input_dir == "":
     # get list of all directories in results/
-    directory_list = list(glob.glob(os.path.join("results", "*")))
+    directory_list = os.listdir("results")
     directory_list = [d for d in directory_list if os.path.isdir(d)]
     # get latest directory
     input_dir = max(directory_list, key=os.path.getctime)
@@ -86,7 +86,7 @@ if input_dir == "":
 assert os.path.isdir(input_dir), "Input directory does not exist."
 
 # check if input directory has required files
-directory_list = list(glob.glob(os.path.join(input_dir, "*")))
+directory_list = os.listdir(input_dir)
 directory_list = [d for d in directory_list if os.path.isdir(d)]
 
 # make sure there is syn directory
@@ -96,7 +96,9 @@ assert os.path.isdir(os.path.join(input_dir, "syn")), "Input directory does not 
 assert os.path.isfile(os.path.join(input_dir, "complete_template.nii.gz")), "Input directory does not contain complete_template.nii.gz file."
 
 # get list of all *.nii.gz files in syn directory
-nii_files = list(glob.glob(os.path.join(input_dir, "syn", "*.nii.gz")))
+# nii_files = list(glob.glob(os.path.join(input_dir, "syn", "*.nii.gz")))
+nii_files = os.listdir(os.path.join(input_dir, "syn"))
+nii_files = [os.path.join(input_dir, "syn", file) for file in nii_files if file.endswith(".nii.gz")]
 
 # remove any files that start with complete_template
 nii_files = [file for file in nii_files if not os.path.basename(file).startswith("complete_template")]
