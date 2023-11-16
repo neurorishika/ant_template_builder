@@ -170,10 +170,9 @@ results/*/
 # ignore all files and folders in group_registration folder except for the run_registration.sh file and the ANTs folder
 group_registration/*
 group_registration/*/
-!group_registration/run_template_builder.sh
-!group_registration/run_template_refinement.sh
-!group_registration/run_template_reg_refinement.sh
-!group_registration/make_executable.sh
+!group_registration/run_whole_brain_template_builder.sh
+!group_registration/run_antennal_lobe_template_builder.sh
+!group_registration/archived_scripts/*
 !group_registration/ANTs/
 
 # Ignore all AVI and MP4 files in all subfolders

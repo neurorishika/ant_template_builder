@@ -66,7 +66,7 @@ By default, the script will look for data (*.nrrd files) in the `cleaned_data` f
 poetry run python scripts/generate_mirror.py --help
 ```
 
-By default, the script will mirror all *.nrrd files in the input folder. However, the ant brain has a notable asymmetry in the mushroom body. Therefore, it is recommended to mirror only the brains that are oriented in one direction. You can do this by having a metadata.csv (as in this repository) file. The metadata file must have two columns: `Clean Name` and `Egocentric Leaning` where the first is name of the file, and the second has values of `left`,`right` or `sym` (symmetric). The script will only mirror the brains that have `left` or `right` in the `Egocentric Leaning` column depending on the -lr flag. Ideally, mirror and resample ALL the brains (unless disk space is an issue) and then use the asymmetrize_resampled.py script to filter it down to the brains that are oriented in one direction.
+By default, the script will mirror all *.nrrd files in the input folder. However, the ant brain has a notable asymmetry in the mushroom body. Therefore, it is recommended to mirror only the brains that are oriented in one direction. You can do this by having a whole_brain_metadata.csv (as in this repository) file. The metadata file must have two columns: `Clean Name` and `Egocentric Leaning` where the first is name of the file, and the second has values of `left`,`right` or `sym` (symmetric). The script will only mirror the brains that have `left` or `right` in the `Egocentric Leaning` column depending on the -lr flag. Ideally, mirror and resample ALL the brains (unless disk space is an issue) and then use the asymmetrize_resampled.py script to filter it down to the brains that are oriented in one direction.
 
 ### 5. Run the resampling script
 
@@ -92,7 +92,7 @@ To run the asymmetrize script, run the following command in the terminal (make s
 poetry run python scripts/asymmetrize_resampled.py
 ```
 
-By default, the script will look for data (*.nrrd files) in the `resampled_data` folder and generate asymmetrized images in the same folder. It will also backup the original images in the backup folder. You can use "--help" to see the options for the script, including the option to change the input, output and backup folders. This requires the metadata.csv file described above to be present and linked using the -m flag.
+By default, the script will look for data (*.nrrd files) in the `resampled_data` folder and generate asymmetrized images in the same folder. It will also backup the original images in the backup folder. You can use "--help" to see the options for the script, including the option to change the input, output and backup folders. This requires the whole_brain_metadata.csv file described above to be present and linked using the -m flag.
 
 ```
 poetry run python scripts/asymmetrize_resampled.py --help

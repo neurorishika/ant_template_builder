@@ -24,8 +24,9 @@ parser.add_argument('-o','--output_dir', type=str, help='path to output director
 parser.add_argument('-skip','--skip_existing', type=bool, help='skip existing files (default: True)', default=True, nargs='?')
 parser.add_argument('-n','--num_workers', type=int, help='number of workers (default: 1)', default=1, nargs='?')
 parser.add_argument('-s','--symmetric', type=bool, help='symmetric template (default: False)', default=True, nargs='?')
-parser.add_argument('-meta','--metadata', type=str, help='path to metadata file (default: ./metadata.csv)', default="./metadata.csv", nargs='?')
+parser.add_argument('-meta','--metadata', type=str, help='path to metadata file (default: ./whole_brain_metadata.csv)', default="./whole_brain_metadata.csv", nargs='?')
 parser.add_argument('-lr','--left_or_right', type=str, help='left or right (default: left)', default="left", nargs='?')
+parser.add_argument('-a', '--axis', type=str, help='axis to mirror (vertical/horizontal; default: horizontal)', default="horizontal", nargs='?')
 args = parser.parse_args()
 
 # check if input directory is valid
@@ -71,6 +72,15 @@ print("Metadata file: {}".format(metadata_file))
 # check if symmetric template is required
 symmetric = args.symmetric
 left_or_right = args.left_or_right
+
+# check if axis is valid
+axis = args.axis
+assert axis in ['vertical', 'horizontal'], "Axis must be either 'vertical' or 'horizontal'."
+
+if axis == 'vertical':
+    axis = 1
+else:
+    axis = 0
 
 # function to generate mirrored file name
 def generate_mirror_name(x,output_dir=output_dir):
@@ -172,8 +182,8 @@ def runAntsFlip(input_file,output_file,index):
     # os.system('PermuteFlipImageOrientationAxes 3 {} {} 0 1 2 1 0 0 >{}_out.log 2>{}_err.log'.format(input_file, output_file, output_file[:-5], output_file[:-5]))
     
     # generate mirrored file using ImageMath
-    os.system('ImageMath 3 {} ReflectionMatrix {} 0 >{}_out.log 2>{}_err.log'.format(mirror_file, input_file, mirror_file[:-4], mirror_file[:-4]))
-    os.system('antsApplyTransforms -d 3 -i {} -o {} -t {} -r {} >{}_out.log 2>{}_err.log'.format(input_file, output_file, mirror_file, input_file, output_file[:-5], output_file[:-5]))
+    os.system('ImageMath 3 {} ReflectionMatrix {} {} >{}_out.log 2>{}_err.log'.format(mirror_file, input_file, axis, mirror_file[:-4], mirror_file[:-4]))
+    os.system('antsApplyTransforms -d 3 -i {} -o {} -t {} -r {} --float 1 >{}_out.log 2>{}_err.log'.format(input_file, output_file, mirror_file, input_file, output_file[:-5], output_file[:-5]))
     
     # check if output file exists
     assert os.path.isfile(output_file), "ERROR: Output file {} does not exist. Check log files for more information.".format(output_file)
