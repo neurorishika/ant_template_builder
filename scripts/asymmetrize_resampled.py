@@ -22,11 +22,11 @@ parser = argparse.ArgumentParser(description='Filter confocal images to keep onl
 parser.add_argument('-i','--input_dir', type=str, help='path to input directory (must contain .nrrd files; default: ./resampled_data/)', default="./resampled_data/", nargs='?')
 parser.add_argument('-o','--output_dir', type=str, help='path to output directory; default: same as input directory', default="", nargs='?')
 parser.add_argument('-b','--backup_dir', type=str, help='path to backup directory (default: <input_dir>/backup/)', default="", nargs='?')
-parser.add_argument('-m','--diff_dir', type=str, help='path to diff directory (default: <input_dir>/diff/)', default="", nargs='?')
-parser.add_argument('-meta','--metadata', type=str, help='path to metadata file (default: ./metadata.csv)', default="./metadata.csv", nargs='?')
+parser.add_argument('-meta','--metadata', type=str, help='path to metadata file (default: ./whole_brain_metadata.csv)', default="./whole_brain_metadata.csv", nargs='?')
 parser.add_argument('-lr','--left_or_right', type=str, help='left or right (default: left)', default="left", nargs='?')
-parser.add_argument('-q','--quality_affine', type=bool, help='whether to use quality affine (default: False)', default=False, nargs='?')
-parser.add_argument('-s','--skip_affine', type=bool, help='whether to remove manually skipped files from metadata (default: True)', default=True, nargs='?')
+parser.add_argument('-q','--quality_affine', type=bool, help='(ARCHIVED) whether to use quality affine (default: False)', default=False, nargs='?')
+parser.add_argument('-s','--skip_affine', type=bool, help='(ARCHIVED) whether to remove manually skipped files from metadata (default: True)', default=True, nargs='?')
+parser.add_argument('-m','--diff_dir', type=str, help='(ARCHIVED) path to diff directory (default: <input_dir>/diff/)', default="", nargs='?')
 args = parser.parse_args()
 
 # check if input directory is valid
@@ -65,14 +65,24 @@ print("Backup directory: {}".format(backup_dir))
 metadata_file = args.metadata
 assert os.path.isfile(metadata_file), "Metadata file does not exist."
 
+# check metadata to be either whole_brain_metadata.csv or antennal_lobe_metadata.csv
+assert os.path.basename(metadata_file) in ['whole_brain_metadata.csv', 'antennal_lobe_metadata.csv'], "Metadata file must be either whole_brain_metadata.csv or antennal_lobe_metadata.csv."
+
 # read metadata file
 metadata = pd.read_csv(metadata_file)
 
 # Keep only the columns we need (Clean name and Egocentric Leaning)
-metadata_original = metadata[['Clean Name', 'Egocentric Leaning','Skip Affine']]
+if os.path.basename(metadata_file) == 'whole_brain_metadata.csv':
+    metadata_original = metadata[['Clean Name', 'Egocentric Leaning','Skip Affine']]
+    # rename columns
+    metadata_original.columns = ['Clean Name', 'Asymmetry','Skip Affine']
+elif os.path.basename(metadata_file) == 'antennal_lobe_metadata.csv':
+    metadata_original = metadata[['Clean Name', 'Lateralization', 'Skip Affine']]
+    # rename columns
+    metadata_original.columns = ['Clean Name', 'Asymmetry', 'Skip Affine']
 
 # convert to map dictionary
-metadata = metadata_original.set_index('Clean Name').to_dict()['Egocentric Leaning']
+metadata = metadata_original.set_index('Clean Name').to_dict()['Asymmetry']
 manually_skipped = metadata_original.set_index('Clean Name').to_dict()['Skip Affine']
 print("Metadata file: {}".format(metadata_file))
 

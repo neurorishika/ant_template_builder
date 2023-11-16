@@ -5,6 +5,9 @@
 # Get date and time in the format YYYYMMDD_HHMM
 DATE=$(date +"%Y%m%d_%H%M")
 
+# Setup a directory for the data to be registered
+DATA_DIRECTORY=../resampled_data/whole_brain
+
 # Setup a identifier (with wildcards) for the images to be registered (e.g. synA647_*.nii.gz)
 ID=synA647_*.nrrd
 
@@ -33,9 +36,9 @@ mkdir obiroi_brain_$DATE/syn
 
 ## STEP 2: Copy Data to the directory
 
-# Copy the data from ../resampled_data to the current directory ./
+# Copy the data from subdirectory to the current directory ./
 
-cp ../resampled_data/$ID ./
+cp $DATA_DIRECTORY/$ID ./
 
 ## STEP 3: Run the registration
 

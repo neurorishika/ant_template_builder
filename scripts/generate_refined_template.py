@@ -22,7 +22,7 @@ print(start_string)
 # parse command line arguments
 parser = argparse.ArgumentParser(description='Resample generated brain template to a target voxel size.')
 parser.add_argument('-i','--input_dir', type=str, help='path to results directory (must contain syn directory and deformed files; default: latest directory in results/)', default="", nargs='?')
-parser.add_argument('-meta','--metadata', type=str, help='path to metadata file (default: ./metadata.csv)', default="./metadata.csv", nargs='?')
+parser.add_argument('-meta','--metadata', type=str, help='path to metadata file (default: ./whole_brain_metadata.csv)', default="./whole_brain_metadata.csv", nargs='?')
 parser.add_argument('-o','--output_dir', type=str, help='path to output directory (default: ./refined_templates/)', default="./refined_templates/", nargs='?')
 parser.add_argument('-t','--keep_temp', type=bool, help='keep temporary files (default: False)', default=False, nargs='?')
 args = parser.parse_args()
