@@ -12,7 +12,7 @@ DFB14_Airyscan Processing_Stitch.czi,synA647_DF_B14.nrrd,0,2.9,0,0,na,sym,0,1
 DFB15_Airyscan Processing_Stitch.czi,synA647_DF_B15.nrrd,0,0,0,0,na,left,0,1
 DFB16_Airyscan Processing_Stitch.czi,synA647_DF_B16.nrrd,0,0,0,0,na,left,0,1
 DFC01_AiryscanProcessing_Stitch.czi,synA647_DF_C01.nrrd,0,-2.9,0,0,na,left,0,1
-DFC04_Airyscan processing_Stitch.czi,synA647_DF_C04.nrrd,0,2.9,0,0,na,left,0,1
+DFC04_Airyscan processing_Stitch.czi,synA647_DF_C04-fixed.nrrd,0,2.9,0,0,na,left,0,1
 DFC05_Airyscan Processing_Stitch.czi,synA647_DF_C05.nrrd,0,0,0,0,low intensity,right,0,1
 DFC07_Airyscan Processing_Stitch.czi,synA647_DF_C07.nrrd,0,0,0,0,na,sym,0,1
 DFC08_Airyscan Processing_Stitch.czi,synA647_DF_C08.nrrd,0,0,0,0,na,left,0,1
