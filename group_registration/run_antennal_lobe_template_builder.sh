@@ -20,19 +20,19 @@ ITERATIONS_AFFINE=2
 ITERATIONS_SYN=4
 
 # Create a directory for the template building in the current directory
-# FORMAT: obiroi_brain_<DATE>
+# FORMAT: obiroi_al_<DATE>
 
-mkdir obiroi_brain_$DATE
+mkdir obiroi_al_$DATE
 
 # Create a subdirectory for the affine registration
-# FORMAT: obiroi_brain_<DATE>/affine
+# FORMAT: obiroi_al_<DATE>/affine
 
-mkdir obiroi_brain_$DATE/affine
+mkdir obiroi_al_$DATE/affine
 
 # Create a subdirectory for the syn registration
-# FORMAT: obiroi_brain_<DATE>/syn
+# FORMAT: obiroi_al_<DATE>/syn
 
-mkdir obiroi_brain_$DATE/syn
+mkdir obiroi_al_$DATE/syn
 
 ## STEP 2: Copy Data to the directory
 
@@ -48,15 +48,15 @@ cp $DATA_DIRECTORY/$ID ./
 # Move all generated files to the affine subdirectory
 # Things to move: affine_* stdout-affine-template.txt, stderr-affine-template.txt, *.cfg, job*.* and GR* folders
 
-mv affine_* obiroi_brain_$DATE/affine
-mv stdout-affine-template.txt obiroi_brain_$DATE/affine
-mv stderr-affine-template.txt obiroi_brain_$DATE/affine
-mv *.cfg obiroi_brain_$DATE/affine
-mv RA* obiroi_brain_$DATE/affine
+mv affine_* obiroi_al_$DATE/affine
+mv stdout-affine-template.txt obiroi_al_$DATE/affine
+mv stderr-affine-template.txt obiroi_al_$DATE/affine
+mv *.cfg obiroi_al_$DATE/affine
+mv RA* obiroi_al_$DATE/affine
 
 # Copy the affine template from the affine registration to the current directory ./ and run directory
-cp obiroi_brain_$DATE/affine/affine_template.nii.gz ./affine_template.nii.gz
-cp obiroi_brain_$DATE/affine/affine_template.nii.gz obiroi_brain_$DATE/affine_template.nii.gz
+cp obiroi_al_$DATE/affine/affine_template.nii.gz ./affine_template.nii.gz
+cp obiroi_al_$DATE/affine/affine_template.nii.gz obiroi_al_$DATE/affine_template.nii.gz
 
 # check if there is a diff folder in the resampled_data directory
 if [ -d "../resampled_data/diff" ]; then
@@ -70,17 +70,17 @@ fi
 # Move all generated files to the syn subdirectory
 # Things to move: complete_* stdout-syn-template.txt, stderr-syn-template.txt, *.cfg, job*.* and GR* folders
 
-mv complete_* obiroi_brain_$DATE/syn
-mv stdout-syn-template.txt obiroi_brain_$DATE/syn
-mv stderr-syn-template.txt obiroi_brain_$DATE/syn
-mv *.cfg obiroi_brain_$DATE/syn
-mv GR* obiroi_brain_$DATE/syn
+mv complete_* obiroi_al_$DATE/syn
+mv stdout-syn-template.txt obiroi_al_$DATE/syn
+mv stderr-syn-template.txt obiroi_al_$DATE/syn
+mv *.cfg obiroi_al_$DATE/syn
+mv GR* obiroi_al_$DATE/syn
 
 # delete all temporary folders (starting with temp)
 rm -rf temp*
 
 # Copy the syn template from the syn registration to the run directory
-cp obiroi_brain_$DATE/syn/complete_template.nii.gz obiroi_brain_$DATE/complete_template.nii.gz
+cp obiroi_al_$DATE/syn/complete_template.nii.gz obiroi_al_$DATE/complete_template.nii.gz
 
 # Delete the intermediate files
 rm affine_template.nii.gz
@@ -88,4 +88,4 @@ rm *.nii.gz
 rm *.nrrd
 
 # Move the run directory to the results directory
-mv obiroi_brain_$DATE ../results
+mv obiroi_al_$DATE ../results
