@@ -164,6 +164,9 @@ raw_data/*
 # Ignore all mat files in all subfolders
 **/*.mat
 
+# ignore all tif files in all subfolders
+**/*.tif
+
 # Ignore all subfolders in folder named 'results'
 results/*/
 
