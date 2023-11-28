@@ -153,6 +153,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.final_row.addWidget(self.affine_only_checkbox)
         self.final_row.addWidget(self.time_series_checkbox)
         self.final_row.addWidget(self.low_memory_checkbox)
+        self.final_row.addWidget(self.flip_brain_checkbox)
         self.main_layout.addLayout(self.final_row)
 
         # create the run button
