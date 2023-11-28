@@ -106,7 +106,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.registration_type_row.addWidget(self.registration_type_rigid_affine_deformable)
         self.main_layout.addLayout(self.registration_type_row)
 
-        # create the row 5 layout (histogram matching, reproducibility, number of threads, flip brain)
+        # create the row 5 layout (histogram matching, reproducibility, number of threads, flip brain, low memory)
         self.num_threads_row = QtWidgets.QHBoxLayout()
         self.num_threads_label = QtWidgets.QLabel("Number of Threads:")
         self.num_threads_textbox = QtWidgets.QLineEdit()
@@ -123,6 +123,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.reproducibility_checkbox = QtWidgets.QCheckBox("Reproducibility")
         self.reproducibility_checkbox.setChecked(True)
         self.num_threads_row.addWidget(self.reproducibility_checkbox)
+
+        self.low_memory_checkbox = QtWidgets.QCheckBox("Low Memory")
+        self.low_memory_checkbox.setChecked(False)
+        self.num_threads_row.addWidget(self.low_memory_checkbox)
 
         self.flip_brain_checkbox = QtWidgets.QCheckBox("Mirror before Registration")
         self.flip_brain_checkbox.setChecked(False)
@@ -228,6 +232,10 @@ class MainWindow(QtWidgets.QMainWindow):
             QtWidgets.QMessageBox.warning(self, "Warning", "Template file, input file, and output directory must be specified.")
             return
         
+        # if the output directory does not end with a slash, add a slash
+        if not output_directory.endswith("/"):
+            output_directory += "/"
+        
         # setup output directory
         input_filename = os.path.basename(input_file)
         output_prefix = os.path.splitext(input_filename)[0]+"_registered_"
@@ -263,28 +271,25 @@ class MainWindow(QtWidgets.QMainWindow):
         # get the flip brain option
         flip_brain = self.flip_brain_checkbox.isChecked()
 
+        # get the low memory option
+        low_memory_flip = "1" if self.low_memory_checkbox.isChecked() else "0"
+        low_memory_registration = "f" if self.low_memory_checkbox.isChecked() else "d"
+
         # create the flip brain command
         if flip_brain:
             # define flipped command
-            flipped_input_file = os.path.splitext(input_file)[0]+"_flipped"+os.path.splitext(input_file)[1]
-            mirror_file = input_file[:-5] if input_file.endswith(".nrrd") else input_file[:-7] + '.mat'
-            flip_brain_command1 = "ImageMath 3 {} ReflectionMatrix {} 0 >{}_out.log 2>{}_err.log".format(mirror_file, input_file, mirror_file[:-4], mirror_file[:-4])
-            flip_brain_command2 = "antsApplyTransforms -d 3 -i {} -o {} -t {} -r {} >{}_out.log 2>{}_err.log".format(input_file, flipped_input_file, mirror_file, input_file, flipped_input_file[:-5], flipped_input_file[:-5])
-            self.terminal.append(flip_brain_command1)
-            self.terminal.append(flip_brain_command2)
-            # create the registration command
-            registration_command = "antsRegistrationSyNQuick.sh -d 3 -f "+template_file+" -m "+flipped_input_file+" -o "+output_prefix+" -n "+num_threads+" -t "+registration_type+" -j "+histogram_matching+" -y "+reproducibility
-            self.terminal.append(registration_command)
+            flipped_input_file = output_directory + os.path.splitext(input_filename)[0]+"_flipped"+os.path.splitext(input_filename)[1]
+            mirror_file = output_directory + ((input_filename[:-5] if input_filename.endswith(".nrrd") else input_filename[:-7]) + '.mat')
+            flip_brain_command1 = "ImageMath 3 {} ReflectionMatrix {} 0 > >(tee -a {}_out.log) 2> >(tee -a {}_err.log >&2)".format(mirror_file, input_file, mirror_file[:-4], mirror_file[:-4])
+            flip_brain_command2 = "antsApplyTransforms -d 3 -i {} -o {} -t {} -r {} --float {} > >(tee -a {}_out.log) 2> >(tee -a {}_err.log >&2)".format(input_file, flipped_input_file, mirror_file, input_file, low_memory_flip, flipped_input_file[:-5], flipped_input_file[:-5])
+            input_file = flipped_input_file
         else:
             # define flipped command
-            flip_brain_command = ""
-            # create the registration command
-            registration_command = "antsRegistrationSyNQuick.sh -d 3 -f "+template_file+" -m "+input_file+" -o "+output_prefix+" -n "+num_threads+" -t "+registration_type+" -j "+histogram_matching+" -y "+reproducibility
-            self.terminal.append(registration_command)
-
-        # run the registration command in new thread and display the output in the terminal
-        self.terminal.append("Running registration...")
-        self.terminal.append("")
+            flip_brain_command1 = ""
+            flip_brain_command2 = ""
+        
+        # create the registration command
+        registration_command = "antsRegistrationSyNQuick.sh -d 3 -f "+template_file+" -m "+input_file+" -o "+output_prefix+" -n "+num_threads+" -t "+registration_type+" -j "+histogram_matching+" -y "+reproducibility+" -p "+low_memory_registration+" > >(tee -a "+output_prefix+"out.log) 2> >(tee -a "+output_prefix+"err.log >&2)"
 
         # disable all the buttons
         self.run_button.setEnabled(False)
@@ -347,11 +352,19 @@ class RegistrationWorker(QtCore.QObject):
         self.flip_brain_command2 = flip_brain_command2
 
     def run_registration(self):
-        if self.flip_brain_command != "":
+        if self.flip_brain_command1 != "" and self.flip_brain_command2 != "":
+            self.progress.emit("Flipping the brain...")
+            self.progress.emit("")
             # run the flip brain command
+            self.progress.emit(self.flip_brain_command1)
             os.system(self.flip_brain_command1)
+            self.progress.emit(self.flip_brain_command2)
             os.system(self.flip_brain_command2)
+            self.progress.emit("")
         # run the registration command
+        self.progress.emit("Running registration...")
+        self.progress.emit("")
+        self.progress.emit(self.registration_command)
         os.system(self.registration_command)
         self.progress.emit("")
         self.progress.emit("Registration finished.")
