@@ -118,7 +118,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.warping_type = "to_template"
         self.warping_type_row.addWidget(self.warping_type_label)
         self.warping_type_row.addWidget(self.warping_type_to_template)
-        self.warping_type_row.addWidget(self.warping_type_to_template_inverse)
+        self.warping_type_row.addWidget(self.warping_type_from_template)
         self.main_layout.addLayout(self.warping_type_row)
 
         # create the special warping row (Volume, Segmentation Label, Point Set)
