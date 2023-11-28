@@ -140,7 +140,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.special_warping_row.addWidget(self.special_warping_point_set)
         self.main_layout.addLayout(self.special_warping_row)
 
-        # create the row 5 layout (Affine only, Time Series, Low Memory)
+        # create the row 5 layout (Affine only, Time Series, Low Memory, Mirror before warping)
         self.final_row = QtWidgets.QHBoxLayout()
         self.affine_only_checkbox = QtWidgets.QCheckBox("Affine Only")
         self.affine_only_checkbox.setChecked(False)
@@ -148,6 +148,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.time_series_checkbox.setChecked(False)
         self.low_memory_checkbox = QtWidgets.QCheckBox("Low Memory")
         self.low_memory_checkbox.setChecked(True)
+        self.flip_brain_checkbox = QtWidgets.QCheckBox("Mirror Before Warping")
+        self.flip_brain_checkbox.setChecked(False)
         self.final_row.addWidget(self.affine_only_checkbox)
         self.final_row.addWidget(self.time_series_checkbox)
         self.final_row.addWidget(self.low_memory_checkbox)
@@ -281,6 +283,10 @@ class MainWindow(QtWidgets.QMainWindow):
             QtWidgets.QMessageBox.warning(self, "Warning", "All files must be specified.")
             return
         
+        # if the output directory does not have a / at the end, add it
+        if not output_directory.endswith("/"):
+            output_directory += "/"
+        
         # setup output directory
         input_filename = os.path.basename(input_file)
         output_prefix = os.path.splitext(input_filename)[0]+"_warped_"
@@ -295,7 +301,18 @@ class MainWindow(QtWidgets.QMainWindow):
         special_warping_type = self.special_warping_type
         affine_only = self.affine_only_checkbox.isChecked()
         time_series = self.time_series_checkbox.isChecked()
-        low_memory = self.low_memory_checkbox.isChecked()
+        low_memory = "1" if self.low_memory_checkbox.isChecked() else "0"
+        flip_brain = self.flip_brain_checkbox.isChecked()
+
+        if flip_brain:
+            flipped_input_file = output_directory + os.path.splitext(input_filename)[0]+"_flipped"+os.path.splitext(input_filename)[1]
+            mirror_file = output_directory + ((input_filename[:-5] if input_filename.endswith(".nrrd") else input_filename[:-7]) + '.mat')
+            flip_brain_command1 = "ImageMath 3 {} ReflectionMatrix {} 0 > >(tee -a {}_out.log) 2> >(tee -a {}_err.log >&2)".format(mirror_file, input_file, mirror_file[:-4], mirror_file[:-4])
+            flip_brain_command2 = "antsApplyTransforms -d 3 -i {} -o {} -t {} -r {} --float {} > >(tee -a {}_out.log) 2> >(tee -a {}_err.log >&2)".format(input_file, flipped_input_file, mirror_file, input_file, low_memory, flipped_input_file[:-5], flipped_input_file[:-5])
+            input_file = flipped_input_file
+        else:
+            flip_brain_command1 = ""
+            flip_brain_command2 = ""
 
 
         # create the command
@@ -319,12 +336,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
         if low_memory:
             warping_command += " --float 1"
-
-        # run the warping command in new thread and display the output in the terminal
-        self.terminal.append(warping_command)
-        self.terminal.append("")
-        self.terminal.append("Running warping...")
-        self.terminal.append("")
         
         # disable all the buttons
         self.run_button.setEnabled(False)
@@ -346,7 +357,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # create a new thread to run the warping command
         self.warping_thread = QtCore.QThread()
-        self.warping_worker = WarpingWorker(warping_command)
+        self.warping_worker = WarpingWorker(warping_command, flip_brain_command1, flip_brain_command2)
         self.warping_worker.moveToThread(self.warping_thread)
         self.warping_thread.started.connect(self.warping_worker.run_warping)
         self.warping_worker.finished.connect(self.warping_thread.quit)
@@ -389,12 +400,26 @@ class WarpingWorker(QtCore.QObject):
     finished = QtCore.pyqtSignal()
     progress = QtCore.pyqtSignal(str)
 
-    def __init__(self, warping_command):
+    def __init__(self, warping_command, flip_brain_command1, flip_brain_command2):
         super().__init__()
         self.warping_command = warping_command
+        self.flip_brain_command1 = flip_brain_command1
+        self.flip_brain_command2 = flip_brain_command2
 
     def run_warping(self):
+        if self.flip_brain_command1 != "" and self.flip_brain_command2 != "":
+            self.progress.emit("Flipping brain...")
+            self.progress.emit("")
+            # run the flip brain command
+            self.progress.emit(self.flip_brain_command1)            
+            os.system(self.flip_brain_command1)
+            self.progress.emit(self.flip_brain_command2)
+            os.system(self.flip_brain_command2)
+            self.progress.emit("")
         # run the warping command
+        self.progress.emit("Running warping...")
+        self.progress.emit("")
+        self.progress.emit(self.warping_command)
         os.system(self.warping_command)
         self.progress.emit("")
         self.progress.emit("Warping finished.")
