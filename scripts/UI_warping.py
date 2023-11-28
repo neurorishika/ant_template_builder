@@ -328,16 +328,21 @@ class MainWindow(QtWidgets.QMainWindow):
         
         # disable all the buttons
         self.run_button.setEnabled(False)
-        self.template_browse.setEnabled(False)
         self.input_browse.setEnabled(False)
+        self.target_browse.setEnabled(False)
         self.output_browse.setEnabled(False)
-        self.warping_type_rigid.setEnabled(False)
-        self.warping_type_rigid_affine.setEnabled(False)
-        self.warping_type_rigid_affine_deformable.setEnabled(False)
-        self.num_threads_textbox.setEnabled(False)
-        self.histogram_matching_checkbox.setEnabled(False)
-        self.reproducibility_checkbox.setEnabled(False)
-        self.flip_brain_checkbox.setEnabled(False)
+        self.warp_browse.setEnabled(False)
+        self.inverse_warp_browse.setEnabled(False)
+        self.affine_browse.setEnabled(False)
+        self.warping_type_to_template.setEnabled(False)
+        self.warping_type_from_template.setEnabled(False)
+        self.special_warping_volume.setEnabled(False)
+        self.special_warping_segmentation_label.setEnabled(False)
+        self.special_warping_point_set.setEnabled(False)
+        self.affine_only_checkbox.setEnabled(False)
+        self.time_series_checkbox.setEnabled(False)
+        self.low_memory_checkbox.setEnabled(False)
+
 
         # create a new thread to run the warping command
         self.warping_thread = QtCore.QThread()
@@ -357,16 +362,20 @@ class MainWindow(QtWidgets.QMainWindow):
     def warping_finished(self):
         # enable all the buttons
         self.run_button.setEnabled(True)
-        self.template_browse.setEnabled(True)
         self.input_browse.setEnabled(True)
+        self.target_browse.setEnabled(True)
         self.output_browse.setEnabled(True)
-        self.warping_type_rigid.setEnabled(True)
-        self.warping_type_rigid_affine.setEnabled(True)
-        self.warping_type_rigid_affine_deformable.setEnabled(True)
-        self.num_threads_textbox.setEnabled(True)
-        self.histogram_matching_checkbox.setEnabled(True)
-        self.reproducibility_checkbox.setEnabled(True)
-        self.flip_brain_checkbox.setEnabled(True)
+        self.warp_browse.setEnabled(True)
+        self.inverse_warp_browse.setEnabled(True)
+        self.affine_browse.setEnabled(True)
+        self.warping_type_to_template.setEnabled(True)
+        self.warping_type_from_template.setEnabled(True)
+        self.special_warping_volume.setEnabled(True)
+        self.special_warping_segmentation_label.setEnabled(True)
+        self.special_warping_point_set.setEnabled(True)
+        self.affine_only_checkbox.setEnabled(True)
+        self.time_series_checkbox.setEnabled(True)
+        self.low_memory_checkbox.setEnabled(True)
 
         # pop up a message box
         QtWidgets.QMessageBox.information(self, "Warping Finished", "Warping finished check the output directory for the registered file: <input_filename>_registered_Warped.nii.gz")
