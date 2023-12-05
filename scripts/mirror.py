@@ -19,14 +19,12 @@ print(start_string)
 
 # parse command line arguments
 parser = argparse.ArgumentParser(description='Generate mirrored images.')
-parser.add_argument('-i','--input_dir', type=str, help='path to input directory (must contain .nrrd files; default: ./cleaned_data/all_data/)', default="./cleaned_data/all_data/", nargs='?')
-parser.add_argument('-o','--output_dir', type=str, help='path to output directory; default: ./cleaned_data/', default="./cleaned_data/", nargs='?')
+parser.add_argument('-i','--input_dir', type=str, help='path to input directory (must contain .nrrd files; default: ./cleaned_data/whole_brain/)', default="./cleaned_data/whole_brain/", nargs='?')
+parser.add_argument('-o','--output_dir', type=str, help='path to output directory; default: ./cleaned_data/whole_brain/', default="./cleaned_data/whole_brain/", nargs='?')
 parser.add_argument('-skip','--skip_existing', type=bool, help='skip existing files (default: True)', default=True, nargs='?')
 parser.add_argument('-n','--num_workers', type=int, help='number of workers (default: 1)', default=1, nargs='?')
-parser.add_argument('-s','--symmetric', type=bool, help='symmetric template (default: False)', default=True, nargs='?')
-parser.add_argument('-meta','--metadata', type=str, help='path to metadata file (default: ./whole_brain_metadata.csv)', default="./whole_brain_metadata.csv", nargs='?')
-parser.add_argument('-lr','--left_or_right', type=str, help='left or right (default: left)', default="left", nargs='?')
 parser.add_argument('-a', '--axis', type=str, help='axis to mirror (vertical/horizontal; default: horizontal)', default="horizontal", nargs='?')
+parser.add_argument('-c','--clean_up', type=bool, help='remove non-error log files (default: True)', default=True, nargs='?')
 args = parser.parse_args()
 
 # check if input directory is valid
@@ -55,24 +53,6 @@ else:
 
 print("Output directory: {}".format(output_dir))
 
-# check if metadata file exists
-metadata_file = args.metadata
-assert os.path.isfile(metadata_file), "Metadata file does not exist."
-
-# read metadata file
-metadata = pd.read_csv(metadata_file)
-
-# Keep only the columns we need (Clean name and Egocentric Leaning)
-metadata = metadata[['Clean Name', 'Egocentric Leaning']]
-
-# convert to map dictionary
-metadata = metadata.set_index('Clean Name').to_dict()['Egocentric Leaning']
-print("Metadata file: {}".format(metadata_file))
-
-# check if symmetric template is required
-symmetric = args.symmetric
-left_or_right = args.left_or_right
-
 # check if axis is valid
 axis = args.axis
 assert axis in ['vertical', 'horizontal'], "Axis must be either 'vertical' or 'horizontal'."
@@ -81,6 +61,9 @@ if axis == 'vertical':
     axis = 1
 else:
     axis = 0
+
+# get clean_up
+clean_up = args.clean_up
 
 # function to generate mirrored file name
 def generate_mirror_name(x,output_dir=output_dir):
@@ -108,22 +91,7 @@ for file in output_files:
             skip_list.append(file)
         else:
             print("WARNING: Output file {} already exists and will be overwritten.".format(file))
-            os.remove(file)
-
-# if symmetric template is not required, add sfiles in the same leaning direction as left_or_right and sym leaning brains to skip list
-
-if not symmetric:
-    # loop over all input files
-    for index, file in enumerate(data_files):
-        # get clean name (with extension)
-        clean_name = os.path.basename(file)
-        # get leaning direction
-        leaning_direction = metadata[clean_name]
-        # check if leaning direction is same as left_or_right or sym
-        if leaning_direction == left_or_right or leaning_direction == 'sym':
-            skip_list.append(output_files[index])
-            print("WARNING: Output file {} will be skipped as it is already {} leaning.".format(output_files[index], leaning_direction))
-        
+            os.remove(file)     
 
 # check if skip list is empty
 if len(skip_list) > 0:
@@ -195,21 +163,25 @@ if args.num_workers == 1:
         runAntsFlip(input_file, output_file, iterator)
 elif args.num_workers > 1:
     # check if number of workers is valid
-    assert args.num_workers < len(data_files), "Number of workers must be less than number of files."
+    assert args.num_workers <= len(data_files), "Number of workers must be less than number of files."
     assert args.num_workers <= os.cpu_count(), "Number of workers must be less than or equal to number of cores."
     # run ANTs in parallel
     Parallel(n_jobs=args.num_workers)(delayed(runAntsFlip)(input_file, output_file, iterator) for iterator, (input_file, output_file) in enumerate(zip(data_files, output_files)))
 else:
     raise ValueError("Number of workers must be a positive integer.")
 
+if clean_up:
+    # Remove all log files with no error messages
+    print("Removing empty log files...")
 
-# Remove all empty log files
-print("Removing empty log files...")
+    for file in os.listdir(output_dir):
+        if file.endswith("_err.log"):
+            if os.stat(os.path.join(output_dir, file)).st_size == 0:
+                os.remove(os.path.join(output_dir, file))
+                # remove corresponding out file
+                try:
+                    os.remove(os.path.join(output_dir, file[:-8] + "_out.log"))
+                except:
+                    print("WARNING: Could not remove corresponding out file for {}. Please check manually.".format(file))
 
-for file in os.listdir(output_dir):
-    if file.endswith("_out.log") or file.endswith("_err.log"):
-        if os.stat(os.path.join(output_dir, file)).st_size == 0:
-            os.remove(os.path.join(output_dir, file))
 print("Done. Exiting...")
-
-    

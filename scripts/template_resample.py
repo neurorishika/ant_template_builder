@@ -21,9 +21,9 @@ print(start_string)
 
 # parse command line arguments
 parser = argparse.ArgumentParser(description='Resample generated brain template to a target voxel size.')
-parser.add_argument('-i','--input_dir', type=str, help='path to results directory (must contain syn directory and complete_template.nii.gz files; default: latest directory in results/)', default="", nargs='?')
-parser.add_argument('-db','--clean_database', type=str, help='path to clean database directory (must contain .nrrd files; default: ./cleaned_data)', default="./cleaned_data", nargs='?')
-parser.add_argument('-o','--output_dir', type=str, help='path to output directory (default: ./highres_templates)', default="./highres_templates", nargs='?')
+parser.add_argument('-i','--input_dir', type=str, help='path to results directory (must contain syn directory and complete_template.nii.gz files; default: latest obiroi directory in results/)', default="", nargs='?')
+parser.add_argument('-db','--clean_database', type=str, help='path to clean database directory (must contain .nrrd files; default: ./cleaned_data/whole_brain)', default="./cleaned_data/whole_brain", nargs='?')
+parser.add_argument('-o','--output_dir', type=str, help='path to output directory (default: ./final_templates)', default="./final_templates", nargs='?')
 parser.add_argument('-v','--target_voxel_size', type=str, help='target voxel size in microns (e.g. 0.8x0.8x0.8)', default="0.8x0.8x0.8", nargs='?')
 parser.add_argument('-n','--num_workers', type=int, help='number of workers to use (default: 1)', default=1, nargs='?')
 parser.add_argument('-t','--keep_temp', type=bool, help='keep temporary files (default: False)', default=False, nargs='?')
@@ -38,12 +38,12 @@ timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M')
 target_voxel_size = args.target_voxel_size
 original_target_voxel_size = target_voxel_size
 target_voxel_size = target_voxel_size.split('x')
-assert len(target_voxel_size) == 3, "Target voxel size must be in the format '0.8x0.8x0.8'."
+assert len(target_voxel_size) == 3, "Target voxel size must be in the format '<x-resolution>x<y-resolution>x<z-resolution>'."
 
 try:
     target_voxel_size = [float(i) for i in target_voxel_size]
 except:
-    raise ValueError("Target voxel size must be in the format '0.8x0.8x0.8'.")
+    raise ValueError("Target voxel size must be in the format '<x-resolution>x<y-resolution>x<z-resolution>'.")
 
 # check if target voxel size is positive
 assert all(i > 0 for i in target_voxel_size), "Target voxel size must be positive."
@@ -79,6 +79,8 @@ if input_dir == "":
     # get list of all directories in results/
     directory_list = os.listdir("results")
     directory_list = [d for d in directory_list if os.path.isdir(d)]
+    # filter out directories that do not start with obiroi
+    directory_list = [d for d in directory_list if d.startswith("obiroi")]
     # get latest directory
     input_dir = max(directory_list, key=os.path.getctime)
 

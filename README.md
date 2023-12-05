@@ -18,7 +18,7 @@ Make sure you have [git](https://git-scm.com/) installed on your computer. Then 
 git clone https://github.com/neurorishika/ant_template_builder.git 
 ```
 
-### 3. Place the pre-processed images in the `cleaned_data` folder
+### 3. Place the pre-processed images in the `cleaned_data/whole_brain` folder
 
 The pre-processed images should be in the `.nrrd` format. NRRD stands for Nearly Raw Raster Data, and is a file format designed to store and visualize medical image data. The images should be in the same orientation. Please use [Fiji](https://imagej.net/Fiji/Downloads) to reorient the images if they are not in the same orientation. Also preferably the images should be 8-bit. This is not necessary but recommended.
 
@@ -54,69 +54,107 @@ pip install pyqt5
 
 ### Run the mirroring script
 
-If you want to generate mirrored images in order to symmetrize the template, you can run the mirroring script. To run the mirroring script, run the following command in the terminal (make sure you are in the `ant_template_builder` folder).
+If you want to generate mirrored images to include in the template, you can run the mirroring script. To run the mirroring script, run the following command in the terminal (make sure you are in the `ant_template_builder` folder).
 
 ```
-poetry run python scripts/generate_mirror.py
+poetry run python scripts/mirror.py
 ```
 
-By default, the script will look for data (*.nrrd files) in the `cleaned_data` folder and generate mirrored images in the same folder. You can use "--help" to see the options for the script, including the option to change the input and output folders. Also it will replace any mirrored images that already exist in the output folder unless the -skip flag is set as True.
+By default, the script will look for data (*.nrrd files) in the `cleaned_data/whole_brain` folder and generate mirrored images in the same folder. You can use "--help" to see the options for the script, including the option to change the input and output folders. Also it will replace any mirrored images that already exist in the output folder unless the -skip flag is set as True.
 
 ```
-poetry run python scripts/generate_mirror.py --help
+poetry run python scripts/mirror.py --help
 ```
-
-By default, the script will mirror all *.nrrd files in the input folder. However, the ant brain has a notable asymmetry in the mushroom body. Therefore, it is recommended to mirror only the brains that are oriented in one direction. You can do this by having a whole_brain_metadata.csv (as in this repository) file. The metadata file must have two columns: `Clean Name` and `Egocentric Leaning` where the first is name of the file, and the second has values of `left`,`right` or `sym` (symmetric). The script will only mirror the brains that have `left` or `right` in the `Egocentric Leaning` column depending on the -lr flag. Ideally, mirror and resample ALL the brains (unless disk space is an issue) and then use the asymmetrize_resampled.py script to filter it down to the brains that are oriented in one direction.
 
 ### 5. Run the resampling script
 
 To run the resampling script, run the following command in the terminal (make sure you are in the `ant_template_builder` folder).
 
 ```
-poetry run python scripts/resampler.py
+poetry run python scripts/resample.py
 ```
 
-By default, the target resolution is an isotropic resolution of 0.8 μm. You can use "--help" to see the options for the script, including the option to change the target resolution to a different value (potentially anisotropic). The script will generate the resampled images in the `resampled_data` folder.
+By default, the target resolution is an isotropic resolution of 0.8 μm. You can use "--help" to see the options for the script, including the option to change the target resolution to a different value (potentially anisotropic). The script will generate the resampled images in the `resampled_data/whole_brain` folder by default. You can use "--help" to see the options for the script, including the option to change the input and output folders. 
 
 ```
-poetry run python scripts/resampler.py --help
+poetry run python scripts/resample.py --help
 ```
 
-You can also generate mirrored images by using the `-m' flag. This will generate mirrored images in the 'resampled_data' folder.
+### 6. Run the asymmetrize script
 
-### 6. (Optional) Run the asymmetrize script
+The ant brain has a notable asymmetry in the medial lobe of the mushroom body. Therefore, it is recommended to use only the brains that are oriented in one direction and use the mirror reflections for the others. You can do this by having a whole_brain_metadata.csv (as in this repository) file. The metadata file must have two columns: `Clean Name` and `Egocentric Leaning` where the first is name of the file, and the second has values of `left` or `right` (or `sym` (symmetric) if a determination cannot be made). The script will only mirror the brains that have `left` or `right` in the `Egocentric Leaning` column depending on the -lr flag. Ideally, mirror and resample ALL the brains (unless disk space is an issue) and then use the asymmetrize.py script to filter it down to the brains that are oriented in one direction.
 
 To run the asymmetrize script, run the following command in the terminal (make sure you are in the `ant_template_builder` folder).
 
 ```
-poetry run python scripts/asymmetrize_resampled.py
+poetry run python scripts/asymmetrize.py
 ```
 
-By default, the script will look for data (*.nrrd files) in the `resampled_data` folder and generate asymmetrized images in the same folder. It will also backup the original images in the backup folder. You can use "--help" to see the options for the script, including the option to change the input, output and backup folders. This requires the whole_brain_metadata.csv file described above to be present and linked using the -m flag.
+By default, the script will look for data (*.nrrd files) in the `resampled_data/whole_brain` folder and generate asymmetrized images in the same folder. It will also backup the original images in the backup folder. You can use "--help" to see the options for the script, including the option to change the input, output and backup folders. This requires the whole_brain_metadata.csv file described above to be present and linked using the -m flag.
 
 ```
-poetry run python scripts/asymmetrize_resampled.py --help
+poetry run python scripts/asymmetrize.py --help
 ```
 
-Note: By default, the asymmetrize script will keep the symmetric brains in their original orientation. However this can reduce the final template quality. We therefore have an additional flag -q or --quality_affine that will copy all the symmetric brains into a diff_folder which will NOT be used for creating the initial affine template, but used for the final diffemorphic template. This will improve the quality of the final template. If quality affine is set to True, the metadata file must also include a column called 'Skip Affine' with values of 0 or 1. If the value is 1, the brain will be skipped for affine registration. This is useful for brains that of a poor quality and should not be used for affine registration (this is excluding the symmetric brains which are automatically skipped for affine registration).
+OPTIONAL LEGACY FEATURE: By default, the asymmetrize script will keep the symmetric brains in their original orientation. However this can reduce the final template quality. We therefore have an additional flag -q or --quality_affine that will copy all the symmetric brains into a diff_folder which will NOT be used for creating the initial affine template, but used for the final template. This may improve the quality of the final template. If quality affine is set to True, the metadata file must also include a column called 'Skip Affine' with values of 0 or 1. If the value is 1, the brain will be skipped for affine registration. This is useful for brains that of a poor quality and should not be used for affine registration (this is excluding the symmetric brains which are automatically skipped for affine registration).
 
+ADDITIONAL NOTE: You can also reset the folder to the original state by running the following command:
+
+```
+poetry run python scripts/reset_symmetry.py
+```
+
+By default, this will fix the `resampled_data/whole_brain` folder. You can use "--help" to see the options for the script, including the option to change the input folder.
+
+```
+poetry run python scripts/reset_symmetry.py --help
+```
 
 ### 6. Run the registration script
 
 The bash script for running the registration is in the `group_registration` folder. To run the script, navigate to the `group_registration` folder and run the following command:
 
 ```
-./run_registration.sh
+./run_whole_brain_registration.sh
 ```
 
 Once the registration is complete, the final results will be in the 'results/obiroi_brain_YYYYMMDD_HHMM' folder, all intermediate information will be inside the 'affine' and  'syn' subfolders. The final template will be in the 'results/obiroi_brain_YYYYMMDD_HHMM/complete_template.nrrd' file. Note that this template will be in the same orientation and resolution as the input images. To generate videos or a higher resolution template, please see the next section.
 
+
+### Generate a different resolution template from a generated template
+
+To generate a different resolution template from a generated template, you can use the `template_resample.py` script. To run the script, navigate to the `ant_template_builder` folder and run the following command:
+
+```
+poetry run python scripts/template_resample.py
+```
+
+By default, the script will look for the latest obiroi_brain_YYYYMMDD_HHMM folder in the `results` folder and generate a template at 0.8 μm x 0.8 μm x 0.8 μm resolution in the 'final_templates' folder. You can use "--help" to see the options for the script, including the option to change the input and output folders and the target resolution.
+
+```
+poetry run python scripts/template_resample.py --help
+
+```
+
+### Register a new brain to the template
+
+To register a new brain, we have provided a GUI that can be used to register a new brain to the template. To run the GUI, navigate to the `ant_template_builder` folder and run the following command:
+
+```
+poetry run python scripts/UI_registration.py
+```
+
+### Warp a Segmentation Label / Point Set / Different Channel to the Template
+
+To warp a segmentation label, point set or a different channel to the template, we have provided a GUI that can be used to warp the segmentation label, point set or a different channel to the template. To run the GUI, navigate to the `ant_template_builder` folder and run the following command:
+
+```
+poetry run python scripts/UI_warp.py
+```
+
 ### (Optional) Generate a video of the final template
 
-### (Optional) Generate a higher resolution template from a lower resolution template
-
-### (Optional) Register a new brain to the template
-
+The best way to generate a video of the final template is to use [Fiji](https://imagej.net/Fiji/Downloads). Open the final template in Fiji and then go to Save As > Save as AVI or Save as Animated GIF.
 
 ## Setup on RU HPC Cluster
 
@@ -202,4 +240,11 @@ Go inside the `ant_template_builder` folder and run the following command to bui
 poetry install
 ```
 
+### 4. Run the template generation pipeline
+
+At this point, you should have the ANTs software installed and the environment setup. You can now run the template generation pipeline as described in the previous section. The only difference is that you will have to requisition a node on the HPC cluster to run the registration. 
+
+RECOMMENDED PARTITIONS ON RU HPC CLUSTER(AS OF DEC 2023):
+1. bigmem (for running the template generation pipeline with a massive dataset with maximum parallelization)
+2. hpc_a10 (for running the template generation pipeline with a small dataset with maximum parallelization or a medium dataset with moderate parallelization (recommended for most cases))
 

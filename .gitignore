@@ -186,3 +186,7 @@ group_registration/*/
 **/*.tar.gz
 **/*.tgz
 **/*.tar
+
+# Ignore logs and err in all subfolders
+**/*.log
+**/*.err

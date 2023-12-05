@@ -2,21 +2,21 @@ Raw Name,Clean Name,Flip Vertical,Rotation Applied,Z reverse,Flipped in Preproce
 DFB01_Airyscan Processing_Stitch.czi,synA647_DF_B01.nrrd,0,0,0,0,na,left,0,1
 DFB03_A_Airyscan Processing_Stitch.czi,synA647_DF_B03_A.nrrd,0,4.8,0,0,na,right,0,1
 DFB03_B_Airyscan Processing_Stitch.czi,synA647_DF_B03_B.nrrd,0,0,0,0,na,left,0,1
-DFB03_D_Airyscan Processing_Stitch.czi,synA647_DF_B03_D.nrrd,0,0,0,0,na,sym,0,1
+DFB03_D_Airyscan Processing_Stitch.czi,synA647_DF_B03_D.nrrd,0,0,0,0,na,right,0,1
 DFB04_B_Airyscan Processing_Stitch.czi,synA647_DF_B04_B.nrrd,0,0,0,0,na,right,0,1
 DFB05_C_Airyscan Processing_Stitch.czi,synA647_DF_B05_C.nrrd,0,0,0,0,na,right,0,1
-DFB14_Airyscan Processing_Stitch.czi,synA647_DF_B14.nrrd,0,2.9,0,0,na,sym,0,1
+DFB14_Airyscan Processing_Stitch.czi,synA647_DF_B14.nrrd,0,2.9,0,0,na,left,0,1
 DFB16_Airyscan Processing_Stitch.czi,synA647_DF_B16.nrrd,0,0,0,0,na,left,0,1
 DFC01_AiryscanProcessing_Stitch.czi,synA647_DF_C01.nrrd,0,-2.9,0,0,na,left,0,1
 DFC04_Airyscan processing_Stitch.czi,synA647_DF_C04-fixed.nrrd,0,2.9,0,0,fixed (piece of VNC removed),left,0,1
 DFC05_Airyscan Processing_Stitch.czi,synA647_DF_C05.nrrd,0,0,0,0,low intensity,right,0,1
-DFC07_Airyscan Processing_Stitch.czi,synA647_DF_C07.nrrd,0,0,0,0,na,sym,0,1
+DFC07_Airyscan Processing_Stitch.czi,synA647_DF_C07.nrrd,0,0,0,0,na,right,0,1
 DFC08_Airyscan Processing_Stitch.czi,synA647_DF_C08.nrrd,0,0,0,0,na,left,0,1
 220216_ant_40x_A647syn_brain10.tif,synA647_LL_10_220216.nrrd,0,2.9,0,1,distorted cx,left,0,1
-LL_201212_1-3_brain3_synorf.tiff,synA647_LL_1-33.nrrd,0,0,0,1,distorted cx,sym,0,1
+LL_201212_1-3_brain3_synorf.tiff,synA647_LL_1-33.nrrd,0,0,0,1,distorted cx,left,0,1
 220217_A647syn_brain14.tif,synA647_LL_14_220217.nrrd,0,-83.2,0,1,low intensity,left,0,1
-LL_201212_1-4_brain1_synorf.tiff,synA647_LL_1-41.nrrd,0,0,0,1,slightly left,sym,0,1
-220217_ant_40x_A647syn_brain15.tif,synA647_LL_15_220217.nrrd,0,90,1,1,distorted cx,sym,0,1
+LL_201212_1-4_brain1_synorf.tiff,synA647_LL_1-41.nrrd,0,0,0,1,slightly left,right,0,1
+220217_ant_40x_A647syn_brain15.tif,synA647_LL_15_220217.nrrd,0,90,1,1,distorted cx,left,0,1
 LL_201120_B1-1_synorf.tif,synA647_LL_201120_B11.nrrd,0,0,0,1,anterior cut,left,0,1
 LL_201120_B2-1_synorf.tif,synA647_LL_201120_B21.nrrd,0,4.8,0,1,anterior cut,left,0,1
 LL_201120_C2-1_synorf.tif,synA647_LL_201120_C21.nrrd,0,0,0,1,anterior cut,right,0,1
@@ -37,8 +37,8 @@ LL_200917_B26_Airyscan Processing_Stitch.czi,synA647_LL_B26_200917.nrrd,0,49.4,0
 LL_200917_B34_Airyscan Processing_Stitch.czi,synA647_LL_B34_200917.nrrd,0,-51.3,0,1,na,right,0,1
 200727_L12_synA647_Airyscan Processing_Stitch.czi,synA647_LL_L12_200727.nrrd,1,61,0,1,na,left,0,1
 200724_L3_synA647_Airyscan Processing_Stitch.czi,synA647_LL_L3_200724.nrrd,0,-81.3,0,1,na,right,0,1
-200724_L4_synA647_Airyscan Processing_Stitch.czi,synA647_LL_L4_200724.nrrd,1,70.6,0,1,na,sym,0,1
-200724_L8_synA647_Airyscan Processing_Stitch.czi,synA647_LL_L8_200724.nrrd,0,-70.6,0,1,na,sym,0,1
+200724_L4_synA647_Airyscan Processing_Stitch.czi,synA647_LL_L4_200724.nrrd,1,70.6,0,1,na,left,0,1
+200724_L8_synA647_Airyscan Processing_Stitch.czi,synA647_LL_L8_200724.nrrd,0,-70.6,0,1,na,left,0,1
 DFA07_Airyscan Processing_Stitch.czi,synA647_DF_A07.nrrd,0,8.7,0,0,EXCLUDED,left,0,1
 DFA10_Airyscan Processing_Stitch.czi,synA647_DF_A10.nrrd,0,-4.3,0,0,EXCLUDED,right,0,1
 DFB02_A_Airyscan Processing_Stitch.czi,synA647_DF_B02.nrrd,0,10.6,0,0,EXCLUDED,right,0,1
