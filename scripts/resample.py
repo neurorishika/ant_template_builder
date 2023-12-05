@@ -19,11 +19,12 @@ print(start_string)
 
 # parse command line arguments
 parser = argparse.ArgumentParser(description='Resample confocal stacks to a target voxel size.')
-parser.add_argument('-i','--input_dir', type=str, help='path to input directory (must contain .nrrd files; default: ./cleaned_data)', default="./cleaned_data", nargs='?')
-parser.add_argument('-o','--output_dir', type=str, help='path to output directory (default: ./resampled_data)', default="./resampled_data", nargs='?')
+parser.add_argument('-i','--input_dir', type=str, help='path to input directory (must contain .nrrd files; default: ./cleaned_data/whole_brain/)', default="./cleaned_data/whole_brain/", nargs='?')
+parser.add_argument('-o','--output_dir', type=str, help='path to output directory (default: ./resampled_data/whole_brain/)', default="./resampled_data/whole_brain/", nargs='?')
 parser.add_argument('-v','--target_voxel_size', type=str, help='target voxel size in microns (e.g. 0.8x0.8x0.8)', default="0.8x0.8x0.8", nargs='?')
 parser.add_argument('-n','--num_workers', type=int, help='number of workers to use (default: 1)', default=1, nargs='?')
 parser.add_argument('-t','--type', type=str, help='type of resampling (spacing or size; default: spacing)', default="spacing", nargs='?')
+parser.add_argument('-c','--clean_up', type=bool, help='remove non-error log files (default: True)', default=True, nargs='?')
 args = parser.parse_args()
 
 # check if target voxel size is valid
@@ -70,6 +71,9 @@ for f in output_files:
 resampling_type = args.type
 assert resampling_type in ['spacing', 'size'], "Resampling type must be 'spacing' or 'size'."
 
+# get clean up flag
+clean_up = args.clean_up
+
 # define a function to resample a file
 def resample_file(index):
     # print progress
@@ -103,14 +107,20 @@ else:
 # clear output
 os.system('cls' if os.name == 'nt' else 'clear')
 
-# Remove all empty log files
+if clean_up:
+    # Remove all empty log files
+    print("Removing empty log files...")
 
-print("Removing empty log files...")
-
-for file in os.listdir(output_dir):
-    if file.endswith("_out.log") or file.endswith("_err.log"):
-        if os.stat(os.path.join(output_dir, file)).st_size == 0:
-            os.remove(os.path.join(output_dir, file))
+    for file in os.listdir(output_dir):
+        if file.endswith("_err.log"):
+            if os.stat(os.path.join(output_dir, file)).st_size == 0:
+                os.remove(os.path.join(output_dir, file))
+                # remove corresponding out file
+                try:
+                    os.remove(os.path.join(output_dir, file[:-8] + "_out.log"))
+                except:
+                    print(f"Could not remove out file associated with {file}. Please check manually.")
+                    
 
 print("All files resampled. Exiting...")
 

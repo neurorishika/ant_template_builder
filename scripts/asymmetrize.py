@@ -13,13 +13,13 @@ os.system('cls' if os.name == 'nt' else 'clear')
 start_string = 'Kronauer Lab - Microscopy Image Processing Pipeline\n'
 start_string += "="*(len(start_string)-1) + '\n'
 start_string += 'Asymmetrize Resampled Images by Rishika Mohanta\n'
-start_string += 'Version 1.1.0\n'
+start_string += 'Version 1.2.0\n'
 
 print(start_string)
 
 # parse command line arguments
 parser = argparse.ArgumentParser(description='Filter confocal images to keep only uniformly asymmetric brains.')
-parser.add_argument('-i','--input_dir', type=str, help='path to input directory (must contain .nrrd files; default: ./resampled_data/)', default="./resampled_data/", nargs='?')
+parser.add_argument('-i','--input_dir', type=str, help='path to input directory (must contain .nrrd files; default: ./resampled_data/whole_brain/)', default="./resampled_data/whole_brain/", nargs='?')
 parser.add_argument('-o','--output_dir', type=str, help='path to output directory; default: same as input directory', default="", nargs='?')
 parser.add_argument('-b','--backup_dir', type=str, help='path to backup directory (default: <input_dir>/backup/)', default="", nargs='?')
 parser.add_argument('-meta','--metadata', type=str, help='path to metadata file (default: ./whole_brain_metadata.csv)', default="./whole_brain_metadata.csv", nargs='?')

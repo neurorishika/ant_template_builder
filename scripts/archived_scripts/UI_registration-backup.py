@@ -8,7 +8,7 @@
 #   - checkbox for whether to use rigid, rigid+affine, or rigid+affine+deformable (Row 4) Only one can be selected, default is rigid+affine+deformable
 #   - number of threads to use (max is the number of cores on the machine) (Label + Textbox) (Row 5) Default is 1
 #   - checkbox to use histogram matching (Row 5) Default is unchecked
-#   - checkbox for quality_check (use the same random seed) (Row 5) Default is checked
+#   - checkbox for reproducibility (use the same random seed) (Row 5) Default is checked
 #   - checkbox for whether to flip the brain before registration (Row 5) Default is unchecked
 #   - button to run the registration (Row 6)
 #   - text terminal to display the progress of the registration (Row 7)
@@ -90,93 +90,49 @@ class MainWindow(QtWidgets.QMainWindow):
         # create the registration type row 
         self.registration_type_row = QtWidgets.QHBoxLayout()
         self.registration_type_label = QtWidgets.QLabel("Registration Type:")
-        self.registration_type_RI = QtWidgets.QRadioButton("Purely Rigid")
-        self.registration_type_RI.setChecked(False)
-        self.registration_type_RI.toggled.connect(self.set_registration_type)
-        self.registration_type_RA = QtWidgets.QRadioButton("Affine + Rigid")
-        self.registration_type_RA.setChecked(False)
-        self.registration_type_RA.toggled.connect(self.set_registration_type)
-        self.registration_type_EL = QtWidgets.QRadioButton("Elastic Registration")
-        self.registration_type_EL.setChecked(False)
-        self.registration_type_EL.toggled.connect(self.set_registration_type)
-        self.registration_type_SY = QtWidgets.QRadioButton("SyN with arbitrary time")
-        self.registration_type_SY.setChecked(False)
-        self.registration_type_SY.toggled.connect(self.set_registration_type)
-        self.registration_type_S2 = QtWidgets.QRadioButton("SyN with 2 time points")
-        self.registration_type_S2.setChecked(False)
-        self.registration_type_S2.toggled.connect(self.set_registration_type)
-        self.registration_type_GR = QtWidgets.QRadioButton("Greedy SyN")
-        self.registration_type_GR.setChecked(True) # default registration type
-        self.registration_type_GR.toggled.connect(self.set_registration_type)
-        self.registration_type_EX = QtWidgets.QRadioButton("Exponential SyN")
-        self.registration_type_EX.setChecked(False)
-        self.registration_type_EX.toggled.connect(self.set_registration_type)
-        self.registration_type_DD = QtWidgets.QRadioButton("Diffeomorphic Demons")
-        self.registration_type_DD.setChecked(False)
-        self.registration_type_DD.toggled.connect(self.set_registration_type)
-        self.registration_type = "GR" # default registration type
+        self.registration_type_rigid = QtWidgets.QRadioButton("Rigid")
+        self.registration_type_rigid.setChecked(False)
+        self.registration_type_rigid.toggled.connect(self.set_registration_type)
+        self.registration_type_rigid_affine = QtWidgets.QRadioButton("Rigid + Affine")
+        self.registration_type_rigid_affine.setChecked(False)
+        self.registration_type_rigid_affine.toggled.connect(self.set_registration_type)
+        self.registration_type_rigid_affine_deformable = QtWidgets.QRadioButton("Rigid + Affine + Deformable")
+        self.registration_type_rigid_affine_deformable.setChecked(True)
+        self.registration_type_rigid_affine_deformable.toggled.connect(self.set_registration_type)
+        self.registration_type = "rigid+affine+deformable" # default registration type
         self.registration_type_row.addWidget(self.registration_type_label)
-        self.registration_type_row.addWidget(self.registration_type_RI)
-        self.registration_type_row.addWidget(self.registration_type_RA)
-        self.registration_type_row.addWidget(self.registration_type_EL)
-        self.registration_type_row.addWidget(self.registration_type_SY)
-        self.registration_type_row.addWidget(self.registration_type_S2)
-        self.registration_type_row.addWidget(self.registration_type_GR)
-        self.registration_type_row.addWidget(self.registration_type_EX)
-        self.registration_type_row.addWidget(self.registration_type_DD)
+        self.registration_type_row.addWidget(self.registration_type_rigid)
+        self.registration_type_row.addWidget(self.registration_type_rigid_affine)
+        self.registration_type_row.addWidget(self.registration_type_rigid_affine_deformable)
         self.main_layout.addLayout(self.registration_type_row)
 
-        # create the similarity metric row
-        self.similarity_metric_row = QtWidgets.QHBoxLayout()
-        self.similarity_metric_label = QtWidgets.QLabel("Similarity Metric:")
-        self.similarity_metric_CC = QtWidgets.QRadioButton("Cross Correlation")
-        self.similarity_metric_CC.setChecked(True) # default similarity metric
-        self.similarity_metric_CC.toggled.connect(self.set_similarity_metric)
-        self.similarity_metric_MI = QtWidgets.QRadioButton("Mutual Information")
-        self.similarity_metric_MI.setChecked(False)
-        self.similarity_metric_MI.toggled.connect(self.set_similarity_metric)
-        self.similarity_metric_MSQ = QtWidgets.QRadioButton("Mean Squared Difference")
-        self.similarity_metric_MSQ.setChecked(False)
-        self.similarity_metric_MSQ.toggled.connect(self.set_similarity_metric)
-        self.similarity_metric_PR = QtWidgets.QRadioButton("Probability Mapping")
-        self.similarity_metric_PR.setChecked(False)
-        self.similarity_metric_PR.toggled.connect(self.set_similarity_metric)
-        self.similarity_metric = "CC" # default similarity metric
-        self.similarity_metric_row.addWidget(self.similarity_metric_label)
-        self.similarity_metric_row.addWidget(self.similarity_metric_CC)
-        self.similarity_metric_row.addWidget(self.similarity_metric_MI)
-        self.similarity_metric_row.addWidget(self.similarity_metric_MSQ)
-        self.similarity_metric_row.addWidget(self.similarity_metric_PR)
-        self.main_layout.addLayout(self.similarity_metric_row)
+        # create the row 5 layout (histogram matching, reproducibility, number of threads, flip brain, low memory)
+        self.num_threads_row = QtWidgets.QHBoxLayout()
+        self.num_threads_label = QtWidgets.QLabel("Number of Threads:")
+        self.num_threads_textbox = QtWidgets.QLineEdit()
+        self.num_threads_textbox.setText("1")
+        self.num_threads_textbox.setValidator(QtGui.QIntValidator())
+        self.num_threads_textbox.textChanged.connect(self.check_num_threads)
+        self.num_threads_row.addWidget(self.num_threads_label)
+        self.num_threads_row.addWidget(self.num_threads_textbox)
 
+        self.histogram_matching_checkbox = QtWidgets.QCheckBox("Histogram Matching")
+        self.histogram_matching_checkbox.setChecked(False)
+        self.num_threads_row.addWidget(self.histogram_matching_checkbox)
 
-
-        # create the last row layout (n4 bias field, quality_check, number of threads, flip brain, low memory)
-        self.last_row = QtWidgets.QHBoxLayout()
-        self.num_iterations_label = QtWidgets.QLabel("Number of Iterations:")
-        self.num_iterations_textbox = QtWidgets.QLineEdit()
-        self.num_iterations_textbox.setText("30x90x20x8")
-        self.num_iterations_textbox.textChanged.connect(self.check_num_iterations)
-        self.last_row.addWidget(self.num_iterations_label)
-        self.last_row.addWidget(self.num_iterations_textbox)
-
-        self.n4_bias_field_checkbox = QtWidgets.QCheckBox("N4 Bias Field Correction")
-        self.n4_bias_field_checkbox.setChecked(True)
-        self.last_row.addWidget(self.n4_bias_field_checkbox)
-
-        self.quality_check_checkbox = QtWidgets.QCheckBox("Quality Check")
-        self.quality_check_checkbox.setChecked(True)
-        self.last_row.addWidget(self.quality_check_checkbox)
+        self.reproducibility_checkbox = QtWidgets.QCheckBox("Reproducibility")
+        self.reproducibility_checkbox.setChecked(True)
+        self.num_threads_row.addWidget(self.reproducibility_checkbox)
 
         self.low_memory_checkbox = QtWidgets.QCheckBox("Low Memory")
         self.low_memory_checkbox.setChecked(False)
-        self.last_row.addWidget(self.low_memory_checkbox)
+        self.num_threads_row.addWidget(self.low_memory_checkbox)
 
         self.flip_brain_checkbox = QtWidgets.QCheckBox("Mirror before Registration")
         self.flip_brain_checkbox.setChecked(False)
-        self.last_row.addWidget(self.flip_brain_checkbox)
+        self.num_threads_row.addWidget(self.flip_brain_checkbox)
 
-        self.main_layout.addLayout(self.last_row)
+        self.main_layout.addLayout(self.num_threads_row)
 
         # create the run button
         self.run_button = QtWidgets.QPushButton("Run Registration")
@@ -242,50 +198,23 @@ class MainWindow(QtWidgets.QMainWindow):
         sender = self.sender()
 
         # check which button was clicked
-        if sender.text() == "Purely Rigid":
-            self.registration_type = "RI"
-        elif sender.text() == "Affine + Rigid":
-            self.registration_type = "RA"
-        elif sender.text() == "Elastic Registration":
-            self.registration_type = "EL"
-        elif sender.text() == "SyN with arbitrary time":
-            self.registration_type = "SY"
-        elif sender.text() == "SyN with 2 time points":
-            self.registration_type = "S2"
-        elif sender.text() == "Greedy SyN":
-            self.registration_type = "GR"
-        elif sender.text() == "Exponential SyN":
-            self.registration_type = "EX"
-        elif sender.text() == "Diffeomorphic Demons":
-            self.registration_type = "DD"
+        if sender.text() == "Rigid":
+            self.registration_type = "rigid"
+        elif sender.text() == "Rigid + Affine":
+            self.registration_type = "rigid+affine"
+        elif sender.text() == "Rigid + Affine + Deformable":
+            self.registration_type = "rigid+affine+deformable"
 
-    # function to set the similarity metric
-    def set_similarity_metric(self):
-        # get the sender
-        sender = self.sender()
+    # function to check the number of threads
+    def check_num_threads(self):
+        # get the number of threads
+        num_threads = self.num_threads_textbox.text()
 
-        # check which button was clicked
-        if sender.text() == "Cross Correlation":
-            self.similarity_metric = "CC"
-        elif sender.text() == "Mutual Information":
-            self.similarity_metric = "MI"
-        elif sender.text() == "Mean Squared Difference":
-            self.similarity_metric = "MSQ"
-        elif sender.text() == "Probability Mapping":
-            self.similarity_metric = "PR"
-
-    # function to check the number of iterations
-    def check_num_iterations(self):
-        # get the number of iterations
-        num_iterations = self.num_iterations_textbox.text()
-
-        # make sure its a series of positive integers separated by x
-        try:
-            num_iterations = [int(i) for i in num_iterations.split("x")]
-            assert all(i > 0 for i in num_iterations)
-        except:
-            QtWidgets.QMessageBox.warning(self, "Warning", "Number of iterations must be a series of positive integers separated by x.")
-            return
+        # check if the number of threads is a positive integer
+        if num_threads.isdigit() and int(num_threads) > 0:
+            self.num_threads = num_threads
+        else:
+            self.num_threads = None
 
     # function to run the registration using ANTs
     def run_registration(self):
@@ -318,28 +247,33 @@ class MainWindow(QtWidgets.QMainWindow):
             return
 
         # check number of threads
-        self.check_num_iterations()
+        self.check_num_threads()
 
         # get the number of threads
-        num_iterations = self.num_iterations
+        num_threads = self.num_threads
 
         # get the registration type
         registration_type = self.registration_type
-
-        # get the similarity metric
-        similarity_metric = self.similarity_metric
+        # map it to the correct string
+        if registration_type == "rigid":
+            registration_type = "r"
+        elif registration_type == "rigid+affine":
+            registration_type = "a"
+        elif registration_type == "rigid+affine+deformable":
+            registration_type = "s"
 
         # get the histogram matching option
-        n4_bias_field = "1" if self.n4_bias_field_checkbox.isChecked() else "0"
+        histogram_matching = "1" if self.histogram_matching_checkbox.isChecked() else "0"
 
-        # get the quality_check option
-        quality_check = "1" if self.quality_check_checkbox.isChecked() else "0"
+        # get the reproducibility option
+        reproducibility = "1" if self.reproducibility_checkbox.isChecked() else "0"
 
         # get the flip brain option
         flip_brain = self.flip_brain_checkbox.isChecked()
 
         # get the low memory option
         low_memory_flip = "1" if self.low_memory_checkbox.isChecked() else "0"
+        low_memory_registration = "f" if self.low_memory_checkbox.isChecked() else "d"
 
         # create the flip brain command
         if flip_brain:
@@ -355,7 +289,7 @@ class MainWindow(QtWidgets.QMainWindow):
             flip_brain_command2 = ""
         
         # create the registration command
-        registration_command = "antsIntroduction.sh -d 3 -r "+template_file+" -i "+input_file+" -o "+output_prefix+" -m "+num_iterations+" -t "+registration_type+" -n "+n4_bias_field+" -q "+quality_check+" -s "+similarity_metric+" >"+output_prefix+"out.log 2>"+output_prefix+"err.log"
+        registration_command = "antsRegistrationSyN.sh -d 3 -f "+template_file+" -m "+input_file+" -o "+output_prefix+" -n "+num_threads+" -t "+registration_type+" -j "+histogram_matching+" -y "+reproducibility+" -p "+low_memory_registration+" >"+output_prefix+"out.log 2>"+output_prefix+"err.log"
 
         # disable all the buttons
         self.run_button.setEnabled(False)
@@ -365,9 +299,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.registration_type_rigid.setEnabled(False)
         self.registration_type_rigid_affine.setEnabled(False)
         self.registration_type_rigid_affine_deformable.setEnabled(False)
-        self.num_iterations_textbox.setEnabled(False)
-        self.n4_bias_field_checkbox.setEnabled(False)
-        self.quality_check_checkbox.setEnabled(False)
+        self.num_threads_textbox.setEnabled(False)
+        self.histogram_matching_checkbox.setEnabled(False)
+        self.reproducibility_checkbox.setEnabled(False)
         self.flip_brain_checkbox.setEnabled(False)
 
         # create a new thread to run the registration command
@@ -394,9 +328,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.registration_type_rigid.setEnabled(True)
         self.registration_type_rigid_affine.setEnabled(True)
         self.registration_type_rigid_affine_deformable.setEnabled(True)
-        self.num_iterations_textbox.setEnabled(True)
-        self.n4_bias_field_checkbox.setEnabled(True)
-        self.quality_check_checkbox.setEnabled(True)
+        self.num_threads_textbox.setEnabled(True)
+        self.histogram_matching_checkbox.setEnabled(True)
+        self.reproducibility_checkbox.setEnabled(True)
         self.flip_brain_checkbox.setEnabled(True)
 
         # pop up a message box

@@ -19,10 +19,10 @@ print(start_string)
 
 # parse command line arguments
 parser = argparse.ArgumentParser(description='Reset asymmetrized confocal images from backup and diff directories.')
-parser.add_argument('-i','--input_dir', type=str, help='path to input directory (must contain .nrrd files; default: ./resampled_data/)', default="./resampled_data/", nargs='?')
+parser.add_argument('-i','--input_dir', type=str, help='path to input directory (must contain .nrrd files; default: ./resampled_data/whole_brain/)', default="./resampled_data/whole_brain/", nargs='?')
 parser.add_argument('-b','--backup_dir', type=str, help='path to backup directory (default: <input_dir>/backup/)', default="", nargs='?')
-parser.add_argument('-m','--diff_dir', type=str, help='path to diff directory (default: <input_dir>/diff/)', default="", nargs='?')
-parser.add_argument('-n','--quality_affine', type=bool, help='whether to use quality affine (default: True)', default=True, nargs='?')
+parser.add_argument('-n','--quality_affine', type=bool, help='(ARCHIVED) whether to use quality affine (default: False)', default=False, nargs='?')
+parser.add_argument('-m','--diff_dir', type=str, help='(ARCHIVED) path to diff directory (default: <input_dir>/diff/)', default="", nargs='?')
 args = parser.parse_args()
 
 # check if input directory is valid
