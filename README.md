@@ -248,3 +248,49 @@ RECOMMENDED PARTITIONS ON RU HPC CLUSTER(AS OF DEC 2023):
 1. bigmem (for running the template generation pipeline with a massive dataset with maximum parallelization)
 2. hpc_a10 (for running the template generation pipeline with a small dataset with maximum parallelization or a medium dataset with moderate parallelization (recommended for most cases))
 
+#### TIPS for running the python scripts on the HPC cluster
+
+##### Copying data to and from the HPC cluster
+
+Copy data from your local computer to the HPC cluster using `scp` or `rsync`. For example, to copy the data from your local computer to the HPC cluster, run the following command:
+
+```
+rsync -avz <local_folder> <username>@login04-hpc.rockefeller.edu:/rugpfs/fs0/kron_lab/scratch/<username>/<remote_folder>
+``` 
+
+Copy data from the HPC cluster to your local computer using `scp` or `rsync`. For example, to copy the data from the HPC cluster to your local computer, run the following command:
+
+```
+rsync -avz <username>@login04-hpc.rockefeller.edu:/rugpfs/fs0/kron_lab/scratch/<username>/<remote_folder> <local_folder>
+```
+In most cases you will either need to copy the cleaned data to the HPC cluster or copy the final template from the HPC cluster to your local computer.
+
+##### Running the python scripts on the HPC cluster
+
+Use `screen` to run the python scripts on the HPC cluster using interactive mode. This will allow you to run the scripts in the background and disconnect from the HPC cluster without interrupting the scripts. First connect to the HPC cluster using ssh and then run the following command:
+
+```
+screen -S <screen_name>
+```
+
+Check which partitions have nodes that are idle by running the following command:
+
+```
+sinfo | grep idle
+```
+
+If you find a hpc_a10 or bigmem partition that has idle nodes, start a new interactive session on the HPC cluster on an exclusive node by running the following command:
+
+```
+srun -p <hpc_a10 or bigmem> --time=<however long you need in DD-HH:MM:SS format> --exclusive --pty -i /bin/bash
+```
+
+Once you are on the node, navigate to the scratch folder and start the python scripts of your choice as described in the previous section. Once the scripts are running, you can disconnect from the HPC cluster by pressing `Ctrl + A + D`. To reconnect to the screen, run the following command:
+
+```
+screen -r <screen_name>
+```
+
+Regularly check the status of the scripts by reconnecting to the screen and checking the status of the scripts. Once the scripts are complete, you can exit the screen by pressing `Ctrl + D`.
+
+
