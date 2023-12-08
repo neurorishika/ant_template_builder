@@ -4,34 +4,8 @@ import os
 import itertools
 import nrrd
 import numpy as np
-from scipy.signal import find_peaks
 
-def dice_volume(vol1, vol2):
-    """
-    Computes the Dice volume overlap between two volumes.
-    """
-    # make sure the volumes are boolean
-    vol1 = vol1.astype(bool)
-    vol2 = vol2.astype(bool)
-    # make sure they are not empty
-    if np.sum(vol1) == 0 or np.sum(vol2) == 0:
-        return np.nan
-    # compute the dice volume overlap and return it
-    return 2 * np.sum(np.logical_and(vol1, vol2)) / (np.sum(vol1) + np.sum(vol2))
-
-def pairwise_dice_volume(vols):
-    """
-    Computes the Dice volume overlap between all pairs of volumes.
-    """
-    n_vols = len(vols)
-    dice_scores = np.ones((n_vols, n_vols))*np.nan
-    for i in range(n_vols):
-        for j in range(i+1, n_vols):
-            dice_scores[i, j] = dice_volume(vols[i], vols[j])
-    return dice_scores
-
-
-train_or_test = 'train'
+train_or_test = 'test'
 
 data_dir = '../verification_data/segmentation_data/'+train_or_test
 # get all the filenames
@@ -294,30 +268,25 @@ for label in labels:
 # for each final label, sort the unique values map them to the values 0, 1, 2, ...
 n_channels = []
 
-processed_labels = []
-
 for i, label in enumerate(final_labels):
     print("Processing label: " + final_labels_paths[i])
     processed_label = label.copy()
-    # get a histogram of the label data (0-255)
-    hist, _ = np.histogram(label, bins=256)
-    # find the peaks of the histogram
-    peaks, _ = find_peaks(hist, threshold=1e3)
-    # add to n_channels
-    n_channels.append(len(peaks)+2) # for the background and the highest peak
-    # digitize the label data
-    processed_label = np.digitize(processed_label, bins=np.linspace(0, 255, len(peaks)+2))-1 # from 0 to n_channels-1
-    # add the processed label to the list
-    processed_labels.append(processed_label)
-    # save the label as a nrrd file with processed added to the name
-    nrrd.write(final_labels_paths[i].replace('.npy', 'processed.nrrd'), np.float32(processed_label), label_header)
+    # get the unique values
+    unique_values = np.unique(label)
+    # sort the unique values
+    unique_values.sort()
+    # append the number of channels to the list
+    n_channels.append(len(unique_values))
+    print("Number of channels: {}".format(len(unique_values)))
+    # map the unique values to the values 0, 1, 2, ...
+    for j, value in enumerate(unique_values):
+        processed_label[label == value] = j
+    # save the label as a numpy array with processed added to the name
+    np.save(final_labels_paths[i].replace('.npy', '_processed.npy'), processed_label)
     print("Saved label: " + final_labels_paths[i])
 
 # assert that all the labels have the same number of channels
 assert len(set(n_channels)) == 1, "All the labels should have the same number of channels"
-
-# replace the final labels with the processed labels
-final_labels = processed_labels
 
 # create the channel wise labels
 channel_wise_labels = []
@@ -329,49 +298,60 @@ for i in range(n_channels):
     channel_wise_labels.append([label == i for label in final_labels])
     print("Channel {} Labels generated.".format(i))
 
+def dice_volume(vol1, vol2):
+    """
+    Computes the Dice volume overlap between two volumes.
+    """
+    return 2 * np.sum(np.logical_and(vol1, vol2)) / (np.sum(vol1) + np.sum(vol2))
+
+def pairwise_dice_volume(vols):
+    """
+    Computes the Dice volume overlap between all pairs of volumes.
+    """
+    n_vols = len(vols)
+    dice_volumes = np.ones((n_vols, n_vols))*np.nan
+    for i in range(n_vols):
+        for j in range(i+1, n_vols):
+            dice_volumes[i, j] = dice_volume(vols[i], vols[j])
+    return dice_volumes
+
 # compute the pairwise dice volume for each channel
-dice_scores = []
+dice_volumes = []
 for channel in channel_wise_labels:
-    dice_scores.append(pairwise_dice_volume(channel))
-    print("Dice volumes computed for channel {}".format(len(dice_scores)))
+    dice_volumes.append(pairwise_dice_volume(channel))
+    print("Dice volumes computed for channel {}".format(len(dice_volumes)))
 
 # save the dice volumes
-np.save(processed_data_dir + f'/dice_scores_{train_or_test}.npy', dice_scores)
+np.save(processed_data_dir + f'/dice_volumes_{train_or_test}.npy', dice_volumes)
 
 # compute the average dice volume for each channel
-for i, channel in enumerate(dice_scores):
+for i, channel in enumerate(dice_volumes):
     # remove the NaNs
     channel_ = channel[~np.isnan(channel)].flatten()
-    # check if there are any dice volumes
-    if len(channel_) == 0:
-        print("No overlap volumes for channel {}".format(i))
-        continue
     # compute the statistics
-    print('Channel {}'.format(i if i>0 else '0 (Background)'))
+    print('Channel {}'.format(i))
     print('==========')
-    print("Average Dice score: {:.2f}".format(np.mean(channel_)))
-    print("Median Dice score: {:.2f}".format(np.median(channel_)))
-    print("95% CI Dice score: ({:.2f}, {:.2f})".format(np.percentile(channel_, 2.5), np.percentile(channel_, 97.5)))
-    print("Min Dice score: {:.2f}".format(np.min(channel_)))
-    print("Max Dice score: {:.2f}".format(np.max(channel_)))
-    print("Std Dice score: {:.2f}".format(np.std(channel_)))
+    print("Average Dice volume: {:.2f}".format(np.mean(channel_)))
+    print("Median Dice volume: {:.2f}".format(np.median(channel_)))
+    print("95% CI: ({:.2f}, {:.2f})".format(np.percentile(channel_, 2.5), np.percentile(channel_, 97.5)))
+    print("Min: {:.2f}".format(np.min(channel_)))
+    print("Max: {:.2f}".format(np.max(channel_)))
+    print("Std: {:.2f}".format(np.std(channel_)))
     print("")
 
 # find the consensus segmentation for each channel
-consensus_segmentation = np.zeros_like(channel_wise_labels[0][0], dtype=np.float32)
+consensus_segmentation = np.zeros_like(channel_wise_labels[0])
 for i,channel in enumerate(channel_wise_labels):
-    channel = np.array(channel)
     # compute the logical and of all the segmentations along the channel axis
     consensus = np.logical_and.reduce(channel, axis=0)
-    # save the consensus segmentation as an nrrd file
-    nrrd.write(processed_data_dir + f'/consensus_segmentation_channel_{i}_{train_or_test}.nrrd', np.float32(consensus), label_header)
+    # save the consensus segmentation as an numpy array
+    np.save(processed_data_dir + f'/consensus_segmentation_channel_{i}_{train_or_test}.npy', consensus)
     # add the consensus segmentation to the consensus segmentation
-    if i > 0:
-        consensus_segmentation += np.float32(consensus)*(i+1)
+    consensus_segmentation += consensus*(i+1)
     print("Consensus segmentation computed for channel {}".format(i))
 
 # save the consensus segmentation as a nrrd file
-nrrd.write(processed_data_dir + '/consensus_segmentation_{}.nrrd'.format(train_or_test), np.float32(consensus_segmentation), label_header)
+nrrd.write(processed_data_dir + '/consensus_segmentation_{}.nrrd'.format(train_or_test), consensus_segmentation, label_header)
 print("Consensus segmentation saved as a nrrd file.")
 
 print("Done!")
