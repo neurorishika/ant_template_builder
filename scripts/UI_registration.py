@@ -357,6 +357,9 @@ class MainWindow(QtWidgets.QMainWindow):
         # create the registration command
         registration_command = "antsIntroduction.sh -d 3 -r "+template_file+" -i "+input_file+" -o "+output_prefix+" -m "+num_iterations+" -t "+registration_type+" -n "+n4_bias_field+" -q "+quality_check+" -s "+similarity_metric+" >"+output_prefix+"out.log 2>"+output_prefix+"err.log"
 
+        # get output directory
+        output_directory = os.path.dirname(output_prefix)
+
         # disable all the buttons
         self.run_button.setEnabled(False)
         self.template_browse.setEnabled(False)
@@ -383,7 +386,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # create a new thread to run the registration command
         self.registration_thread = QtCore.QThread()
-        self.registration_worker = RegistrationWorker(registration_command, flip_brain_command1, flip_brain_command2)
+        self.registration_worker = RegistrationWorker(registration_command, flip_brain_command1, flip_brain_command2, output_directory)
         self.registration_worker.moveToThread(self.registration_thread)
         self.registration_thread.started.connect(self.registration_worker.run_registration)
         self.registration_worker.finished.connect(self.registration_thread.quit)
@@ -432,11 +435,12 @@ class RegistrationWorker(QtCore.QObject):
     finished = QtCore.pyqtSignal()
     progress = QtCore.pyqtSignal(str)
 
-    def __init__(self, registration_command, flip_brain_command1, flip_brain_command2):
+    def __init__(self, registration_command, flip_brain_command1, flip_brain_command2,output_directory):
         super().__init__()
         self.registration_command = registration_command
         self.flip_brain_command1 = flip_brain_command1
         self.flip_brain_command2 = flip_brain_command2
+        self.output_directory = output_directory
 
     def run_registration(self):
         if self.flip_brain_command1 != "" and self.flip_brain_command2 != "":
@@ -453,6 +457,23 @@ class RegistrationWorker(QtCore.QObject):
         self.progress.emit("")
         self.progress.emit(self.registration_command)
         os.system(self.registration_command)
+        # remove tmp files
+        self.progress.emit("Removing temporary files...")
+        cwd = os.getcwd()
+        tmp_folder = filter(lambda x: os.path.isdir(x) and x.startswith("tmp"), os.listdir(cwd))
+        for folder in tmp_folder:
+            os.system("rm -rf "+folder)
+        # move the additional output files to the output directory
+        self.progress.emit("Moving additional output files...")
+        cwd = os.getcwd()
+        # get .cfg and .nii.gz files
+        cfg_files = filter(lambda x: os.path.isfile(x) and x.endswith(".cfg"), os.listdir(cwd))
+        nii_files = filter(lambda x: os.path.isfile(x) and x.endswith(".nii.gz"), os.listdir(cwd))
+        # move the files
+        for file in cfg_files:
+            os.system("mv "+file+" "+self.output_directory)
+        for file in nii_files:
+            os.system("mv "+file+" "+self.output_directory)
         self.progress.emit("")
         self.progress.emit("Registration finished.")
         # emit the finished signal
