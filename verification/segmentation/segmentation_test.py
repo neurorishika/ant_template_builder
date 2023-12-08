@@ -153,16 +153,18 @@ n_jobs = len(n_jobs)
 n_cpu = os.cpu_count()
 print("Number of jobs: {}".format(n_jobs))
 
-
-command = f'poetry run python ../../scripts/resample.py -i {processed_data_dir+"/backup"} -o {processed_data_dir} -v {target_resolution} -n {min(n_jobs, n_cpu)}'
-print(command)
-os.system(command)
-
-
 # add resampled_<target_resolution> to the filenames
 new_images = [x.replace('.nrrd', '_resampled_{}.nrrd'.format(target_resolution)) for x in new_images]
 new_labels = [x.replace('.nrrd', '_resampled_{}.nrrd'.format(target_resolution)) for x in new_labels]
 
+# check if all the images and labels have been resampled already
+if all([os.path.isfile(x) for x in new_images]) and all([os.path.isfile(x) for x in new_labels]):
+    print("All the images and labels have been resampled already. Skipping.")
+else:
+    # create the command
+    command = f'poetry run python ../../scripts/resample.py -i {processed_data_dir+"/backup"} -o {processed_data_dir} -v {target_resolution} -n {min(n_jobs, n_cpu)}'
+    print(command)
+    os.system(command)
 
 images = new_images
 labels = new_labels
@@ -220,6 +222,12 @@ for label in labels:
     # get the corresponding output prefix
     image_output_prefix = os.path.basename(image).replace('.nrrd', '_')
     image_output_prefix = processed_data_dir + '/' + image_output_prefix
+
+    # check if files with this prefix already exist
+    if os.path.isfile(output_prefix + '.nrrd'):
+        print("The warped label already exists. Skipping.")
+        continue
+    
     # convert template path to full path
     template_path_ = os.path.abspath(template_path)
     # convert label path to full path
