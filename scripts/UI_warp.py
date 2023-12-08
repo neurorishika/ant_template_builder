@@ -308,8 +308,8 @@ class MainWindow(QtWidgets.QMainWindow):
         if flip_brain:
             flipped_input_file = output_directory + os.path.splitext(input_filename)[0]+"_flipped"+os.path.splitext(input_filename)[1]
             mirror_file = output_directory + ((input_filename[:-5] if input_filename.endswith(".nrrd") else input_filename[:-7]) + '.mat')
-            flip_brain_command1 = "ImageMath 3 {} ReflectionMatrix {} 0 > >(tee -a {}_out.log) 2> >(tee -a {}_err.log >&2)".format(mirror_file, input_file, mirror_file[:-4], mirror_file[:-4])
-            flip_brain_command2 = "antsApplyTransforms -d 3 -i {} -o {} -t {} -r {} --float {} > >(tee -a {}_out.log) 2> >(tee -a {}_err.log >&2)".format(input_file, flipped_input_file, mirror_file, input_file, low_memory, flipped_input_file[:-5], flipped_input_file[:-5])
+            flip_brain_command1 = "ImageMath 3 {} ReflectionMatrix {} 0 >{}_out.log 2>{}_err.log".format(mirror_file, input_file, mirror_file[:-4], mirror_file[:-4])
+            flip_brain_command2 = "antsApplyTransforms -d 3 -i {} -o {} -t {} -r {} --float {} >{}_out.log 2>{}_err.log".format(input_file, flipped_input_file, mirror_file, input_file, low_memory, flipped_input_file[:-5], flipped_input_file[:-5])
             input_file = flipped_input_file
         else:
             flip_brain_command1 = ""
@@ -320,7 +320,7 @@ class MainWindow(QtWidgets.QMainWindow):
         warping_command = "antsApplyTransforms" # base command
         warping_command += " -d 4 -e 3" if time_series else " -d 3"
         warping_command += " -i "+input_file
-        warping_command += " -o "+output_prefix if not special_warping_type == "point_set" else " -o "+output_prefix[:-1]+".csv"
+        warping_command += " -o "+output_prefix[:-1]+".nrrd" if not special_warping_type == "point_set" else " -o "+output_prefix[:-1]+".csv"
         warping_command += " -r "+target_file
 
         if warping_type == "to_template":
@@ -337,6 +337,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
         if low_memory:
             warping_command += " --float 1"
+
+        # add logging
+        warping_command += " >{}_out.log 2>{}_err.log".format(output_prefix[:-1], output_prefix[:-1])
         
         # disable all the buttons
         self.run_button.setEnabled(False)
@@ -422,6 +425,10 @@ class WarpingWorker(QtCore.QObject):
         self.progress.emit("")
         self.progress.emit(self.warping_command)
         os.system(self.warping_command)
+
+        # remove all empty log/error files
+        self.progress.emit("Removing empty log/error files...")
+
         self.progress.emit("")
         self.progress.emit("Warping finished.")
         # emit the finished signal

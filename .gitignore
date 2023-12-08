@@ -196,3 +196,9 @@ group_registration/*/
 # Ignore logs and err in all subfolders
 **/*.log
 **/*.err
+**/*.out
+**/*.txt
+
+# Ignore numpy files in all subfolders
+**/*.npy
+**/*.npz
