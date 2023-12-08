@@ -321,7 +321,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.check_num_iterations()
 
         # get the number of threads
-        num_iterations = self.num_iterations
+        num_iterations = self.num_iterations_textbox.text()
 
         # get the registration type
         registration_type = self.registration_type
@@ -362,13 +362,24 @@ class MainWindow(QtWidgets.QMainWindow):
         self.template_browse.setEnabled(False)
         self.input_browse.setEnabled(False)
         self.output_browse.setEnabled(False)
-        self.registration_type_rigid.setEnabled(False)
-        self.registration_type_rigid_affine.setEnabled(False)
-        self.registration_type_rigid_affine_deformable.setEnabled(False)
+        self.registration_type_RA.setEnabled(False)
+        self.registration_type_RI.setEnabled(False)
+        self.registration_type_SY.setEnabled(False)
+        self.registration_type_S2.setEnabled(False)
+        self.registration_type_GR.setEnabled(False)
+        self.registration_type_EX.setEnabled(False)
+        self.registration_type_DD.setEnabled(False)
+        self.registration_type_EL.setEnabled(False)
         self.num_iterations_textbox.setEnabled(False)
         self.n4_bias_field_checkbox.setEnabled(False)
         self.quality_check_checkbox.setEnabled(False)
         self.flip_brain_checkbox.setEnabled(False)
+        self.similarity_metric_CC.setEnabled(False)
+        self.similarity_metric_MI.setEnabled(False)
+        self.similarity_metric_MSQ.setEnabled(False)
+        self.similarity_metric_PR.setEnabled(False)
+        self.low_memory_checkbox.setEnabled(False)
+
 
         # create a new thread to run the registration command
         self.registration_thread = QtCore.QThread()
@@ -391,13 +402,23 @@ class MainWindow(QtWidgets.QMainWindow):
         self.template_browse.setEnabled(True)
         self.input_browse.setEnabled(True)
         self.output_browse.setEnabled(True)
-        self.registration_type_rigid.setEnabled(True)
-        self.registration_type_rigid_affine.setEnabled(True)
-        self.registration_type_rigid_affine_deformable.setEnabled(True)
+        self.registration_type_RA.setEnabled(True)
+        self.registration_type_RI.setEnabled(True)
+        self.registration_type_SY.setEnabled(True)
+        self.registration_type_S2.setEnabled(True)
+        self.registration_type_GR.setEnabled(True)
+        self.registration_type_EX.setEnabled(True)
+        self.registration_type_DD.setEnabled(True)
+        self.registration_type_EL.setEnabled(True)
         self.num_iterations_textbox.setEnabled(True)
         self.n4_bias_field_checkbox.setEnabled(True)
         self.quality_check_checkbox.setEnabled(True)
         self.flip_brain_checkbox.setEnabled(True)
+        self.similarity_metric_CC.setEnabled(True)
+        self.similarity_metric_MI.setEnabled(True)
+        self.similarity_metric_MSQ.setEnabled(True)
+        self.similarity_metric_PR.setEnabled(True)
+        self.low_memory_checkbox.setEnabled(True)
 
         # pop up a message box
         QtWidgets.QMessageBox.information(self, "Registration Finished", "Registration finished check the output directory for the registered file: <input_filename>_registered_Warped.nii.gz")

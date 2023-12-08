@@ -167,8 +167,14 @@ raw_data/*
 # ignore all tif files in all subfolders
 **/*.tif
 
+# ignore all cfg files in all subfolders
+**/*.cfg
+
 # Ignore all subfolders in folder named 'results'
 results/*/
+
+# Ignore all folders in all subfolders whose name starts with 'tmp'
+**/tmp*/
 
 # ignore all files and folders in group_registration folder except for the run_registration.sh file and the ANTs folder
 group_registration/*
