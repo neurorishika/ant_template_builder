@@ -190,7 +190,7 @@ for image in images:
     output_prefix = os.path.basename(image).replace('.nrrd', '_')
     output_prefix = os.path.join(processed_data_dir, output_prefix)
     # check if files with this prefix already exist
-    if os.path.isfile(output_prefix + 'Warped.nii.gz'):
+    if os.path.isfile(output_prefix + 'Warp.nii.gz'):
         print("The registered image already exists. Skipping.")
         continue
     
