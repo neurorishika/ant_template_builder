@@ -261,6 +261,7 @@ for label in labels:
     print("Opening label: " + output_prefix + '.nrrd')
     label_data, label_header = nrrd.read(output_prefix + '.nrrd')
     final_labels.append(label_data)
+    np.save(output_prefix + '.npy', label_data)
     final_labels_paths.append(output_prefix + '.npy')
 
 
@@ -280,8 +281,8 @@ for i, label in enumerate(final_labels):
     # map the unique values to the values 0, 1, 2, ...
     for j, value in enumerate(unique_values):
         processed_label[label == value] = j
-    # save the label as a numpy array
-    np.save(final_labels_paths[i], label)
+    # save the label as a numpy array with processed added to the name
+    np.save(final_labels_paths[i].replace('.npy', '_processed.npy'), processed_label)
     print("Saved label: " + final_labels_paths[i])
 
 # assert that all the labels have the same number of channels
