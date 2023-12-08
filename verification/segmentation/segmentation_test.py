@@ -2,6 +2,8 @@
 
 import os
 import itertools
+import nrrd
+import numpy as np
 
 train_or_test = 'test'
 
@@ -179,10 +181,6 @@ for image, label in itertools.product(images, labels):
 images = list(image_to_label.keys())
 labels = list(image_to_label.values())
 
-
-images
-
-
 # loop over the images and register them to the template using ANTs
 # loop over the images
 for image in images:
@@ -250,8 +248,6 @@ for label in labels:
 
 
 # open the warped labels using pynrrd and save them as numpy arrays
-import nrrd
-import numpy as np
 
 final_labels = []
 final_labels_paths = []
@@ -262,6 +258,7 @@ for label in labels:
     output_prefix = os.path.basename(label).replace('.nrrd', '_')
     output_prefix = processed_data_dir + '/warped_' + output_prefix
     # open the label using pynrrd
+    print("Opening label: " + output_prefix + '.nrrd')
     label_data, label_header = nrrd.read(output_prefix + '.nrrd')
     final_labels.append(label_data)
     final_labels_paths.append(output_prefix + '.npy')
@@ -271,6 +268,7 @@ for label in labels:
 n_channels = []
 
 for i, label in enumerate(final_labels):
+    print("Processing label: " + final_labels_paths[i])
     processed_label = label.copy()
     # get the unique values
     unique_values = np.unique(label)
@@ -278,11 +276,13 @@ for i, label in enumerate(final_labels):
     unique_values.sort()
     # append the number of channels to the list
     n_channels.append(len(unique_values))
+    print("Number of channels: {}".format(len(unique_values)))
     # map the unique values to the values 0, 1, 2, ...
     for j, value in enumerate(unique_values):
         processed_label[label == value] = j
     # save the label as a numpy array
     np.save(final_labels_paths[i], label)
+    print("Saved label: " + final_labels_paths[i])
 
 # assert that all the labels have the same number of channels
 assert len(set(n_channels)) == 1, "All the labels should have the same number of channels"
@@ -290,10 +290,12 @@ assert len(set(n_channels)) == 1, "All the labels should have the same number of
 # create the channel wise labels
 channel_wise_labels = []
 n_channels = n_channels[0]
+print("Consensus Number of channels: {}".format(n_channels))
 
 # loop over the channels
 for i in range(n_channels):
     channel_wise_labels.append([label == i for label in final_labels])
+    print("Channel {} Labels generated.".format(i))
 
 def dice_volume(vol1, vol2):
     """
@@ -316,6 +318,7 @@ def pairwise_dice_volume(vols):
 dice_volumes = []
 for channel in channel_wise_labels:
     dice_volumes.append(pairwise_dice_volume(channel))
+    print("Dice volumes computed for channel {}".format(len(dice_volumes)))
 
 # save the dice volumes
 np.save(processed_data_dir + f'/dice_volumes_{train_or_test}.npy', dice_volumes)
@@ -344,9 +347,11 @@ for i,channel in enumerate(channel_wise_labels):
     np.save(processed_data_dir + f'/consensus_segmentation_channel_{i}_{train_or_test}.npy', consensus)
     # add the consensus segmentation to the consensus segmentation
     consensus_segmentation += consensus*(i+1)
+    print("Consensus segmentation computed for channel {}".format(i))
 
 # save the consensus segmentation as a nrrd file
 nrrd.write(processed_data_dir + '/consensus_segmentation_{}.nrrd'.format(train_or_test), consensus_segmentation, label_header)
+print("Consensus segmentation saved as a nrrd file.")
 
 print("Done!")
 
