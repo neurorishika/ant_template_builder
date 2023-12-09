@@ -7,6 +7,23 @@ import os
 import glob
 from PyQt5 import QtWidgets, QtCore, QtGui
 
+# check if there are no arguments or exactly 4 arguments other than the script name
+if len(sys.argv) == 7:
+    _output_directory = sys.argv[1] 
+    _target_file = sys.argv[2] if sys.argv[2] != "MISSING" else ""
+    _warp_file = sys.argv[3] if sys.argv[3] != "MISSING" else ""
+    _inverse_warp_file = sys.argv[4] if sys.argv[4] != "MISSING" else ""
+    _affine_file = sys.argv[5] if sys.argv[5] != "MISSING" else ""
+    _was_flipped = True if sys.argv[6] == "flipped" else False
+elif len(sys.argv) == 1:
+    _output_directory = ""
+    _target_file = ""
+    _warp_file = ""
+    _inverse_warp_file = ""
+    _affine_file = ""
+    _was_flipped = False
+
+
 about_message ="""
 Welcome to the Kronauer Lab Warping Toolkit!
 ==========================================================
@@ -50,6 +67,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.output_row = QtWidgets.QHBoxLayout()
         self.output_label = QtWidgets.QLabel("Output Directory:")
         self.output_textbox = QtWidgets.QLineEdit()
+        self.output_textbox.setText(_output_directory)
         self.output_textbox.setReadOnly(True)
         self.output_browse = QtWidgets.QPushButton("Browse")
         self.output_browse.clicked.connect(self.browse_output)
@@ -62,6 +80,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.target_row = QtWidgets.QHBoxLayout()
         self.target_label = QtWidgets.QLabel("Target Reference:")
         self.target_textbox = QtWidgets.QLineEdit()
+        self.target_textbox.setText(_target_file)
         self.target_textbox.setReadOnly(True)
         self.target_browse = QtWidgets.QPushButton("Browse")
         self.target_browse.clicked.connect(self.browse_target)
@@ -75,6 +94,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.warp_row = QtWidgets.QHBoxLayout()
         self.warp_label = QtWidgets.QLabel("Warp File:")
         self.warp_textbox = QtWidgets.QLineEdit()
+        self.warp_textbox.setText(_warp_file)
         self.warp_textbox.setReadOnly(True)
         self.warp_browse = QtWidgets.QPushButton("Browse")
         self.warp_browse.clicked.connect(self.browse_warp)
@@ -87,6 +107,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.inverse_warp_row = QtWidgets.QHBoxLayout()
         self.inverse_warp_label = QtWidgets.QLabel("Inverse Warp File:")
         self.inverse_warp_textbox = QtWidgets.QLineEdit()
+        self.inverse_warp_textbox.setText(_inverse_warp_file)
         self.inverse_warp_textbox.setReadOnly(True)
         self.inverse_warp_browse = QtWidgets.QPushButton("Browse")
         self.inverse_warp_browse.clicked.connect(self.browse_inverse_warp)
@@ -99,6 +120,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.affine_row = QtWidgets.QHBoxLayout()
         self.affine_label = QtWidgets.QLabel("Affine File:")
         self.affine_textbox = QtWidgets.QLineEdit()
+        self.affine_textbox.setText(_affine_file)
         self.affine_textbox.setReadOnly(True)
         self.affine_browse = QtWidgets.QPushButton("Browse")
         self.affine_browse.clicked.connect(self.browse_affine)
@@ -150,7 +172,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.low_memory_checkbox = QtWidgets.QCheckBox("Low Memory")
         self.low_memory_checkbox.setChecked(True)
         self.flip_brain_checkbox = QtWidgets.QCheckBox("Mirror Before Warping")
-        self.flip_brain_checkbox.setChecked(False)
+        self.flip_brain_checkbox.setChecked(_was_flipped)
         self.debug_mode_checkbox = QtWidgets.QCheckBox("Debug Mode")
         self.debug_mode_checkbox.setChecked(False)
         self.final_row.addWidget(self.affine_only_checkbox)
@@ -318,9 +340,21 @@ class MainWindow(QtWidgets.QMainWindow):
         affine_file = self.affine_textbox.text()
 
         # make sure none of the files are empty
-        if input_file == "" or target_file == "" or output_directory == "" or warp_file == "" or inverse_warp_file == "" or affine_file == "":
+        if input_file == "" or target_file == "" or output_directory == "" or affine_file == "":
             QtWidgets.QMessageBox.warning(self, "Warning", "All files must be specified.")
             return
+        
+        if affine_only == False and not warp_file == "":
+            # it must be a to_template warping
+            if not warping_type == "to_template":
+                QtWidgets.QMessageBox.warning(self, "Warning", "Warp file can only be specified for to_template warping.")
+                return
+        
+        if affine_only == False and not inverse_warp_file == "":
+            # it must be a from_template warping
+            if not warping_type == "from_template":
+                QtWidgets.QMessageBox.warning(self, "Warning", "Inverse Warp file can only be specified for from_template warping.")
+                return
         
         # if the output directory does not have a / at the end, add it
         if not output_directory.endswith("/"):
@@ -400,7 +434,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         if flip_brain:
             
-            flipped_out_file = output_directory + os.path.splitext(input_filename)[0]+"_mirror"+os.path.splitext(input_filename)[1]
+            flipped_out_file = output_directory + os.path.splitext(input_filename)[0]+"_fixed"+os.path.splitext(input_filename)[1]
             mirror_reverse_file = output_directory + ((input_filename[:-5] if input_filename.endswith(".nrrd") else input_filename[:-7]) + '_reverse.mat')
             flip_output_commands.append("ImageMath 3 {} ReflectionMatrix {} 1 >{}_out.log 2>{}_err.log".format(mirror_reverse_file, input_file, mirror_reverse_file[:-4], mirror_reverse_file[:-4]))
             flip_output_commands.append("antsApplyTransforms -d 3 -i {} -o {} -t {} -r {} --float {} >{}_out.log 2>{}_err.log".format(out_file, flipped_out_file, mirror_reverse_file, input_file, low_memory, flipped_out_file[:-5], flipped_out_file[:-5]))
@@ -526,12 +560,16 @@ class WarpingWorker(QtCore.QObject):
                         continue
                     # convert to error file
                     error_file = file[:-8]+"_err.log"
+                    # check if error file exists, if not, continue
+                    if not os.path.exists(error_file):
+                        continue
                     # check if empty
                     if os.stat(error_file).st_size == 0:
                         # remove the log file and the error file
-                        self.progress.emit("Removing "+file[:-8]+"_out.log")
-                        os.remove(file[:-8]+"_out.log")
-                        self.progress.emit("")
+                        if os.path.exists(file[:-8]+"_out.log"):
+                            self.progress.emit("Removing "+file[:-8]+"_out.log")
+                            os.remove(file[:-8]+"_out.log")
+                            self.progress.emit("")
                         self.progress.emit("Removing "+error_file)
                         os.remove(error_file)
                         self.progress.emit("")

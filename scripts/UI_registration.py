@@ -176,6 +176,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.flip_brain_checkbox.setChecked(False)
         self.last_row.addWidget(self.flip_brain_checkbox)
 
+        self.debug_mode_checkbox = QtWidgets.QCheckBox("Debug Mode")
+        self.debug_mode_checkbox.setChecked(False)
+        self.last_row.addWidget(self.debug_mode_checkbox)
+
         self.main_layout.addLayout(self.last_row)
 
         # create the run button
@@ -309,7 +313,7 @@ class MainWindow(QtWidgets.QMainWindow):
         
         # setup output directory
         input_filename = os.path.basename(input_file)
-        output_prefix = os.path.splitext(input_filename)[0]+"_registered_"
+        output_prefix = os.path.splitext(input_filename)[0]+"_"
         output_prefix = os.path.join(output_directory, output_prefix)
 
         # make sure no files with the same prefix already exist (use glob)
@@ -341,21 +345,46 @@ class MainWindow(QtWidgets.QMainWindow):
         # get the low memory option
         low_memory_flip = "1" if self.low_memory_checkbox.isChecked() else "0"
 
+        # get the debug mode option
+        debug_mode = self.debug_mode_checkbox.isChecked()
+
+        # create a list of intermediate files
+        intermediate_files = []
+
+        # create a list of flip brain commands
+        flip_brain_commands = []
+
         # create the flip brain command
         if flip_brain:
             # define flipped command
             flipped_input_file = output_directory + os.path.splitext(input_filename)[0]+"_flipped"+os.path.splitext(input_filename)[1]
             mirror_file = output_directory + ((input_filename[:-5] if input_filename.endswith(".nrrd") else input_filename[:-7]) + '.mat')
-            flip_brain_command1 = "ImageMath 3 {} ReflectionMatrix {} 0 >{}_out.log 2>{}_err.log".format(mirror_file, input_file, mirror_file[:-4], mirror_file[:-4])
-            flip_brain_command2 = "antsApplyTransforms -d 3 -i {} -o {} -t {} -r {} --float {} >{}_out.log 2>{}_err.log".format(input_file, flipped_input_file, mirror_file, input_file, low_memory_flip, flipped_input_file[:-5], flipped_input_file[:-5])
+            flip_brain_commands.append("ImageMath 3 {} ReflectionMatrix {} 0 >{}_out.log 2>{}_err.log".format(mirror_file, input_file, mirror_file[:-4], mirror_file[:-4]))
+            flip_brain_commands.append("antsApplyTransforms -d 3 -i {} -o {} -t {} -r {} --float {} >{}_out.log 2>{}_err.log".format(input_file, flipped_input_file, mirror_file, input_file, low_memory_flip, flipped_input_file[:-5], flipped_input_file[:-5]))
+            # create a file that be a reminder that the brain was flipped using cat
+            flip_marker_file = output_directory + os.path.splitext(input_filename)[0]+"_flipped.txt"
+            with open(flip_marker_file, "w") as f:
+                f.write("This file is a reminder that the brain was flipped before registration.")
+            # set the input file to the flipped input file
             input_file = flipped_input_file
-        else:
-            # define flipped command
-            flip_brain_command1 = ""
-            flip_brain_command2 = ""
+
+            # add the intermediate files to the list (log files included)
+            intermediate_files.append(mirror_file)
+            intermediate_files.append(flipped_input_file)
+            intermediate_files.append(mirror_file[:-4]+"_out.log")
+            intermediate_files.append(mirror_file[:-4]+"_err.log")
+            intermediate_files.append(flipped_input_file[:-5]+"_out.log")
+            intermediate_files.append(flipped_input_file[:-5]+"_err.log")
         
         # create the registration command
         registration_command = "antsIntroduction.sh -d 3 -r "+template_file+" -i "+input_file+" -o "+output_prefix+" -m "+num_iterations+" -t "+registration_type+" -n "+n4_bias_field+" -q "+quality_check+" -s "+similarity_metric+" >"+output_prefix+"out.log 2>"+output_prefix+"err.log"
+
+        # add the intermediate files to the list (log files included)
+        intermediate_files.append(output_prefix+"out.log")
+        intermediate_files.append(output_prefix+"err.log")
+
+        if debug_mode:
+            intermediate_files = []
 
         # get output directory
         output_directory = os.path.dirname(output_prefix)
@@ -386,7 +415,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # create a new thread to run the registration command
         self.registration_thread = QtCore.QThread()
-        self.registration_worker = RegistrationWorker(registration_command, flip_brain_command1, flip_brain_command2, output_directory)
+        self.registration_worker = RegistrationWorker(registration_command, flip_brain_commands, output_directory, intermediate_files)
         self.registration_worker.moveToThread(self.registration_thread)
         self.registration_thread.started.connect(self.registration_worker.run_registration)
         self.registration_worker.finished.connect(self.registration_thread.quit)
@@ -424,8 +453,30 @@ class MainWindow(QtWidgets.QMainWindow):
         self.low_memory_checkbox.setEnabled(True)
 
         # pop up a message box
-        QtWidgets.QMessageBox.information(self, "Registration Finished", "Registration finished check the output directory for the registered file: <input_filename>_registered_Warped.nii.gz")
+        QtWidgets.QMessageBox.information(self, "Registration Finished", "Registration finished check the output directory for the registered file: {}_deformed.nii.gz".format(os.path.splitext(os.path.basename(self.input_textbox.text()))[0]))
 
+        # ask the user if they want to warp other channels
+        reply = QtWidgets.QMessageBox.question(self, "Warp Other Channels", "Do you want to warp other channels?", QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No, QtWidgets.QMessageBox.Yes)
+        if reply == QtWidgets.QMessageBox.Yes:
+            # create a list with the files to send to warping gui
+            output_directory = os.path.dirname(self.output_textbox.text())
+            target_file = os.path.join(output_directory, os.path.splitext(os.path.basename(self.input_textbox.text()))[0]+"_deformed.nii.gz")
+            warp_file = os.path.join(output_directory, os.path.splitext(os.path.basename(self.input_textbox.text()))[0]+"_Warp.nii.gz")
+            inverse_warp_file = os.path.join(output_directory, os.path.splitext(os.path.basename(self.input_textbox.text()))[0]+"_InverseWarp.nii.gz")
+            affine_file = os.path.join(output_directory, os.path.splitext(os.path.basename(self.input_textbox.text()))[0]+"_Affine.txt")
+            was_flipped = "flipped" if self.flip_brain_checkbox.isChecked() else "not_flipped"
+            # make sure the files exist
+            if not os.path.exists(target_file) or not os.path.exists(warp_file) or not os.path.exists(inverse_warp_file) or not os.path.exists(affine_file):
+                QtWidgets.QMessageBox.warning(self, "Warning", "Some files are missing. Please check the output directory.")
+                target_file = "MISSING" if not os.path.exists(target_file) else target_file
+                warp_file = "MISSING" if not os.path.exists(warp_file) else warp_file
+                inverse_warp_file = "MISSING" if not os.path.exists(inverse_warp_file) else inverse_warp_file
+                affine_file = "MISSING" if not os.path.exists(affine_file) else affine_file
+            # use os.system to run the warping gui
+            os.system("poetry run python scripts/UI_warp.py "+output_directory+" "+target_file+" "+warp_file+" "+inverse_warp_file+" "+affine_file+" "+was_flipped)
+        else:
+            return
+        
     # function to update the terminal
     def update_terminal(self, text):
         self.terminal.append(text)
@@ -435,34 +486,37 @@ class RegistrationWorker(QtCore.QObject):
     finished = QtCore.pyqtSignal()
     progress = QtCore.pyqtSignal(str)
 
-    def __init__(self, registration_command, flip_brain_command1, flip_brain_command2,output_directory):
+    def __init__(self, registration_command, flip_brain_commands, output_directory, intermediate_files):
         super().__init__()
         self.registration_command = registration_command
-        self.flip_brain_command1 = flip_brain_command1
-        self.flip_brain_command2 = flip_brain_command2
+        self.flip_brain_commands = flip_brain_commands
         self.output_directory = output_directory
+        self.intermediate_files = intermediate_files
 
     def run_registration(self):
-        if self.flip_brain_command1 != "" and self.flip_brain_command2 != "":
+        if len(self.flip_brain_commands) > 0:
             self.progress.emit("Flipping the brain...")
             self.progress.emit("")
             # run the flip brain command
-            self.progress.emit(self.flip_brain_command1)
-            os.system(self.flip_brain_command1)
-            self.progress.emit(self.flip_brain_command2)
-            os.system(self.flip_brain_command2)
-            self.progress.emit("")
+            for command in self.flip_brain_commands:
+                self.progress.emit(command)
+                os.system(command)
+                self.progress.emit("")
         # run the registration command
         self.progress.emit("Running registration...")
         self.progress.emit("")
         self.progress.emit(self.registration_command)
         os.system(self.registration_command)
-        # remove tmp files
-        self.progress.emit("Removing temporary files...")
+        # move tmp files
+        self.progress.emit("Move temporary files...")
         cwd = os.getcwd()
         tmp_folder = filter(lambda x: os.path.isdir(x) and x.startswith("tmp"), os.listdir(cwd))
         for folder in tmp_folder:
-            os.system("rm -rf "+folder)
+            self.progress.emit("mv "+folder+" "+self.output_directory)
+            os.system("mv "+folder+" "+self.output_directory)
+            if len(self.intermediate_files) > 0:
+                self.intermediate_files.append(os.path.join(self.output_directory, folder))
+        self.progress.emit("")
         # move the additional output files to the output directory
         self.progress.emit("Moving additional output files...")
         cwd = os.getcwd()
@@ -471,10 +525,56 @@ class RegistrationWorker(QtCore.QObject):
         nii_files = filter(lambda x: os.path.isfile(x) and x.endswith(".nii.gz"), os.listdir(cwd))
         # move the files
         for file in cfg_files:
+            self.progress.emit("mv "+file+" "+self.output_directory)
             os.system("mv "+file+" "+self.output_directory)
-        for file in nii_files:
-            os.system("mv "+file+" "+self.output_directory)
+            if len(self.intermediate_files) > 0:
+                self.intermediate_files.append(os.path.join(self.output_directory, file))
         self.progress.emit("")
+
+        for file in nii_files:
+            self.progress.emit("mv "+file+" "+self.output_directory)
+            os.system("mv "+file+" "+self.output_directory)
+            if len(self.intermediate_files) > 0:
+                self.intermediate_files.append(os.path.join(self.output_directory, file))
+        self.progress.emit("")
+
+        # remove the intermediate files
+        if len(self.intermediate_files) > 0:
+            self.progress.emit("Removing intermediate files...")
+            for file in self.intermediate_files:
+                # check if log or error file
+                if file.endswith("_out.log") or file.endswith("_err.log"):
+                    # check if file exists, if not, continue
+                    if not os.path.exists(file):
+                        continue
+                    # convert to error file
+                    error_file = file[:-8]+"_err.log"
+                    # check if error file exists, if not, continue
+                    if not os.path.exists(error_file):
+                        continue
+                    # check if empty
+                    if os.stat(error_file).st_size == 0:
+                        # remove the log file and the error file
+                        if os.path.exists(file[:-8]+"_out.log"):
+                            self.progress.emit("Removing "+file[:-8]+"_out.log")
+                            os.remove(file[:-8]+"_out.log")
+                            self.progress.emit("")
+                        self.progress.emit("Removing "+error_file)
+                        os.remove(error_file)
+                        self.progress.emit("")
+                else:
+                    # check if directory
+                    if os.path.isdir(file):
+                        # remove the directory
+                        self.progress.emit("Removing "+file)
+                        os.rmdir(file)
+                        self.progress.emit("")
+                    else:
+                        # remove the file
+                        self.progress.emit("Removing "+file)
+                        os.remove(file)
+                        self.progress.emit("")
+
         self.progress.emit("Registration finished.")
         # emit the finished signal
         self.finished.emit()
