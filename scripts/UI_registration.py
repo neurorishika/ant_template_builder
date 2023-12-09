@@ -558,10 +558,10 @@ class RegistrationWorker(QtCore.QObject):
                         # remove the log file and the error file
                         if os.path.exists(file[:-8]+"_out.log"):
                             self.progress.emit("Removing "+file[:-8]+"_out.log")
-                            os.remove(file[:-8]+"_out.log")
+                            #os.remove(file[:-8]+"_out.log")
                             self.progress.emit("")
                         self.progress.emit("Removing "+error_file)
-                        os.remove(error_file)
+                        #os.remove(error_file)
                         self.progress.emit("")
                 else:
                     # check if directory
@@ -573,7 +573,7 @@ class RegistrationWorker(QtCore.QObject):
                     else:
                         # remove the file
                         self.progress.emit("Removing "+file)
-                        os.remove(file)
+                        #os.remove(file)
                         self.progress.emit("")
 
         self.progress.emit("Registration finished.")
