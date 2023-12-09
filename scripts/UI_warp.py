@@ -46,18 +46,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.input_row.addWidget(self.input_browse)
         self.main_layout.addLayout(self.input_row)
 
-        # create the target reference row
-        self.target_row = QtWidgets.QHBoxLayout()
-        self.target_label = QtWidgets.QLabel("Target Reference:")
-        self.target_textbox = QtWidgets.QLineEdit()
-        self.target_textbox.setReadOnly(True)
-        self.target_browse = QtWidgets.QPushButton("Browse")
-        self.target_browse.clicked.connect(self.browse_target)
-        self.target_row.addWidget(self.target_label)
-        self.target_row.addWidget(self.target_textbox)
-        self.target_row.addWidget(self.target_browse)
-        self.main_layout.addLayout(self.target_row)
-
         # create the output directory row
         self.output_row = QtWidgets.QHBoxLayout()
         self.output_label = QtWidgets.QLabel("Output Directory:")
@@ -69,6 +57,19 @@ class MainWindow(QtWidgets.QMainWindow):
         self.output_row.addWidget(self.output_textbox)
         self.output_row.addWidget(self.output_browse)
         self.main_layout.addLayout(self.output_row)
+
+        # create the target reference row
+        self.target_row = QtWidgets.QHBoxLayout()
+        self.target_label = QtWidgets.QLabel("Target Reference:")
+        self.target_textbox = QtWidgets.QLineEdit()
+        self.target_textbox.setReadOnly(True)
+        self.target_browse = QtWidgets.QPushButton("Browse")
+        self.target_browse.clicked.connect(self.browse_target)
+        self.target_textbox.textChanged.connect(self.target_changed)
+        self.target_row.addWidget(self.target_label)
+        self.target_row.addWidget(self.target_textbox)
+        self.target_row.addWidget(self.target_browse)
+        self.main_layout.addLayout(self.target_row)
 
         # create the Warp file row
         self.warp_row = QtWidgets.QHBoxLayout()
@@ -140,7 +141,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.special_warping_row.addWidget(self.special_warping_point_set)
         self.main_layout.addLayout(self.special_warping_row)
 
-        # create the row 5 layout (Affine only, Time Series, Low Memory, Mirror before warping)
+        # create the row 5 layout (Affine only, Time Series, Low Memory, Mirror before warping, Debug)
         self.final_row = QtWidgets.QHBoxLayout()
         self.affine_only_checkbox = QtWidgets.QCheckBox("Affine Only")
         self.affine_only_checkbox.setChecked(False)
@@ -150,10 +151,13 @@ class MainWindow(QtWidgets.QMainWindow):
         self.low_memory_checkbox.setChecked(True)
         self.flip_brain_checkbox = QtWidgets.QCheckBox("Mirror Before Warping")
         self.flip_brain_checkbox.setChecked(False)
+        self.debug_mode_checkbox = QtWidgets.QCheckBox("Debug Mode")
+        self.debug_mode_checkbox.setChecked(False)
         self.final_row.addWidget(self.affine_only_checkbox)
         self.final_row.addWidget(self.time_series_checkbox)
         self.final_row.addWidget(self.low_memory_checkbox)
         self.final_row.addWidget(self.flip_brain_checkbox)
+        self.final_row.addWidget(self.debug_mode_checkbox)
         self.main_layout.addLayout(self.final_row)
 
         # create the run button
@@ -203,6 +207,40 @@ class MainWindow(QtWidgets.QMainWindow):
             return
         # set the textbox to the filename
         self.target_textbox.setText(filename)
+
+    # function to ask if the user wants to autofill the files
+    def target_changed(self):
+        # ask the user if they want to autofill the files
+        reply = QtWidgets.QMessageBox.question(self, "Autofill", "Do you want to autofill the files?", QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
+        if reply == QtWidgets.QMessageBox.Yes:
+            # get the target file
+            target_file = self.target_textbox.text()
+            # make sure the target file has "deformed.nii.gz" at the end
+            if not target_file.endswith("deformed.nii.gz"):
+                QtWidgets.QMessageBox.warning(self, "Warning", "Target file must be a deformed file. Please change the target file for autofill.")
+                return
+            # change deformed.nii.gz to Warp.nii.gz
+            warp_file = target_file.replace("deformed.nii.gz", "Warp.nii.gz")
+            # check if the warp file exists
+            if not os.path.exists(warp_file):
+                QtWidgets.QMessageBox.warning(self, "Warning", "Warp file does not exist. Please change the target file for autofill or add the warp file manually.")
+            else:
+                self.warp_textbox.setText(warp_file)
+            # change deformed.nii.gz to InverseWarp.nii.gz
+            inverse_warp_file = target_file.replace("deformed.nii.gz", "InverseWarp.nii.gz")
+            # check if the inverse warp file exists
+            if not os.path.exists(inverse_warp_file):
+                QtWidgets.QMessageBox.warning(self, "Warning", "Inverse Warp file does not exist. Please change the target file for autofill or add the inverse warp file manually.")
+            else:
+                self.inverse_warp_textbox.setText(inverse_warp_file)
+            # change deformed.nii.gz to Affine.txt
+            affine_file = target_file.replace("deformed.nii.gz", "Affine.txt")
+            # check if the affine file exists
+            if not os.path.exists(affine_file):
+                QtWidgets.QMessageBox.warning(self, "Warning", "Affine file does not exist. Please change the target file for autofill or add the affine file manually.")
+            else:
+                self.affine_textbox.setText(affine_file)
+
 
     # function to browse for the output directory
     def browse_output(self):
@@ -304,17 +342,26 @@ class MainWindow(QtWidgets.QMainWindow):
         time_series = self.time_series_checkbox.isChecked()
         low_memory = "1" if self.low_memory_checkbox.isChecked() else "0"
         flip_brain = self.flip_brain_checkbox.isChecked()
+        debug_mode = self.debug_mode_checkbox.isChecked()
+
+        intermediate_files = []
+        flip_input_commands = []
 
         if flip_brain:
+
             flipped_input_file = output_directory + os.path.splitext(input_filename)[0]+"_flipped"+os.path.splitext(input_filename)[1]
             mirror_file = output_directory + ((input_filename[:-5] if input_filename.endswith(".nrrd") else input_filename[:-7]) + '.mat')
-            flip_brain_command1 = "ImageMath 3 {} ReflectionMatrix {} 0 >{}_out.log 2>{}_err.log".format(mirror_file, input_file, mirror_file[:-4], mirror_file[:-4])
-            flip_brain_command2 = "antsApplyTransforms -d 3 -i {} -o {} -t {} -r {} --float {} >{}_out.log 2>{}_err.log".format(input_file, flipped_input_file, mirror_file, input_file, low_memory, flipped_input_file[:-5], flipped_input_file[:-5])
+            flip_input_commands.append("ImageMath 3 {} ReflectionMatrix {} 0 >{}_out.log 2>{}_err.log".format(mirror_file, input_file, mirror_file[:-4], mirror_file[:-4]))
+            flip_input_commands.append("antsApplyTransforms -d 3 -i {} -o {} -t {} -r {} --float {} >{}_out.log 2>{}_err.log".format(input_file, flipped_input_file, mirror_file, input_file, low_memory, flipped_input_file[:-5], flipped_input_file[:-5]))
             input_file = flipped_input_file
-        else:
-            flip_brain_command1 = ""
-            flip_brain_command2 = ""
 
+            # intermediate files
+            intermediate_files.append(mirror_file)
+            intermediate_files.append(flipped_input_file)
+            intermediate_files.append(mirror_file[:-4]+"_out.log")
+            intermediate_files.append(mirror_file[:-4]+"_err.log")
+            intermediate_files.append(flipped_input_file[:-5]+"_out.log")
+            intermediate_files.append(flipped_input_file[:-5]+"_err.log")
 
         # create the command
         warping_command = "antsApplyTransforms" # base command
@@ -340,7 +387,35 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # add logging
         warping_command += " >{}_out.log 2>{}_err.log".format(output_prefix[:-1], output_prefix[:-1])
+
+        # intermediate files
+        intermediate_files.append(output_prefix[:-1]+"_out.log")
+        intermediate_files.append(output_prefix[:-1]+"_err.log")
+
+        # output file
+        out_file = output_prefix[:-1]+".nrrd" if not special_warping_type == "point_set" else output_prefix[:-1]+".csv"
+
+        # flip the brain back if it was flipped
+        flip_output_commands = []
+
+        if flip_brain:
+            
+            flipped_out_file = output_directory + os.path.splitext(input_filename)[0]+"_mirror"+os.path.splitext(input_filename)[1]
+            mirror_reverse_file = output_directory + ((input_filename[:-5] if input_filename.endswith(".nrrd") else input_filename[:-7]) + '_reverse.mat')
+            flip_output_commands.append("ImageMath 3 {} ReflectionMatrix {} 1 >{}_out.log 2>{}_err.log".format(mirror_reverse_file, input_file, mirror_reverse_file[:-4], mirror_reverse_file[:-4]))
+            flip_output_commands.append("antsApplyTransforms -d 3 -i {} -o {} -t {} -r {} --float {} >{}_out.log 2>{}_err.log".format(out_file, flipped_out_file, mirror_reverse_file, input_file, low_memory, flipped_out_file[:-5], flipped_out_file[:-5]))
+            
+            # intermediate files
+            intermediate_files.append(out_file)
+            intermediate_files.append(mirror_reverse_file)
+            intermediate_files.append(mirror_reverse_file[:-4]+"_out.log")
+            intermediate_files.append(mirror_reverse_file[:-4]+"_err.log")
+            intermediate_files.append(flipped_out_file[:-5]+"_out.log")
+            intermediate_files.append(flipped_out_file[:-5]+"_err.log")
         
+        if debug_mode:
+            intermediate_files = []
+
         # disable all the buttons
         self.run_button.setEnabled(False)
         self.input_browse.setEnabled(False)
@@ -357,11 +432,13 @@ class MainWindow(QtWidgets.QMainWindow):
         self.affine_only_checkbox.setEnabled(False)
         self.time_series_checkbox.setEnabled(False)
         self.low_memory_checkbox.setEnabled(False)
+        self.flip_brain_checkbox.setEnabled(False)
+        self.debug_mode_checkbox.setEnabled(False)
 
 
         # create a new thread to run the warping command
         self.warping_thread = QtCore.QThread()
-        self.warping_worker = WarpingWorker(warping_command, flip_brain_command1, flip_brain_command2)
+        self.warping_worker = WarpingWorker(warping_command, flip_input_commands, flip_output_commands, intermediate_files)
         self.warping_worker.moveToThread(self.warping_thread)
         self.warping_thread.started.connect(self.warping_worker.run_warping)
         self.warping_worker.finished.connect(self.warping_thread.quit)
@@ -391,6 +468,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.affine_only_checkbox.setEnabled(True)
         self.time_series_checkbox.setEnabled(True)
         self.low_memory_checkbox.setEnabled(True)
+        self.flip_brain_checkbox.setEnabled(True)
+        self.debug_mode_checkbox.setEnabled(True)
 
         # pop up a message box
         QtWidgets.QMessageBox.information(self, "Warping Finished", "Warping finished check the output directory for the registered file: <input_filename>_registered_Warped.nii.gz")
@@ -404,21 +483,21 @@ class WarpingWorker(QtCore.QObject):
     finished = QtCore.pyqtSignal()
     progress = QtCore.pyqtSignal(str)
 
-    def __init__(self, warping_command, flip_brain_command1, flip_brain_command2):
+    def __init__(self, warping_command, flip_input_commands, flip_output_commands, intermediate_files):
         super().__init__()
         self.warping_command = warping_command
-        self.flip_brain_command1 = flip_brain_command1
-        self.flip_brain_command2 = flip_brain_command2
+        self.flip_input_commands = flip_input_commands
+        self.flip_output_commands = flip_output_commands
+        self.intermediate_files = intermediate_files
 
     def run_warping(self):
-        if self.flip_brain_command1 != "" and self.flip_brain_command2 != "":
+        if len(self.flip_input_commands) > 0:
             self.progress.emit("Flipping brain...")
             self.progress.emit("")
             # run the flip brain command
-            self.progress.emit(self.flip_brain_command1)            
-            os.system(self.flip_brain_command1)
-            self.progress.emit(self.flip_brain_command2)
-            os.system(self.flip_brain_command2)
+            for command in self.flip_input_commands:
+                self.progress.emit(command)
+                os.system(command)
             self.progress.emit("")
         # run the warping command
         self.progress.emit("Running warping...")
@@ -426,8 +505,34 @@ class WarpingWorker(QtCore.QObject):
         self.progress.emit(self.warping_command)
         os.system(self.warping_command)
 
+        if len(self.flip_output_commands) > 0:
+            self.progress.emit("Flipping brain back...")
+            self.progress.emit("")
+            # run the flip brain command
+            for command in self.flip_output_commands:
+                self.progress.emit(command)
+                os.system(command)
+            self.progress.emit("")
+
         # remove all empty log/error files
-        self.progress.emit("Removing empty log/error files...")
+        if len(self.intermediate_files) > 0:
+            self.progress.emit("Removing intermediate files...")
+            for file in self.intermediate_files:
+                # check if log or error file
+                if file.endswith("_out.log") or file.endswith("_err.log"):
+                    # convert to error file
+                    error_file = file[:-7]+"_err.log"
+                    # check if empty
+                    if os.stat(error_file).st_size == 0:
+                        # remove the log file and the error file
+                        self.progress.emit("Removing "+file[:-7]+"_out.log")
+                        os.remove(file[:-7]+"_out.log")
+                        self.progress.emit("Removing "+error_file)
+                        os.remove(error_file)
+                else:
+                    # remove the file
+                    self.progress.emit("Removing "+file)
+                    os.remove(file)
 
         self.progress.emit("")
         self.progress.emit("Warping finished.")
