@@ -521,12 +521,12 @@ class WarpingWorker(QtCore.QObject):
                 # check if log or error file
                 if file.endswith("_out.log") or file.endswith("_err.log"):
                     # convert to error file
-                    error_file = file[:-7]+"_err.log"
+                    error_file = file[:-8]+"_err.log"
                     # check if empty
                     if os.stat(error_file).st_size == 0:
                         # remove the log file and the error file
-                        self.progress.emit("Removing "+file[:-7]+"_out.log")
-                        os.remove(file[:-7]+"_out.log")
+                        self.progress.emit("Removing "+file[:-8]+"_out.log")
+                        os.remove(file[:-8]+"_out.log")
                         self.progress.emit("Removing "+error_file)
                         os.remove(error_file)
                 else:
