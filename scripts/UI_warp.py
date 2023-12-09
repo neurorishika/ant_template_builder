@@ -520,6 +520,9 @@ class WarpingWorker(QtCore.QObject):
             for file in self.intermediate_files:
                 # check if log or error file
                 if file.endswith("_out.log") or file.endswith("_err.log"):
+                    # check if file exists, if not, continue
+                    if not os.path.exists(file):
+                        continue
                     # convert to error file
                     error_file = file[:-8]+"_err.log"
                     # check if empty
