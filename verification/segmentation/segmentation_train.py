@@ -69,7 +69,7 @@ template_filename = template_filename[0]
 # template path
 template_path = os.path.join(template_dir, template_filename)
 
-processed_data_dir = 'processed_data'
+processed_data_dir = 'processed_data/'+train_or_test
 
 # loop over the images and labels and check if names have LEFT or RIGHT in them
 
@@ -92,14 +92,12 @@ for image in images:
             continue
         reflection_matrix = os.path.join(processed_data_dir, os.path.basename(image)[:-5] + "_reflection_matrix.mat")
         # create the command
-        flip_brain_command1 = "ImageMath 3 {} ReflectionMatrix {} 0".format(reflection_matrix, image)
-        flip_brain_command2 = "WarpImageMultiTransform 3 {} {} -R {} {}".format(image, mirrored_image, image, reflection_matrix)
+        flip_brain_command1 = "ImageMath 3 {} ReflectionMatrix {} 0 >{}_out.log 2>{}_err.log".format(reflection_matrix, image, reflection_matrix[:-4], reflection_matrix[:-4])
+        flip_brain_command2 = "WarpImageMultiTransform 3 {} {} -R {} {} >{}_out.log 2>{}_err.log".format(image, mirrored_image, image, reflection_matrix, os.path.basename(mirrored_image).split('.')[0], os.path.basename(mirrored_image).split('.')[0])
         # run the commands
         print(flip_brain_command1)
-        # os.system(flip_brain_command1)
         os.system(flip_brain_command1)
         print(flip_brain_command2)
-        # os.system(flip_brain_command2)
         os.system(flip_brain_command2)
         # change the image name to the mirrored image
         new_images.append(mirrored_image)
@@ -135,10 +133,8 @@ for label in labels:
         flip_brain_command2 = "antsApplyTransforms -d 3 -i {} -o {} -t {} -r {} >{}_out.log 2>{}_err.log".format(label, mirrored_label, reflection_matrix, label, os.path.basename(mirrored_label).split('.')[0], os.path.basename(mirrored_label).split('.')[0])
         # run the commands
         print(flip_brain_command1)
-        # os.system(flip_brain_command1)
         os.system(flip_brain_command1)
         print(flip_brain_command2)
-        # os.system(flip_brain_command2)
         os.system(flip_brain_command2)
         # change the label name to the mirrored label
         new_labels.append(mirrored_label)
@@ -228,7 +224,7 @@ for image in images:
 
     # create registration command
     command = f'antsIntroduction.sh -d 3 -r {template_path_} -i {image_} '
-    command += f'-o {output_prefix_} -t GR -s CC -m 30x90x20x8 -n 1 -q 1 '
+    command += f'-o {output_prefix_} -t GR -s CC -m 30x90x20x8 -n 1 -q 0 '
     command += f'>{output_prefix_}_out.log 2>{output_prefix_}_err.log'
     # add the command to the list of commands
     print(command)
@@ -356,6 +352,18 @@ for i, channel in enumerate(dice_scores):
     print("Max Dice score: {:.2f}".format(np.max(channel_)))
     print("Std Dice score: {:.2f}".format(np.std(channel_)))
     print("")
+
+    # save the statistics
+    with open(processed_data_dir + f'/dice_scores_{train_or_test}.txt', 'a') as f:
+        f.write('Channel {}\n'.format(i if i>0 else '0 (Background)'))
+        f.write('==========\n')
+        f.write("Average Dice score: {:.2f}\n".format(np.mean(channel_)))
+        f.write("Median Dice score: {:.2f}\n".format(np.median(channel_)))
+        f.write("95% CI Dice score: ({:.2f}, {:.2f})\n".format(np.percentile(channel_, 2.5), np.percentile(channel_, 97.5)))
+        f.write("Min Dice score: {:.2f}\n".format(np.min(channel_)))
+        f.write("Max Dice score: {:.2f}\n".format(np.max(channel_)))
+        f.write("Std Dice score: {:.2f}\n".format(np.std(channel_)))
+        f.write("\n")
 
 # find the consensus segmentation for each channel
 consensus_segmentation = np.zeros_like(channel_wise_labels[0][0], dtype=np.float32)

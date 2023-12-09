@@ -74,6 +74,12 @@ print('Mean log jacobian: {:.4f}'.format(mean_val))
 print('SD log jacobian: {:.4f}'.format(std_val))
 print('95% CI: [{:.4f}, {:.4f}]'.format(CI_95[0], CI_95[1]))
 
+# save the jacobian stats as a text file
+with open('whole_brain/jacobian_values.txt', 'w') as f:
+    f.write('Mean log jacobian: {:.4f}\n'.format(mean_val))
+    f.write('SD log jacobian: {:.4f}\n'.format(std_val))
+    f.write('95% CI: [{:.4f}, {:.4f}]\n'.format(CI_95[0], CI_95[1]))
+
 # get a histogram of the jacobians (dont show the plot)
 
 # turn off interactive mode
@@ -100,5 +106,42 @@ plt.tight_layout()
 plt.savefig('whole_brain/jacobian_histogram.png', dpi=300)
 plt.close()
 print('Saved histogram of jacobians')
+
+# load the consensus template if it exists
+if os.path.exists('../segmentation/processed_data/template/consensus_segmentation_template.nrrd'):
+    print('Found consensus template')
+    consensus_template, _ = nrrd.read('../segmentation/processed_data/template/consensus_segmentation_template.nrrd')
+    # look fo the number of channels by counting the number of consensus_segmentation_channel files
+    n_channels = len([f for f in os.listdir('../segmentation/processed_data/template') if f.startswith('consensus_segmentation_channel' and f.endswith('.nrrd'))])
+    print('Found {} channels'.format(n_channels))
+    # digitize the consensus template
+    consensus_template = np.digitize(consensus_template, bins=np.linspace(0, np.max(consensus_template), n_channels))-1
+    # loop over the labels and mask the jacobians
+    for l in range(n_channels):
+        print('Channel {}'.format(l))
+        print('==========')
+        # get the mask
+        mask = consensus_template == l
+        # mask the jacobians
+        masked_jacobians = []
+        for j in jacobians:
+            masked_jacobians.append(j[mask])
+        # compute the statistics
+        mean_val = np.mean(masked_jacobians)
+        std_val = np.std(masked_jacobians)
+        CI_95 = np.percentile(masked_jacobians, [2.5, 97.5])
+        print('Mean log jacobian: {:.4f}'.format(mean_val))
+        print('SD log jacobian: {:.4f}'.format(std_val))
+        print('95% CI: [{:.4f}, {:.4f}]'.format(CI_95[0], CI_95[1]))
+        # save the statistics
+        with open('neuropils/jacobian_values_channel_{}.txt'.format(l), 'w') as f:
+            f.write('Mean log jacobian: {:.4f}\n'.format(mean_val))
+            f.write('SD log jacobian: {:.4f}\n'.format(std_val))
+            f.write('95% CI: [{:.4f}, {:.4f}]\n'.format(CI_95[0], CI_95[1]))
+        
+        # save all the values as a csv file
+        np.savetxt('neuropils/jacobian_values_channel_{}.csv'.format(l), masked_jacobians, delimiter=',')
+        print('Saved statistics and values for channel {}'.format(l))
+
 
 print('Done')
