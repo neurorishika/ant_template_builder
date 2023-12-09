@@ -473,7 +473,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 warp_file = "MISSING" if not os.path.exists(warp_file) else warp_file
                 inverse_warp_file = "MISSING" if not os.path.exists(inverse_warp_file) else inverse_warp_file
                 affine_file = "MISSING" if not os.path.exists(affine_file) else affine_file
-            # use #os.system to run the warping gui
+            # use os.system to run the warping gui
             os.system("poetry run python scripts/UI_warp.py "+output_directory+" "+target_file+" "+warp_file+" "+inverse_warp_file+" "+affine_file+" "+was_flipped)
         else:
             return
@@ -501,20 +501,20 @@ class RegistrationWorker(QtCore.QObject):
             # run the flip brain command
             for command in self.flip_brain_commands:
                 self.progress.emit(command)
-                #os.system(command)
+                os.system(command)
                 self.progress.emit("")
         # run the registration command
         self.progress.emit("Running registration...")
         self.progress.emit("")
         self.progress.emit(self.registration_command)
-        #os.system(self.registration_command)
+        os.system(self.registration_command)
         # move tmp files
         self.progress.emit("Move temporary files...")
         cwd = os.getcwd()
         tmp_folder = filter(lambda x: os.path.isdir(x) and x.startswith("tmp"), os.listdir(cwd))
         for folder in tmp_folder:
             self.progress.emit("mv "+folder+" "+self.output_directory)
-            #os.system("mv "+folder+" "+self.output_directory)
+            os.system("mv "+folder+" "+self.output_directory)
             if len(self.intermediate_files) > 0:
                 self.intermediate_files.append(os.path.join(self.output_directory, folder))
         self.progress.emit("")
@@ -527,14 +527,14 @@ class RegistrationWorker(QtCore.QObject):
         # move the files
         for file in cfg_files:
             self.progress.emit("mv "+file+" "+self.output_directory)
-            #os.system("mv "+file+" "+self.output_directory)
+            os.system("mv "+file+" "+self.output_directory)
             if len(self.intermediate_files) > 0:
                 self.intermediate_files.append(os.path.join(self.output_directory, file))
         self.progress.emit("")
 
         for file in nii_files:
             self.progress.emit("mv "+file+" "+self.output_directory)
-            #os.system("mv "+file+" "+self.output_directory)
+            os.system("mv "+file+" "+self.output_directory)
             if len(self.intermediate_files) > 0:
                 self.intermediate_files.append(os.path.join(self.output_directory, file))
         self.progress.emit("")
@@ -558,10 +558,10 @@ class RegistrationWorker(QtCore.QObject):
                         # remove the log file and the error file
                         if os.path.exists(file[:-8]+"_out.log"):
                             self.progress.emit("Removing "+file[:-8]+"_out.log")
-                            #os.remove(file[:-8]+"_out.log")
+                            os.remove(file[:-8]+"_out.log")
                             self.progress.emit("")
                         self.progress.emit("Removing "+error_file)
-                        #os.remove(error_file)
+                        os.remove(error_file)
                         self.progress.emit("")
                 else:
                     # check if directory
@@ -573,7 +573,7 @@ class RegistrationWorker(QtCore.QObject):
                     else:
                         # remove the file
                         self.progress.emit("Removing "+file)
-                        #os.remove(file)
+                        os.remove(file)
                         self.progress.emit("")
 
         self.progress.emit("Registration finished.")
