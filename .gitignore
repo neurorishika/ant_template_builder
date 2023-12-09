@@ -198,6 +198,7 @@ group_registration/*/
 **/*.err
 **/*.out
 **/*.txt
+**/*.txt.csv
 
 # Ignore numpy files in all subfolders
 **/*.npy
