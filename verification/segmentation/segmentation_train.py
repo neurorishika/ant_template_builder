@@ -33,7 +33,7 @@ def pairwise_dice_volume(vols):
 
 train_or_test = 'train'
 
-data_dir = '../verification_data/segmentation_data/'+train_or_test
+data_dir = '../data/segmentation_data/'+train_or_test
 # get all the filenames
 filenames = os.listdir(data_dir)
 # keep only tif files
@@ -53,7 +53,7 @@ images = list(image_to_label.keys())
 labels = list(image_to_label.values())
 
 # Get the templates
-template_dir = '../verification_data/templates'
+template_dir = '../data/templates'
 template_filenames = os.listdir(template_dir)
 # keep only nrrd files
 template_filenames = [f for f in template_filenames if f.endswith('.nrrd')]
@@ -130,9 +130,9 @@ for label in labels:
             continue
         reflection_matrix = os.path.join(processed_data_dir, os.path.basename(label)[:-5] + "_reflection_matrix.mat")
         # create the command
-        flip_brain_command1 = "ImageMath 3 {} ReflectionMatrix {} 0".format(reflection_matrix, label)
-        flip_brain_command2 = "WarpImageMultiTransform 3 {} {} -R {} {}".format(label, mirrored_label, label, reflection_matrix)
-        # flip_brain_command2 = "antsApplyTransforms -d 3 -i {} -o {} -t {} -r {}".format(label, mirrored_label, reflection_matrix, label)
+        flip_brain_command1 = "ImageMath 3 {} ReflectionMatrix {} 0 >{}_out.log 2>{}_err.log".format(reflection_matrix, label, reflection_matrix[:-4], reflection_matrix[:-4])
+        # flip_brain_command2 = "WarpImageMultiTransform 3 {} {} -R {} {}".format(label, mirrored_label, label, reflection_matrix)
+        flip_brain_command2 = "antsApplyTransforms -d 3 -i {} -o {} -t {} -r {} >{}_out.log 2>{}_err.log".format(label, mirrored_label, reflection_matrix, label, os.path.basename(mirrored_label).split('.')[0], os.path.basename(mirrored_label).split('.')[0])
         # run the commands
         print(flip_brain_command1)
         # os.system(flip_brain_command1)
@@ -229,7 +229,7 @@ for image in images:
     # create registration command
     command = f'antsIntroduction.sh -d 3 -r {template_path_} -i {image_} '
     command += f'-o {output_prefix_} -t GR -s CC -m 30x90x20x8 -n 1 -q 1 '
-    command += f'>{output_prefix_}.log 2>{output_prefix_}.err'
+    command += f'>{output_prefix_}_out.log 2>{output_prefix_}_err.log'
     # add the command to the list of commands
     print(command)
     os.system(command)
@@ -261,12 +261,12 @@ for label in labels:
     # convert image path to full path
     image_output_prefix_ = os.path.abspath(image_output_prefix)
     # create registration command
-    command = f'WarpImageMultiTransform 3 {label_} {output_prefix_}.nrrd -R {template_path_} '
-    command += f'{image_output_prefix_}Warp.nii.gz {image_output_prefix_}Affine.txt '
-    command += f'>{output_prefix_}.log 2>{output_prefix_}.err'
-    # command = f'antsApplyTransforms -d 3 -i {label} -r {template_path}'
-    # command += f' -o {output_prefix}.nrrd -n GenericLabel -t {image_output_prefix}1Warp.nii.gz'
-    # command += f' -t {image_output_prefix}0GenericAffine.mat >{output_prefix}.log 2>{output_prefix}.err'
+    # command = f'WarpImageMultiTransform 3 {label_} {output_prefix_}.nrrd -R {template_path_} '
+    # command += f'{image_output_prefix_}Warp.nii.gz {image_output_prefix_}Affine.txt '
+    # command += f'>{output_prefix_}.log 2>{output_prefix_}.err'
+    command = f'antsApplyTransforms -d 3 -i {label_} -r {template_path_}'
+    command += f' -o {output_prefix_}.nrrd -n GenericLabel -t {image_output_prefix_}Warp.nii.gz'
+    command += f' -t {image_output_prefix}Affine.txt >{output_prefix}_out.log 2>{output_prefix}_err.log'
     # add the command to the list of commands
     print(command)
     os.system(command)
