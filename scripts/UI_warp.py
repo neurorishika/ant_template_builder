@@ -498,7 +498,8 @@ class WarpingWorker(QtCore.QObject):
             for command in self.flip_input_commands:
                 self.progress.emit(command)
                 os.system(command)
-            self.progress.emit("")
+                self.progress.emit("")
+
         # run the warping command
         self.progress.emit("Running warping...")
         self.progress.emit("")
@@ -512,7 +513,7 @@ class WarpingWorker(QtCore.QObject):
             for command in self.flip_output_commands:
                 self.progress.emit(command)
                 os.system(command)
-            self.progress.emit("")
+                self.progress.emit("")
 
         # remove all empty log/error files
         if len(self.intermediate_files) > 0:
@@ -530,12 +531,15 @@ class WarpingWorker(QtCore.QObject):
                         # remove the log file and the error file
                         self.progress.emit("Removing "+file[:-8]+"_out.log")
                         os.remove(file[:-8]+"_out.log")
+                        self.progress.emit("")
                         self.progress.emit("Removing "+error_file)
                         os.remove(error_file)
+                        self.progress.emit("")
                 else:
                     # remove the file
                     self.progress.emit("Removing "+file)
                     os.remove(file)
+                    self.progress.emit("")
 
         self.progress.emit("")
         self.progress.emit("Warping finished.")
