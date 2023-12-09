@@ -339,6 +339,9 @@ class MainWindow(QtWidgets.QMainWindow):
         inverse_warp_file = self.inverse_warp_textbox.text()
         affine_file = self.affine_textbox.text()
 
+        warping_type = self.warping_type
+        affine_only = self.affine_only_checkbox.isChecked()
+
         # make sure none of the files are empty
         if input_file == "" or target_file == "" or output_directory == "" or affine_file == "":
             QtWidgets.QMessageBox.warning(self, "Warning", "All files must be specified.")
@@ -370,9 +373,7 @@ class MainWindow(QtWidgets.QMainWindow):
             QtWidgets.QMessageBox.warning(self, "Warning", "Files with the same prefix already exist. Please change the output directory or the input file.")
             return
 
-        warping_type = self.warping_type
         special_warping_type = self.special_warping_type
-        affine_only = self.affine_only_checkbox.isChecked()
         time_series = self.time_series_checkbox.isChecked()
         low_memory = "1" if self.low_memory_checkbox.isChecked() else "0"
         flip_brain = self.flip_brain_checkbox.isChecked()

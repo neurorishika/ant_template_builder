@@ -316,10 +316,10 @@ class MainWindow(QtWidgets.QMainWindow):
         output_prefix = os.path.splitext(input_filename)[0]+"_"
         output_prefix = os.path.join(output_directory, output_prefix)
 
-        # make sure no files with the same prefix already exist (use glob)
-        if len(glob.glob(output_prefix+"*")) > 0:
-            QtWidgets.QMessageBox.warning(self, "Warning", "Files with the same prefix already exist. Please change the output directory or the input file.")
-            return
+        # # make sure no files with the same prefix already exist (use glob)
+        # if len(glob.glob(output_prefix+"*")) > 0:
+        #     QtWidgets.QMessageBox.warning(self, "Warning", "Files with the same prefix already exist. Please change the output directory or the input file.")
+        #     return
 
         # check number of threads
         self.check_num_iterations()
@@ -459,12 +459,13 @@ class MainWindow(QtWidgets.QMainWindow):
         reply = QtWidgets.QMessageBox.question(self, "Warp Other Channels", "Do you want to warp other channels?", QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No, QtWidgets.QMessageBox.Yes)
         if reply == QtWidgets.QMessageBox.Yes:
             # create a list with the files to send to warping gui
-            output_directory = os.path.dirname(self.output_textbox.text())
+            output_directory = os.path.dirname(self.output_textbox.text()+"/")
             target_file = os.path.join(output_directory, os.path.splitext(os.path.basename(self.input_textbox.text()))[0]+"_deformed.nii.gz")
             warp_file = os.path.join(output_directory, os.path.splitext(os.path.basename(self.input_textbox.text()))[0]+"_Warp.nii.gz")
             inverse_warp_file = os.path.join(output_directory, os.path.splitext(os.path.basename(self.input_textbox.text()))[0]+"_InverseWarp.nii.gz")
             affine_file = os.path.join(output_directory, os.path.splitext(os.path.basename(self.input_textbox.text()))[0]+"_Affine.txt")
             was_flipped = "flipped" if self.flip_brain_checkbox.isChecked() else "not_flipped"
+            print(output_directory, target_file, warp_file, inverse_warp_file, affine_file, was_flipped)
             # make sure the files exist
             if not os.path.exists(target_file) or not os.path.exists(warp_file) or not os.path.exists(inverse_warp_file) or not os.path.exists(affine_file):
                 QtWidgets.QMessageBox.warning(self, "Warning", "Some files are missing. Please check the output directory.")
@@ -472,7 +473,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 warp_file = "MISSING" if not os.path.exists(warp_file) else warp_file
                 inverse_warp_file = "MISSING" if not os.path.exists(inverse_warp_file) else inverse_warp_file
                 affine_file = "MISSING" if not os.path.exists(affine_file) else affine_file
-            # use os.system to run the warping gui
+            # use #os.system to run the warping gui
             os.system("poetry run python scripts/UI_warp.py "+output_directory+" "+target_file+" "+warp_file+" "+inverse_warp_file+" "+affine_file+" "+was_flipped)
         else:
             return
@@ -500,20 +501,20 @@ class RegistrationWorker(QtCore.QObject):
             # run the flip brain command
             for command in self.flip_brain_commands:
                 self.progress.emit(command)
-                os.system(command)
+                #os.system(command)
                 self.progress.emit("")
         # run the registration command
         self.progress.emit("Running registration...")
         self.progress.emit("")
         self.progress.emit(self.registration_command)
-        os.system(self.registration_command)
+        #os.system(self.registration_command)
         # move tmp files
         self.progress.emit("Move temporary files...")
         cwd = os.getcwd()
         tmp_folder = filter(lambda x: os.path.isdir(x) and x.startswith("tmp"), os.listdir(cwd))
         for folder in tmp_folder:
             self.progress.emit("mv "+folder+" "+self.output_directory)
-            os.system("mv "+folder+" "+self.output_directory)
+            #os.system("mv "+folder+" "+self.output_directory)
             if len(self.intermediate_files) > 0:
                 self.intermediate_files.append(os.path.join(self.output_directory, folder))
         self.progress.emit("")
@@ -526,14 +527,14 @@ class RegistrationWorker(QtCore.QObject):
         # move the files
         for file in cfg_files:
             self.progress.emit("mv "+file+" "+self.output_directory)
-            os.system("mv "+file+" "+self.output_directory)
+            #os.system("mv "+file+" "+self.output_directory)
             if len(self.intermediate_files) > 0:
                 self.intermediate_files.append(os.path.join(self.output_directory, file))
         self.progress.emit("")
 
         for file in nii_files:
             self.progress.emit("mv "+file+" "+self.output_directory)
-            os.system("mv "+file+" "+self.output_directory)
+            #os.system("mv "+file+" "+self.output_directory)
             if len(self.intermediate_files) > 0:
                 self.intermediate_files.append(os.path.join(self.output_directory, file))
         self.progress.emit("")
