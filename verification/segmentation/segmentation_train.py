@@ -232,6 +232,7 @@ for image in images:
 
 
 # loop over the labels and warp them to the template using the generated transforms during registration
+new_labels = []
 
 for label in labels:
     # generate output prefix
@@ -266,25 +267,40 @@ for label in labels:
     # add the command to the list of commands
     print(command)
     os.system(command)
+    ## WE MIGHT HAVE TO FLIP THE BRAIN AGAIN HERE
+    # check if the image was mirrored by seeing if the backup folder has a mat file with the same name
+    if os.path.isfile(os.path.dirname(output_prefix)+'/backup/'+os.path.basename(output_prefix)[:-5] + "_reflection_matrix.mat"):
+        # flip the brain
+        print("Flipping label: " + output_prefix + '.nrrd')
+        flipback_matrix = os.path.join(processed_data_dir, os.path.basename(output_prefix)[:-5] + "_flipback_matrix.mat")
+        new_output_prefix = output_prefix + 'flipped'
+        # create the command
+        flip_brain_command1 = "ImageMath 3 {} ReflectionMatrix {} 0 >{}_out.log 2>{}_err.log".format(flipback_matrix, output_prefix + '.nrrd', flipback_matrix[:-4], flipback_matrix[:-4])
+        flip_brain_command2 = "WarpImageMultiTransform 3 {} {} -R {} {} >{}_out.log 2>{}_err.log".format(output_prefix + '.nrrd', new_output_prefix + '.nrrd', output_prefix + '.nrrd', flipback_matrix, new_output_prefix, new_output_prefix)
+        flip_brain_command3 = "PermuteFlipImageOrientationAxes 3 {} {} 0 1 2 1 0 0 >{}_out.log 2>{}_err.log".format(new_output_prefix + '.nrrd', new_output_prefix + '.nrrd', new_output_prefix, new_output_prefix)
+        # run the commands
+        print(flip_brain_command1)
+        os.system(flip_brain_command1)
+        print(flip_brain_command2)
+        os.system(flip_brain_command2)
+        print(flip_brain_command3)
+        os.system(flip_brain_command3)
+        
+        # change the label name to the flipped label
+        new_labels.append(new_output_prefix + '.nrrd')
 
-
+# replace the labels with the warped labels
+labels = new_labels
 
 # open the warped labels using pynrrd and save them as numpy arrays
 
 final_labels = []
-final_labels_paths = []
 
 # loop over the labels
 for label in labels:
-    # generate output prefix
-    output_prefix = os.path.basename(label).replace('.nrrd', '_')
-    output_prefix = processed_data_dir + '/warped_' + output_prefix
-    # open the label using pynrrd
-    print("Opening label: " + output_prefix + '.nrrd')
-    label_data, label_header = nrrd.read(output_prefix + '.nrrd')
+    print("Opening label: " + label)
+    label_data, label_header = nrrd.read(label)
     final_labels.append(label_data)
-    np.save(output_prefix + '.npy', label_data)
-    final_labels_paths.append(output_prefix + '.npy')
 
 
 # for each final label, sort the unique values map them to the values 0, 1, 2, ...
@@ -293,7 +309,7 @@ n_channels = []
 processed_labels = []
 
 for i, label in enumerate(final_labels):
-    print("Processing label: " + final_labels_paths[i])
+    print("Processing label: " + labels[i])
     processed_label = label.copy()
     # get a histogram of the label data (0-255)
     hist, _ = np.histogram(label, bins=256)
@@ -306,8 +322,8 @@ for i, label in enumerate(final_labels):
     # add the processed label to the list
     processed_labels.append(processed_label)
     # save the label as a nrrd file with processed added to the name
-    nrrd.write(final_labels_paths[i].replace('.npy', 'processed.nrrd'), np.float32(processed_label), label_header)
-    print("Saved label: " + final_labels_paths[i])
+    nrrd.write(labels[i].replace('.npy', 'processed.nrrd'), np.float32(processed_label), label_header)
+    print("Saved label: " + labels[i])
 
 # assert that all the labels have the same number of channels
 assert len(set(n_channels)) == 1, "All the labels should have the same number of channels"

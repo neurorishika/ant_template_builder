@@ -293,4 +293,97 @@ screen -r <screen_name>
 
 Regularly check the status of the scripts by reconnecting to the screen and checking the status of the scripts. Once the scripts are complete, you can exit the screen by pressing `Ctrl + D`.
 
+## Guidelines for cleaning data
+
+### For template generation
+
+These guidelines are for cleaning the data for template generation. The data should be cleaned in the following order:
+
+1. Open the raw confocal stacks (*.czi file) exported from Zen in Fiji.
+
+2. Check the mounting orientation of the brain. The preferred mounting orientation is the anterior side up, such that as you move from Z=0 to Z=Max, you move from the anterior to the posterior side of the brain. Sometimes, the mounting orientation is incorrect, so you will need to rearrange the stacks in the reverse order. You can do this by going to Image > Stacks > Tools > Reverse. If you do so, remember to get the correct left-right orientation; the brain needs to be left-right flipped. DO NOT FLIP THE BRAIN USING THE FLIP COMMAND IN FIJI. This is incompatible with ANTs.  KEEP A NOTE OF THESE FILES, I.E., WHICH NEED TO BE FLIPPED.
+
+3. Make sure the brain is in the correct orientation, i.e., the dorsal side to the top and the ventral side to the bottom in each stack. If the brain is not in the proper orientation, you can rotate the brain by going to Image > Transform > Rotate. Make sure to rotate the brain in the correct direction. If you turn the brain in the wrong direction, you will need to rotate the brain in the opposite direction to get the proper orientation.
+
+4. Normalize the intensity of the image by going to Process > Enhance Contrast. Check the Normalize option, Use stack histogram, Process all slices, and set the saturated pixels to 0.0.
+
+5. To save data, you can change the type of the image to 8-bit by going to Image > Type > 8-bit. This is optional but recommended.
+
+6. If there are multiple channels, you can split the channels by going to Image > Color > Split Channels. Then you can save the channels as separate files. The SynA647 (Synapsin1) channel is used for registration. The other channels warped to the template can be used for visualization, but only the SynA647 channel is used for template generation.
+
+7. Save the image as an NRRD file by going to File > Save As > NRRD. The files should be saved under `cleaned_data/whole_brain`. The preferred naming convention is as follows:  <Channel Type>_<Author Initials>_<Brain ID>_<Date>. The channel type for the template construction pipeline should be `synA647`. For example, if the brain ID is `OB-1`, the date is `2024-01-01`, and the author is Rishika Mohanta, the file name should be `synA647_RM_OB-1_20240101.nrrd`. The date should be in the YYYYMMDD format. Try to keep the file names as short as possible. Files that need to be flipped to account for mounting orientation should be kept in a subfolder named `to_flip` inside the `cleaned_data/whole_brain` folder.
+
+8. Run the mirror.py script to generate the mirrored images. Navigate to the `ant_template_builder` folder and run the following command:
+
+```
+poetry run python scripts/mirror.py -i cleaned_data/whole_brain/to_flip -o cleaned_data/whole_brain
+```
+
+The new files will have `_mirror` appended to the file name. For example, if the original file name was `synA647_RM_OB-1_20240101.nrrd`, the new file name will be `synA647_RM_OB-1_20240101_mirror.nrrd`. You can remove the `_mirror` from the file name. Also, feel free to remove the files in the `to_flip` folder once you are done.
+
+9. The last step is to reopen the files in Fiji and to note the type of the brain by looking at the medial lobe of the mushroom body. Take a look at the section titled "Determining the Asymmetry of the Brain" for more details. Keep track of the filename and the egocentric leaning in a .csv file under `Clean Name` and `Egocentric Leaning` and save them as whole_brain_metadata.csv at the root of this repository.
+
+### For Segmentation
+
+For Segmentation, first follow the same steps for cleaning the data as for template construction except the last step which is not needed. Further, don't save the files in the cleaned data folder; create a new folder to keep all the data, lets call it the "segmentation_folder" and place the cleaned data under a subfolder called "cleaned_data"
+
+1. Resample the brains using the resample.py script. Determine a reasonable isometric resolution to segment at since unnecessarily higher resolutions can lead to instability for manual segmentation using Amira. A good target resolution is 0.8x0.8x0.8 um (i.e., the template resolution). Navigate to the `ant_template_builder` folder and run the following command:
+
+```
+poetry run python scripts/resample.py -i /path/to/segmentation_folder/cleaned_data -o /path/to/segmentation_folder/ -v 0.8x0.8x0.8
+```
+
+2. Open the image in Amira and setup the following textures:
+
+FOR TEMPLATE EVALUATION:
+
+| Texture Name | Texture Value | How to setup     |
+| ------------ | ------------- | ---------------- |
+| Outside      | 0             | Default          |
+| Inside Brain | 1             | Lindsey's Recipe |
+| AL (Left)    | 2             | Manual           |
+| AL (Right)   | 3             | Manual           |
+| MB (Left)    | 4             | Manual           |
+| MB (Right)   | 5             | Manual           |
+| Central Body | 6             | Manual           |
+
+FOR TEMPLATE SEGMENTATION:
+
+| Texture Name           | Texture Value | How to setup    |
+| ---------------------- | ------------- | --------------- |
+| Outside                | 0             | Default         |
+| Inside Brain           | 1             | Lindsey's Recipe|
+| AL (L)                 | 2             | Manual          |
+| AL (R)                 | 3             | Manual          |
+| Medial MB Calyx (L)    | 4             | Manual          |
+| Medial MB Calyx (R)    | 5             | Manual          |
+| Lateral MB Calyx (L)   | 6             | Manual          |
+| Lateral MB Calyx (R)   | 7             | Manual          |
+| MB Peduncle + Lobes (L)| 8             | Manual          |
+| MB Peduncle + Lobes (R)| 9             | Manual          |
+| Medulla (L)            | 10            | Manual          |
+| Medulla (R)            | 11            | Manual          |
+| Lobula (L)             | 12            | Manual          |
+| Lobula (R)             | 13            | Manual          |
+| Protocerebral Bridge   | 14            | Manual          |
+| Nodule (L)             | 15            | Manual          |
+| Nodule (R)             | 16            | Manual          |
+| Central Body Upper     | 17            | Manual          |
+| Central Body Lower     | 18            | Manual          |
+
+3. Use the paintbrush tool to manually segment the brain. Use the textures to keep track of the different regions. The textures are used to keep track of the different regions and are not used for segmentation. The segmentation is done using the paintbrush tool and the wand tool. Save the project and the segmentation at regular intervals.
+
+4. Once segmentation is complete, export the segmentation as a TIFF file. Sometimes the voxel information is lost in the process of exporting the segmentation. To fix this, open the segmentation in Fiji and go to Image > Properties and set the voxel size to the correct value. Then save the segmentation as a NRRD file by going to File > Save As > NRRD. The files should be saved under `segmentation_folder/segmentation`. The preferred naming convention is as follows:  <Channel Type>_<Author Initials>_<Brain ID>_<Date>_segmented. The channel type for the template construction pipeline should be `synA647`. For example, if the brain ID is `OB-1`, the date is `2024-01-01`, and the author is Rishika Mohanta, the file name should be `synA647_RM_OB-1_20240101_segmented.nrrd`. The date should be in the YYYYMMDD format. Try to keep the file names as short as possible.
+
+## Determining the Asymmetry of the Brain
+
+### When it is clearly Asymmetric
+ 
+Look at the point where the two hemispheres of the mushroom body meet. If there is an apparent tilt towards the allocentric left/right (from your viewpoint in the stack) due to one hemisphere of the Medial Lobe being larger and dominating the other, mark them as egocentric right/left accordingly (since we are looking from the front of the animal, anterior to posterior, the egocentric leaning is the opposite of what we see). 
+
+### When it is hard to identify the Asymmetry
+
+Sometimes, the leaning/dominance of the hemisphere is a little unclear; at that point, you can adjust the brightness using the Fiji brightness/contrast tool to see if the tilt is more evident. Focus on the area slightly posterior to the first point of contact when going from anterior to posterior. Two sub-lobe-like structures can be seen at this point. Note that the one that is higher up at the dorsal edge of the mushroom body's medial lobe, right under the central body, is the dominant lobe. If the allocentric left side is more prominent and higher up, the effective leaning is allocentric right, and therefore, the brain is egocentric left-leaning and vice versa. 
+
+
 

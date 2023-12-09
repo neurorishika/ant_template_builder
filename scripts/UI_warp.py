@@ -575,7 +575,9 @@ class WarpingWorker(QtCore.QObject):
                         os.remove(error_file)
                         self.progress.emit("")
                 else:
-                    # remove the file
+                    # remove the file (if it exists)
+                    if not os.path.exists(file):
+                        continue
                     self.progress.emit("Removing "+file)
                     os.remove(file)
                     self.progress.emit("")
