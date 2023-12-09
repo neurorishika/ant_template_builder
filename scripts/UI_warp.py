@@ -347,16 +347,16 @@ class MainWindow(QtWidgets.QMainWindow):
             QtWidgets.QMessageBox.warning(self, "Warning", "All files must be specified.")
             return
         
-        if affine_only == False and not warp_file == "":
+        if affine_only == False and warp_file == "":
             # it must be a to_template warping
-            if not warping_type == "to_template":
-                QtWidgets.QMessageBox.warning(self, "Warning", "Warp file can only be specified for to_template warping.")
+            if warping_type == "to_template":
+                QtWidgets.QMessageBox.warning(self, "Warning", "Warp file must be specified for to_template warping.")
                 return
         
-        if affine_only == False and not inverse_warp_file == "":
+        if affine_only == False and inverse_warp_file == "":
             # it must be a from_template warping
-            if not warping_type == "from_template":
-                QtWidgets.QMessageBox.warning(self, "Warning", "Inverse Warp file can only be specified for from_template warping.")
+            if warping_type == "from_template":
+                QtWidgets.QMessageBox.warning(self, "Warning", "Inverse Warp file must be specified for from_template warping.")
                 return
         
         # if the output directory does not have a / at the end, add it
