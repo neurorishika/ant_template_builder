@@ -66,7 +66,7 @@ mv stdout-affine-template.txt obiroi_brain_$DATE/affine
 mv stderr-affine-template.txt obiroi_brain_$DATE/affine
 mv intermediate* obiroi_brain_$DATE/affine
 mv rigid* obiroi_brain_$DATE/affine
-mv ANTS_* obiroi_brain_$DATE/affine
+mv ANTs_* obiroi_brain_$DATE/affine
 
 # let the user know that the affine registration has been completed
 echo "Affine registration files moved to the affine subdirectory"
@@ -103,7 +103,7 @@ mv complete_* obiroi_brain_$DATE/syn
 mv stdout-syn-template.txt obiroi_brain_$DATE/syn
 mv stderr-syn-template.txt obiroi_brain_$DATE/syn
 mv intermediate* obiroi_brain_$DATE/syn
-mv ANTS_* obiroi_brain_$DATE/syn
+mv ANTs_* obiroi_brain_$DATE/syn
 
 
 # let the user know that the syn registration has been completed
