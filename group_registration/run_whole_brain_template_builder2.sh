@@ -12,8 +12,8 @@ DATA_DIRECTORY=../resampled_data/whole_brain
 ID=synA647_*.nrrd
 
 # Setup the number of threads to be used
-THREADS_AFFINE=56
-THREADS_SYN=56
+THREADS_AFFINE=40
+THREADS_SYN=40
 
 # Setup the number of iterations to be used
 ITERATIONS_AFFINE=4
@@ -65,7 +65,7 @@ mv affine_* obiroi_brain_$DATE/affine
 mv stdout-affine-template.txt obiroi_brain_$DATE/affine
 mv stderr-affine-template.txt obiroi_brain_$DATE/affine
 mv intermediate* obiroi_brain_$DATE/affine
-mv rigid* obiroi_brain_$DATE/affine
+mv rigid obiroi_brain_$DATE/affine
 mv ANTs_* obiroi_brain_$DATE/affine
 
 # let the user know that the affine registration has been completed

@@ -12,8 +12,8 @@ DATA_DIRECTORY=../resampled_data/antennal_lobe
 ID=Brain*.nrrd
 
 # Setup the number of threads to be used
-THREADS_AFFINE=56
-THREADS_SYN=56
+THREADS_AFFINE=12
+THREADS_SYN=12
 
 # Setup the number of iterations to be used
 ITERATIONS_AFFINE=4
@@ -65,7 +65,7 @@ mv affine_* obiroi_al_$DATE/affine
 mv stdout-affine-template.txt obiroi_al_$DATE/affine
 mv stderr-affine-template.txt obiroi_al_$DATE/affine
 mv intermediate* obiroi_al_$DATE/affine
-mv rigid* obiroi_al_$DATE/affine
+mv rigid obiroi_al_$DATE/affine
 mv ANTs_* obiroi_al_$DATE/affine
 
 # let the user know that the affine registration has been completed
