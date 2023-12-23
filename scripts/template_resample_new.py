@@ -137,7 +137,7 @@ basefiles = list(set(basefiles))
 basefile_to_warp = {}
 for basefile in basefiles:
     # find all files that start with basefile and end with Warp.nii.gz
-    warp_files = [file for file in os.listdir(os.path.join(input_dir, "syn")) if file.startswith(basefile) and file.endswith("Warp.nii.gz")]
+    warp_files = [file for file in os.listdir(os.path.join(input_dir, "syn")) if file.startswith(basefile) and file.endswith("Warp.nii.gz") and not "Inverse" in file]
     # make sure there is only one Warp file
     assert len(warp_files) == 1, f"Input directory does not contain {basefile}<xxx>Warp.nii.gz file."
     # add basefile and Warp file to dictionary
