@@ -113,7 +113,6 @@ echo "Syn template copied to the current directory"
 
 # Delete the intermediate files
 rm affine_template.nii.gz
-rm *.nii.gz
 rm *.nrrd
 rm -rf temp*
 
