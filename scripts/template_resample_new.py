@@ -173,6 +173,7 @@ basefile_dict = {}
 # for each original file, find the basefile
 for original_file in original_files:
     # find the matching basefile
+    temp = original_file.replace(".nrrd", "")
     temp = "complete_" + temp
     basefile = [file for file in basefiles if file.startswith(temp)]
     # make sure there is only one basefile
