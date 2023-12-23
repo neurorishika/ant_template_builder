@@ -112,8 +112,8 @@ nii_files = list(set(nii_files))
 def get_original_name(file):
     # get basename
     file = os.path.basename(file)
-    # remove everything after nrrd
-    original_name = file.split(".nrrd")[0] + ".nrrd"
+    # remove everything after resampled
+    original_name = file.split("_resampled")[0] + ".nrrd"
     # remove "complete_" from the beginning
     original_name = original_name.replace("complete_", "")
     return original_name
