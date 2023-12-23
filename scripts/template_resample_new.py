@@ -21,7 +21,7 @@ print(start_string)
 
 # parse command line arguments
 parser = argparse.ArgumentParser(description='Resample generated brain template to a target voxel size.')
-parser.add_argument('-i','--input_dir', type=str, help='path to results directory (must contain syn directory and complete_template.nii.gz files; default: latest obiroi directory in results/)', default="", nargs='?')
+parser.add_argument('-i','--input_dir', type=str, help='path to results directory (must contain syn directory and complete_template0.nii.gz files; default: latest obiroi directory in results/)', default="", nargs='?')
 parser.add_argument('-db','--clean_database', type=str, help='path to clean database directory (must contain .nrrd files; default: ./cleaned_data/whole_brain)', default="./cleaned_data/whole_brain", nargs='?')
 parser.add_argument('-o','--output_dir', type=str, help='path to output directory (default: ./final_templates)', default="./final_templates", nargs='?')
 parser.add_argument('-v','--target_voxel_size', type=str, help='target voxel size in microns (e.g. 0.8x0.8x0.8)', default="0.8x0.8x0.8", nargs='?')
@@ -94,8 +94,8 @@ directory_list = [d for d in directory_list if os.path.isdir(d)]
 # make sure there is syn directory
 assert os.path.isdir(os.path.join(input_dir, "syn")), "Input directory does not contain syn directory."
 
-# make sure there is complete_template.nii.gz file
-assert os.path.isfile(os.path.join(input_dir, "complete_template.nii.gz")), "Input directory does not contain complete_template.nii.gz file."
+# make sure there is complete_template0.nii.gz file
+assert os.path.isfile(os.path.join(input_dir, "complete_template0.nii.gz")), "Input directory does not contain complete_template0.nii.gz file."
 
 # get list of all *.nii.gz files in syn directory
 # nii_files = list(glob.glob(os.path.join(input_dir, "syn", "*.nii.gz")))
@@ -197,7 +197,7 @@ err_file = os.path.join(temp_dir, "upsampled_template_err.log")
 print(f"Log file: {log_file}")
 print(f"Error file: {err_file}")
 
-complete_template_file = os.path.join(input_dir, "complete_template.nii.gz")
+complete_template_file = os.path.join(input_dir, "complete_template0.nii.gz")
 upsampled_template_file = os.path.join(temp_dir, "upsampled_template.nii.gz")
 
 os.system(f"ResampleImageBySpacing 3 {complete_template_file} {upsampled_template_file} {target_resolution[0]} {target_resolution[1]} {target_resolution[2]} 0 0 0 > {log_file} 2> {err_file}")
