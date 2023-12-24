@@ -53,7 +53,8 @@ echo "Affine registration starting"
 
 # Run the initial affine registration
 # ./ANTs/Scripts/buildtemplateparallel.sh -d 3 -i $ITERATIONS_AFFINE -m 1x0x0 -t RA -s CC -c 2 -j $THREADS_AFFINE -o affine_ $ID > >(tee -a stdout-affine-template.txt) 2> >(tee -a stderr-affine-template.txt >&2)
-./ANTs/Scripts/antsMultivariateTemplateConstruction2.sh -d 3 -A 2 -b 1 -c 2  -j $THREADS_AFFINE -i $ITERATIONS_AFFINE -k 1 -f 6x4x2x1 -s 4x2x1x0vox -q 200x100x50x0 -t Affine -m MI -r 1 -o affine_ $ID > >(tee -a stdout-affine-template.txt) 2> >(tee -a stderr-affine-template.txt >&2)
+# ./ANTs/Scripts/antsMultivariateTemplateConstruction2.sh -d 3 -A 2 -b 1 -c 2  -j $THREADS_AFFINE -i $ITERATIONS_AFFINE -k 1 -f 6x4x2x1 -s 4x2x1x0vox -q 200x100x50x0 -t Affine -m MI -r 1 -o affine_ $ID > >(tee -a stdout-affine-template.txt) 2> >(tee -a stderr-affine-template.txt >&2)
+./ANTs/Scripts/antsMultivariateTemplateConstruction2.sh -d 3 -A 2 -b 1 -c 2  -j $THREADS_AFFINE -i $ITERATIONS_AFFINE -k 1 -f 4x2x1 -s 2x1x0vox -q 1x0x0 -t Affine -m CC -r 1 -o affine_ $ID > >(tee -a stdout-affine-template.txt) 2> >(tee -a stderr-affine-template.txt >&2)
 
 # let the user know that the affine registration has been completed
 echo "Affine registration completed"
@@ -91,7 +92,8 @@ echo "Syn registration starting"
 
 # Run the syn registration
 # ./ANTs/Scripts/buildtemplateparallel.sh -d 3 -i $ITERATIONS_SYN -m 30x90x20x8 -t GR -s CC -z affine_template.nii.gz -c 2 -j $THREADS_SYN -o complete_  $ID > stdout-syn-template.txt 2>stderr-syn-template.txt
-./ANTs/Scripts/antsMultivariateTemplateConstruction2.sh -d 3 -b 1 -c 2 -j $THREADS_SYN -i $ITERATIONS_SYN -k 1 -f 6x4x2x1 -s 4x2x1x0vox -q 60x120x40x20 -t SyN -m CC -r 0 -o complete_ -z affine_template0.nii.gz $ID > >(tee -a stdout-syn-template.txt) 2> >(tee -a stderr-syn-template.txt >&2)
+# ./ANTs/Scripts/antsMultivariateTemplateConstruction2.sh -d 3 -b 1 -c 2 -j $THREADS_SYN -i $ITERATIONS_SYN -k 1 -f 6x4x2x1 -s 4x2x1x0vox -q 60x120x40x20 -t SyN -m CC -r 0 -o complete_ -z affine_template0.nii.gz $ID > >(tee -a stdout-syn-template.txt) 2> >(tee -a stderr-syn-template.txt >&2)
+./ANTs/Scripts/antsMultivariateTemplateConstruction2.sh -d 3 -b 1 -c 2 -j $THREADS_SYN -i $ITERATIONS_SYN -k 1 -f 8x4x2x1 -s 4x2x1x0vox -q 30x90x20x8 -t SyN -m CC -r 0 -o complete_ -z affine_template0.nii.gz $ID > >(tee -a stdout-syn-template.txt) 2> >(tee -a stderr-syn-template.txt >&2)
 
 # let the user know that the syn registration has been completed
 echo "Syn registration completed"
