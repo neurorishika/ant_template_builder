@@ -12,8 +12,8 @@ DATA_DIRECTORY=../resampled_data/whole_brain
 ID=synA647_*.nrrd
 
 # Setup the number of threads to be used
-THREADS_AFFINE=56
-THREADS_SYN=56
+THREADS_AFFINE=40
+THREADS_SYN=40
 
 # Setup the number of iterations to be used
 ITERATIONS_AFFINE=2
@@ -52,7 +52,8 @@ echo "Data copied to the current directory"
 echo "Affine registration starting"
 
 # Run the initial affine registration
-./ANTs/Scripts/buildtemplateparallel.sh -d 3 -i $ITERATIONS_AFFINE -m 1x0x0 -t RA -s CC -c 2 -j $THREADS_AFFINE -o affine_ $ID > >(tee -a stdout-affine-template.txt) 2> >(tee -a stderr-affine-template.txt >&2)
+# ./ANTs/Scripts/buildtemplateparallel.sh -d 3 -i $ITERATIONS_AFFINE -m 1x0x0 -t RA -s CC -r 1 -c 2 -j $THREADS_AFFINE -o affine_ $ID > >(tee -a stdout-affine-template.txt) 2> >(tee -a stderr-affine-template.txt >&2)
+./ANTs/Scripts/buildtemplateparallel.sh -d 3 -i $ITERATIONS_AFFINE -m 200x100x50x0 -t RA -s MI -r 1 -c 2 -j $THREADS_AFFINE -o affine_ $ID > >(tee -a stdout-affine-template.txt) 2> >(tee -a stderr-affine-template.txt >&2)
 
 # let the user know that the affine registration has been completed
 echo "Affine registration completed"
@@ -61,6 +62,7 @@ echo "Affine registration completed"
 # Things to move: affine_* stdout-affine-template.txt, stderr-affine-template.txt, *.cfg, job*.* and GR* folders
 
 mv affine_* obiroi_brain_$DATE/affine
+mv rigid_* obiroi_brain_$DATE/affine
 mv stdout-affine-template.txt obiroi_brain_$DATE/affine
 mv stderr-affine-template.txt obiroi_brain_$DATE/affine
 mv *.cfg obiroi_brain_$DATE/affine

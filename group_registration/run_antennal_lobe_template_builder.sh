@@ -52,7 +52,7 @@ echo "Data copied to the current directory"
 echo "Affine registration starting"
 
 # Run the initial affine registration
-./ANTs/Scripts/buildtemplateparallel.sh -d 3 -i $ITERATIONS_AFFINE -m 1x0x0 -t RA -s CC -c 2 -j $THREADS_AFFINE -o affine_ $ID > >(tee -a stdout-affine-template.txt) 2> >(tee -a stderr-affine-template.txt >&2)
+./ANTs/Scripts/buildtemplateparallel.sh -d 3 -i $ITERATIONS_AFFINE -m 1x0x0 -t RA -s MI -r 1 -c 2 -j $THREADS_AFFINE -o affine_ $ID > >(tee -a stdout-affine-template.txt) 2> >(tee -a stderr-affine-template.txt >&2)
 
 # let the user know that the affine registration has been completed
 echo "Affine registration completed"
@@ -61,6 +61,7 @@ echo "Affine registration completed"
 # Things to move: affine_* stdout-affine-template.txt, stderr-affine-template.txt, *.cfg, job*.* and GR* folders
 
 mv affine_* obiroi_al_$DATE/affine
+mv rigid_* obiroi_al_$DATE/affine
 mv stdout-affine-template.txt obiroi_al_$DATE/affine
 mv stderr-affine-template.txt obiroi_al_$DATE/affine
 mv *.cfg obiroi_al_$DATE/affine
