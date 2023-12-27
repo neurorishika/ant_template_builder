@@ -181,7 +181,7 @@ group_registration/*
 group_registration/*/
 !group_registration/run_*.sh
 !group_registration/update_*.sh
-!group_registration/archived_scripts/*
+!group_registration/alternate_template_scripts/
 !group_registration/ANTs/
 
 # Ignore all AVI and MP4 files in all subfolders

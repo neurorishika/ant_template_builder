@@ -12,12 +12,12 @@ DATA_DIRECTORY=../resampled_data/antennal_lobe
 ID=Brain*.nrrd
 
 # Setup the number of threads to be used
-THREADS_AFFINE=56
-THREADS_SYN=56
+THREADS_AFFINE=40
+THREADS_SYN=40
 
 # Setup the number of iterations to be used
 ITERATIONS_AFFINE=2
-ITERATIONS_SYN=4
+ITERATIONS_SYN=6
 
 # Create a directory for the template building in the current directory
 # FORMAT: obiroi_al_<DATE>
@@ -52,7 +52,8 @@ echo "Data copied to the current directory"
 echo "Affine registration starting"
 
 # Run the initial affine registration
-./ANTs/Scripts/buildtemplateparallel.sh -d 3 -i $ITERATIONS_AFFINE -m 1x0x0 -t RA -s MI -r 1 -c 2 -j $THREADS_AFFINE -o affine_ $ID > >(tee -a stdout-affine-template.txt) 2> >(tee -a stderr-affine-template.txt >&2)
+# ./ANTs/Scripts/buildtemplateparallel.sh -d 3 -i $ITERATIONS_AFFINE -m 1x0x0 -t RA -s MI -r 1 -c 2 -j $THREADS_AFFINE -o affine_ $ID > >(tee -a stdout-affine-template.txt) 2> >(tee -a stderr-affine-template.txt >&2)
+./ANTs/Scripts/buildtemplateparallel.sh -d 3 -i $ITERATIONS_AFFINE -m 200x100x50x0 -t RA -s MI -r 1 -c 2 -j $THREADS_AFFINE -o affine_ $ID > >(tee -a stdout-affine-template.txt) 2> >(tee -a stderr-affine-template.txt >&2)
 
 # let the user know that the affine registration has been completed
 echo "Affine registration completed"
