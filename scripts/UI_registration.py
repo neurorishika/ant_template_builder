@@ -519,6 +519,7 @@ class RegistrationWorker(QtCore.QObject):
         self.intermediate_files = intermediate_files
 
     def run_registration(self):
+        start_time = QtCore.QTime.currentTime()
         if len(self.flip_brain_commands) > 0:
             self.progress.emit("Flipping the brain...")
             self.progress.emit("")
@@ -536,11 +537,13 @@ class RegistrationWorker(QtCore.QObject):
         self.progress.emit("Move temporary files...")
         cwd = os.getcwd()
         tmp_folder = filter(lambda x: os.path.isdir(x) and x.startswith("tmp"), os.listdir(cwd))
-        for folder in tmp_folder:
-            self.progress.emit("mv "+folder+" "+self.output_directory)
-            os.system("mv "+folder+" "+self.output_directory)
-            if len(self.intermediate_files) > 0:
-                self.intermediate_files.append(os.path.join(self.output_directory, folder))
+        # find the tmp folder created closest to the start time
+        tmp_folder = sorted(tmp_folder, key=lambda x: abs(start_time.msecsTo(QtCore.QTime.currentTime()) - os.stat(x).st_mtime))
+        tmp_folder = tmp_folder[0]
+        self.progress.emit("mv "+tmp_folder+" "+self.output_directory)
+        os.system("mv "+tmp_folder+" "+self.output_directory)
+        if len(self.intermediate_files) > 0:
+            self.intermediate_files.append(os.path.join(self.output_directory, tmp_folder))
         self.progress.emit("")
         # move the additional output files to the output directory
         self.progress.emit("Moving additional output files...")
