@@ -189,7 +189,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.last_row.addWidget(self.n4_bias_field_checkbox)
 
         self.quality_check_checkbox = QtWidgets.QCheckBox("Quality Check")
-        self.quality_check_checkbox.setChecked(True)
+        self.quality_check_checkbox.setChecked(False)
         self.last_row.addWidget(self.quality_check_checkbox)
 
         self.low_memory_checkbox = QtWidgets.QCheckBox("Low Memory")
