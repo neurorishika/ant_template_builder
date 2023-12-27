@@ -592,7 +592,7 @@ class RegistrationWorker(QtCore.QObject):
                     if os.path.isdir(file):
                         # remove the directory
                         self.progress.emit("Removing "+file)
-                        os.rmdir(file)
+                        os.system("rm -rf "+file)
                         self.progress.emit("")
                     else:
                         # remove the file
