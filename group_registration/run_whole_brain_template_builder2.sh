@@ -52,7 +52,7 @@ echo "Data copied to the current directory"
 echo "Affine registration starting"
 
 # Run the initial affine registration
-./ANTs/Scripts/antsMultivariateTemplateConstruction.sh -d 3 -A 1 -n 1 -c 2  -j $THREADS_AFFINE -i $ITERATIONS_AFFINE -k 1 -m 0x0x0 -t GR -m MI -r 1 -o affine_ $ID > >(tee -a stdout-affine-template.txt) 2> >(tee -a stderr-affine-template.txt >&2)
+./ANTs/Scripts/antsMultivariateTemplateConstruction.sh -d 3 -A 1 -n 1 -c 2  -j $THREADS_AFFINE -i $ITERATIONS_AFFINE -k 1 -m 1x0x0 -t GR -m MI -r 1 -o affine_ $ID > >(tee -a stdout-affine-template.txt) 2> >(tee -a stderr-affine-template.txt >&2)
 
 # let the user know that the affine registration has been completed
 echo "Affine registration completed"
