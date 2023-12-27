@@ -43,6 +43,12 @@ echo "Directory structure created"
 
 cp $DATA_DIRECTORY/$ID ./
 
+# replace all '.' with '_' in the filenames 
+for f in *.nrrd; do mv "$f" `echo $f | tr '.' '_'`; done
+
+# change the last '_' to '.' (reversing the extension change)
+for f in *_nrrd; do mv "$f" "${f%_*}.nrrd"; done
+
 # let the user know that the data has been copied
 echo "Data copied to the current directory"
 
