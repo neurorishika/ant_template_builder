@@ -90,6 +90,10 @@ class MainWindow(QtWidgets.QMainWindow):
         # create the registration type row 
         self.registration_type_row = QtWidgets.QHBoxLayout()
         self.registration_type_label = QtWidgets.QLabel("Registration Type:")
+        # create a ButtonGroup
+        self.registration_type_group = QtWidgets.QButtonGroup()
+        self.registration_type_group.setExclusive(True)
+        # create the radio buttons
         self.registration_type_RI = QtWidgets.QRadioButton("Purely Rigid")
         self.registration_type_RI.setChecked(False)
         self.registration_type_RI.toggled.connect(self.set_registration_type)
@@ -114,6 +118,16 @@ class MainWindow(QtWidgets.QMainWindow):
         self.registration_type_DD = QtWidgets.QRadioButton("Diffeomorphic Demons")
         self.registration_type_DD.setChecked(False)
         self.registration_type_DD.toggled.connect(self.set_registration_type)
+        # add the radio buttons to the button group
+        self.registration_type_group.addButton(self.registration_type_RI)
+        self.registration_type_group.addButton(self.registration_type_RA)
+        self.registration_type_group.addButton(self.registration_type_EL)
+        self.registration_type_group.addButton(self.registration_type_SY)
+        self.registration_type_group.addButton(self.registration_type_S2)
+        self.registration_type_group.addButton(self.registration_type_GR)
+        self.registration_type_group.addButton(self.registration_type_EX)
+        self.registration_type_group.addButton(self.registration_type_DD)
+        # add the radio buttons to the layout
         self.registration_type = "GR" # default registration type
         self.registration_type_row.addWidget(self.registration_type_label)
         self.registration_type_row.addWidget(self.registration_type_RI)
@@ -129,6 +143,10 @@ class MainWindow(QtWidgets.QMainWindow):
         # create the similarity metric row
         self.similarity_metric_row = QtWidgets.QHBoxLayout()
         self.similarity_metric_label = QtWidgets.QLabel("Similarity Metric:")
+        # create a ButtonGroup
+        self.similarity_metric_group = QtWidgets.QButtonGroup()
+        self.similarity_metric_group.setExclusive(True)
+        # create the radio buttons
         self.similarity_metric_CC = QtWidgets.QRadioButton("Cross Correlation")
         self.similarity_metric_CC.setChecked(True) # default similarity metric
         self.similarity_metric_CC.toggled.connect(self.set_similarity_metric)
@@ -141,6 +159,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self.similarity_metric_PR = QtWidgets.QRadioButton("Probability Mapping")
         self.similarity_metric_PR.setChecked(False)
         self.similarity_metric_PR.toggled.connect(self.set_similarity_metric)
+        # add the radio buttons to the button group
+        self.similarity_metric_group.addButton(self.similarity_metric_CC)
+        self.similarity_metric_group.addButton(self.similarity_metric_MI)
+        self.similarity_metric_group.addButton(self.similarity_metric_MSQ)
+        self.similarity_metric_group.addButton(self.similarity_metric_PR)
+        # add the radio buttons to the layout
         self.similarity_metric = "CC" # default similarity metric
         self.similarity_metric_row.addWidget(self.similarity_metric_label)
         self.similarity_metric_row.addWidget(self.similarity_metric_CC)

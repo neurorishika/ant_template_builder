@@ -132,12 +132,19 @@ class MainWindow(QtWidgets.QMainWindow):
         # create the warping type row
         self.warping_type_row = QtWidgets.QHBoxLayout()
         self.warping_type_label = QtWidgets.QLabel("Warping Type:")
+        # create a ButtonGroup
+        self.warping_type_group = QtWidgets.QButtonGroup()
+        # create the buttons
         self.warping_type_to_template = QtWidgets.QRadioButton("To Template")
         self.warping_type_to_template.setChecked(True)
         self.warping_type_to_template.toggled.connect(self.set_warping_type)
         self.warping_type_from_template = QtWidgets.QRadioButton("From Template")
         self.warping_type_from_template.setChecked(False)
         self.warping_type_from_template.toggled.connect(self.set_warping_type)
+        # add the buttons to the ButtonGroup
+        self.warping_type_group.addButton(self.warping_type_to_template)
+        self.warping_type_group.addButton(self.warping_type_from_template)
+        # set the warping type
         self.warping_type = "to_template"
         self.warping_type_row.addWidget(self.warping_type_label)
         self.warping_type_row.addWidget(self.warping_type_to_template)
@@ -147,6 +154,9 @@ class MainWindow(QtWidgets.QMainWindow):
         # create the special warping row (Volume, Segmentation Label, Point Set)
         self.special_warping_row = QtWidgets.QHBoxLayout()
         self.special_warping_label = QtWidgets.QLabel("Type of Data:")
+        # create a ButtonGroup
+        self.special_warping_group = QtWidgets.QButtonGroup()
+        # create the buttons
         self.special_warping_volume = QtWidgets.QRadioButton("Volume")
         self.special_warping_volume.setChecked(True)
         self.special_warping_volume.toggled.connect(self.set_special_warping_type)
@@ -156,6 +166,11 @@ class MainWindow(QtWidgets.QMainWindow):
         self.special_warping_point_set = QtWidgets.QRadioButton("Point Set")
         self.special_warping_point_set.setChecked(False)
         self.special_warping_point_set.toggled.connect(self.set_special_warping_type)
+        # add the buttons to the ButtonGroup
+        self.special_warping_group.addButton(self.special_warping_volume)
+        self.special_warping_group.addButton(self.special_warping_segmentation_label)
+        self.special_warping_group.addButton(self.special_warping_point_set)
+        # set the special warping type
         self.special_warping_type = "volume"
         self.special_warping_row.addWidget(self.special_warping_label)
         self.special_warping_row.addWidget(self.special_warping_volume)
