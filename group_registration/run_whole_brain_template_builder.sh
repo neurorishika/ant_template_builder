@@ -59,7 +59,7 @@ echo "Affine registration starting"
 
 # Run the initial affine registration
 # ./ANTs/Scripts/buildtemplateparallel.sh -d 3 -i $ITERATIONS_AFFINE -m 1x0x0 -t RA -s CC -r 1 -c 2 -j $THREADS_AFFINE -o affine_ $ID > >(tee -a stdout-affine-template.txt) 2> >(tee -a stderr-affine-template.txt >&2)
-./ANTs/Scripts/buildtemplateparallel.sh -d 3 -i $ITERATIONS_AFFINE -m 200x100x50x0 -t RA -s MI -r 1 -c 2 -j $THREADS_AFFINE -o affine_ $ID > >(tee -a stdout-affine-template.txt) 2> >(tee -a stderr-affine-template.txt >&2)
+./ANTs/Scripts/buildtemplateparallel.sh -d 3 -i $ITERATIONS_AFFINE -m 1x0x0 -t GR -s MI -r 1 -c 2 -j $THREADS_AFFINE -o affine_ $ID > >(tee -a stdout-affine-template.txt) 2> >(tee -a stderr-affine-template.txt >&2)
 
 # let the user know that the affine registration has been completed
 echo "Affine registration completed"
@@ -72,7 +72,7 @@ mv rigid_* obiroi_brain_$DATE/affine
 mv stdout-affine-template.txt obiroi_brain_$DATE/affine
 mv stderr-affine-template.txt obiroi_brain_$DATE/affine
 mv *.cfg obiroi_brain_$DATE/affine
-mv RA* obiroi_brain_$DATE/affine
+mv GR* obiroi_brain_$DATE/affine
 
 # let the user know that the affine registration has been completed
 echo "Affine registration files moved to the affine subdirectory"
