@@ -444,6 +444,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # output file
         out_file = output_prefix[:-1]+".nrrd" if not special_warping_type == "point_set" else output_prefix[:-1]+".csv"
+        
+        # save the output file
+        self.out_file = out_file
 
         # flip the brain back if it was flipped
         flip_output_commands = []
@@ -522,7 +525,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.debug_mode_checkbox.setEnabled(True)
 
         # pop up a message box
-        QtWidgets.QMessageBox.information(self, "Warping Finished", "Warping finished check the output directory for the registered file: <input_filename>_registered_Warped.nii.gz")
+        QtWidgets.QMessageBox.information(self, "Warping Finished", "Warping finished check the output directory for the registered file: {}".format(self.out_file))
 
     # function to update the terminal
     def update_terminal(self, text):
