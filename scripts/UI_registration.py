@@ -237,7 +237,8 @@ class MainWindow(QtWidgets.QMainWindow):
     # function to browse for the template file
     def browse_template(self):
         # open a file dialog
-        filename = QtWidgets.QFileDialog.getOpenFileName(self, 'Open Template File', os.getcwd(), 'Image Files (*.nii.gz *.nrrd)')[0]
+        open_folder = os.getcwd() if self.template_textbox.text() == "" else os.path.dirname(self.template_textbox.text())
+        filename = QtWidgets.QFileDialog.getOpenFileName(self, 'Open Template File', open_folder, 'Image Files (*.nii.gz *.nrrd)')[0]
         # make sure there are no spaces in the filename and alert the user to change it if there are
         if self.verify_no_spaces(filename) is False:
             return
@@ -247,7 +248,8 @@ class MainWindow(QtWidgets.QMainWindow):
     # function to browse for the input file
     def browse_input(self):
         # open a file dialog
-        filename = QtWidgets.QFileDialog.getOpenFileName(self, 'Open Input File', os.getcwd(), 'Image Files (*.nii.gz *.nrrd)')[0]
+        open_folder = os.getcwd() if self.input_textbox.text() == "" else os.path.dirname(self.input_textbox.text())
+        filename = QtWidgets.QFileDialog.getOpenFileName(self, 'Open Input File', open_folder, 'Image Files (*.nii.gz *.nrrd)')[0]
         # make sure there are no spaces in the filename and alert the user to change it if there are
         if self.verify_no_spaces(filename) is False:
             return
@@ -257,7 +259,8 @@ class MainWindow(QtWidgets.QMainWindow):
     # function to browse for the output directory
     def browse_output(self):
         # open a file dialog
-        filename = QtWidgets.QFileDialog.getExistingDirectory(self, 'Open Output Directory', os.getcwd())
+        open_folder = os.getcwd() if self.output_textbox.text() == "" else os.path.dirname(self.output_textbox.text())
+        filename = QtWidgets.QFileDialog.getExistingDirectory(self, 'Open Output Directory', open_folder)
         # make sure there are no spaces in the filename and alert the user to change it if there are
         if self.verify_no_spaces(filename) is False:
             return
