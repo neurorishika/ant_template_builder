@@ -43,6 +43,12 @@ echo "Directory structure created"
 
 cp $DATA_DIRECTORY/$ID ./
 
+# replace all '.' with '_' in the filenames 
+for f in *.nrrd; do mv "$f" `echo $f | tr '.' '_'`; done
+
+# change the last '_' to '.' (reversing the extension change)
+for f in *_nrrd; do mv "$f" "${f%_*}.nrrd"; done
+
 # let the user know that the data has been copied
 echo "Data copied to the current directory"
 
@@ -52,7 +58,7 @@ echo "Data copied to the current directory"
 echo "Affine registration starting"
 
 # Run the initial affine registration
-./ANTs/Scripts/antsMultivariateTemplateConstruction.sh -d 3 -A 1 -n 1 -c 2  -j $THREADS_AFFINE -i $ITERATIONS_AFFINE -k 1 -m 1x0x0 -t GR -s MI -r 1 -o affine_ $ID > >(tee -a stdout-affine-template.txt) 2> >(tee -a stderr-affine-template.txt >&2)
+./ANTs/Scripts/antsMultivariateTemplateConstruction.sh -d 3 -A 1 -n 1 -c 2  -j $THREADS_AFFINE -i $ITERATIONS_AFFINE -k 1 -w 1 -m 1x0x0 -t GR -s MI -r 1 -o affine_ $ID > >(tee -a stdout-affine-template.txt) 2> >(tee -a stderr-affine-template.txt >&2)
 
 # let the user know that the affine registration has been completed
 echo "Affine registration completed"
@@ -89,7 +95,7 @@ fi
 echo "Syn registration starting"
 
 # Run the syn registration
-./ANTs/Scripts/antsMultivariateTemplateConstruction.sh -d 3 -A 1 -n 1 -c 2 -j $THREADS_SYN -i $ITERATIONS_SYN -k 1 -m 30x90x20x8 -t GR -s CC -r 0 -o complete_ -z affine_template0.nii.gz $ID > >(tee -a stdout-syn-template.txt) 2> >(tee -a stderr-syn-template.txt >&2)
+./ANTs/Scripts/antsMultivariateTemplateConstruction.sh -d 3 -A 1 -n 1 -c 2 -j $THREADS_SYN -i $ITERATIONS_SYN -k 1 -w 1 -m 30x90x20x8 -t GR -s CC -r 0 -o complete_ -z affine_template0.nii.gz $ID > >(tee -a stdout-syn-template.txt) 2> >(tee -a stderr-syn-template.txt >&2)
 
 # let the user know that the syn registration has been completed
 echo "Syn registration completed"
