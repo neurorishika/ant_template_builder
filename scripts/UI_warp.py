@@ -228,7 +228,8 @@ class MainWindow(QtWidgets.QMainWindow):
     # function to browse for the input file (can be Image Files, or csv files)
     def browse_input(self):
         # open a file dialog
-        filename = QtWidgets.QFileDialog.getOpenFileName(self, 'Open Input File', os.getcwd(), 'Image Files (*.nii.gz *.nrrd) ;; CSV Files (*.csv)')[0]
+        open_folder = os.getcwd() if self.input_textbox.text() == "" else os.path.dirname(self.input_textbox.text())
+        filename = QtWidgets.QFileDialog.getOpenFileName(self, 'Open Input File', open_folder, 'Image Files (*.nii.gz *.nrrd) ;; CSV Files (*.csv)')[0]
         # make sure there are no spaces in the filename and alert the user to change it if there are
         if self.verify_no_spaces(filename) is False:
             return
@@ -238,7 +239,8 @@ class MainWindow(QtWidgets.QMainWindow):
     # function to browse for the target reference file
     def browse_target(self):
         # open a file dialog
-        filename = QtWidgets.QFileDialog.getOpenFileName(self, 'Open Target Reference File', os.getcwd(), 'Image Files (*.nii.gz *.nrrd)')[0]
+        open_folder = os.getcwd() if self.target_textbox.text() == "" else os.path.dirname(self.target_textbox.text())
+        filename = QtWidgets.QFileDialog.getOpenFileName(self, 'Open Target Reference File', open_folder, 'Image Files (*.nii.gz *.nrrd)')[0]
         # make sure there are no spaces in the filename and alert the user to change it if there are
         if self.verify_no_spaces(filename) is False:
             return
@@ -282,7 +284,8 @@ class MainWindow(QtWidgets.QMainWindow):
     # function to browse for the output directory
     def browse_output(self):
         # open a file dialog
-        filename = QtWidgets.QFileDialog.getExistingDirectory(self, 'Open Output Directory', os.getcwd())
+        open_folder = os.cwd() if self.output_textbox.text() == "" else self.output_textbox.text()
+        filename = QtWidgets.QFileDialog.getExistingDirectory(self, 'Open Output Directory', open_folder)
         # make sure there are no spaces in the filename and alert the user to change it if there are
         if self.verify_no_spaces(filename) is False:
             return
@@ -292,7 +295,8 @@ class MainWindow(QtWidgets.QMainWindow):
     # function to browse for the warp file
     def browse_warp(self):
         # open a file dialog
-        filename = QtWidgets.QFileDialog.getOpenFileName(self, 'Open Warp File', os.getcwd(), 'Image Files (*.nii.gz)')[0]
+        open_folder = os.getcwd() if self.warp_textbox.text() == "" else os.path.dirname(self.warp_textbox.text())
+        filename = QtWidgets.QFileDialog.getOpenFileName(self, 'Open Warp File', open_folder, 'Image Files (*.nii.gz)')[0]
         # make sure there are no spaces in the filename and alert the user to change it if there are
         if self.verify_no_spaces(filename) is False:
             return
@@ -302,7 +306,8 @@ class MainWindow(QtWidgets.QMainWindow):
     # function to browse for the inverse warp file
     def browse_inverse_warp(self):
         # open a file dialog
-        filename = QtWidgets.QFileDialog.getOpenFileName(self, 'Open Inverse Warp File', os.getcwd(), 'Image Files (*.nii.gz)')[0]
+        open_folder = os.getcwd() if self.inverse_warp_textbox.text() == "" else os.path.dirname(self.inverse_warp_textbox.text())
+        filename = QtWidgets.QFileDialog.getOpenFileName(self, 'Open Inverse Warp File', open_folder, 'Image Files (*.nii.gz)')[0]
         # make sure there are no spaces in the filename and alert the user to change it if there are
         if self.verify_no_spaces(filename) is False:
             return
@@ -312,7 +317,8 @@ class MainWindow(QtWidgets.QMainWindow):
     # function to browse for the affine file (can be mat files or txt files)
     def browse_affine(self):
         # open a file dialog
-        filename = QtWidgets.QFileDialog.getOpenFileName(self, 'Open Affine File', os.getcwd(), 'MAT Files (*.mat) ;; TXT Files (*.txt)')[0]
+        open_folder = os.getcwd() if self.affine_textbox.text() == "" else os.path.dirname(self.affine_textbox.text())
+        filename = QtWidgets.QFileDialog.getOpenFileName(self, 'Open Affine File', open_folder, 'MAT Files (*.mat) ;; TXT Files (*.txt)')[0]
         # make sure there are no spaces in the filename and alert the user to change it if there are
         if self.verify_no_spaces(filename) is False:
             return
