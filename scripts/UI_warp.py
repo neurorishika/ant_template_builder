@@ -292,7 +292,7 @@ class MainWindow(QtWidgets.QMainWindow):
             else:
                 self.affine_textbox.setText(affine_file)
             # change deformed.nii.gz to .mat
-            mat_file = target_file.replace("deformed.nii.gz", ".mat")
+            mat_file = target_file.replace("_deformed.nii.gz", ".mat")
             # check if the mat file exists
             if not os.path.exists(mat_file):
                 QtWidgets.QMessageBox.warning(self, "Warning", "Mat file does not exist. Please change the target file for autofill or add the mat file manually.")
