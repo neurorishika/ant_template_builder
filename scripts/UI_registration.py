@@ -24,6 +24,7 @@ import sys
 import os
 import glob
 from PyQt5 import QtWidgets, QtCore, QtGui
+import time
 
 about_message ="""
 Welcome to the Kronauer Lab Template Registration Toolkit!
@@ -343,11 +344,6 @@ class MainWindow(QtWidgets.QMainWindow):
         output_prefix = os.path.splitext(input_filename)[0]+"_"
         output_prefix = os.path.join(output_directory, output_prefix)
 
-        # # make sure no files with the same prefix already exist (use glob)
-        # if len(glob.glob(output_prefix+"*")) > 0:
-        #     QtWidgets.QMessageBox.warning(self, "Warning", "Files with the same prefix already exist. Please change the output directory or the input file.")
-        #     return
-
         # check number of threads
         self.check_num_iterations()
 
@@ -397,7 +393,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
             # add the intermediate files to the list (log files included)
             intermediate_files.append(flipped_input_file)
-            # intermediate_files.append(mirror_file)
             intermediate_files.append(mirror_file[:-4]+"_out.log")
             intermediate_files.append(mirror_file[:-4]+"_err.log")
             intermediate_files.append(flipped_input_file[:-5]+"_out.log")
@@ -522,7 +517,6 @@ class RegistrationWorker(QtCore.QObject):
         self.intermediate_files = intermediate_files
 
     def run_registration(self):
-        start_time = QtCore.QTime.currentTime()
         if len(self.flip_brain_commands) > 0:
             self.progress.emit("Flipping the brain...")
             self.progress.emit("")
@@ -535,20 +529,25 @@ class RegistrationWorker(QtCore.QObject):
         self.progress.emit("Running registration...")
         self.progress.emit("")
         self.progress.emit(self.registration_command)
+        current_time = time.time()
         os.system(self.registration_command)
         # # move tmp files
         # self.progress.emit("Move temporary files...")
         # cwd = os.getcwd()
         # tmp_folder = filter(lambda x: os.path.isdir(x) and x.startswith("tmp"), os.listdir(cwd))
-        # # find the tmp folder created closest to the start time
-        # tmp_folder = sorted(tmp_folder, key=lambda x: abs(start_time.msecsTo(QtCore.QTime.currentTime()) - os.stat(x).st_mtime))
-        # tmp_folder = tmp_folder[0]
+        # # get the time of the tmp folder creation
+        # tmp_folder = filter(lambda x: os.stat(x).st_ctime > current_time, tmp_folder)
+        # # sort the tmp folders by creation time (earliest first)
+        # tmp_folder = sorted(tmp_folder, key=lambda x: os.stat(x).st_ctime)
+        # # get the first tmp folder
+        # if len(tmp_folder) > 0:
+        #     tmp_folder = tmp_folder[0]
         # self.progress.emit("mv "+tmp_folder+" "+self.output_directory)
         # os.system("mv "+tmp_folder+" "+self.output_directory)
         # if len(self.intermediate_files) > 0:
         #     self.intermediate_files.append(os.path.join(self.output_directory, tmp_folder))
         # self.progress.emit("")
-        # move the additional output files to the output directory
+        # # move the additional output files to the output directory
         # self.progress.emit("Moving additional output files...")
         # cwd = os.getcwd()
         # # get .cfg and .nii.gz files

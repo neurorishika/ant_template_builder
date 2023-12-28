@@ -129,17 +129,17 @@ class MainWindow(QtWidgets.QMainWindow):
         self.affine_row.addWidget(self.affine_browse)
         self.main_layout.addLayout(self.affine_row)
 
-        # create the Mat file row
-        self.mat_row = QtWidgets.QHBoxLayout()
-        self.mat_label = QtWidgets.QLabel("Mat File:")
-        self.mat_textbox = QtWidgets.QLineEdit()
-        self.mat_textbox.setReadOnly(True)
-        self.mat_browse = QtWidgets.QPushButton("Browse")
-        self.mat_browse.clicked.connect(self.browse_mat)
-        self.mat_row.addWidget(self.mat_label)
-        self.mat_row.addWidget(self.mat_textbox)
-        self.mat_row.addWidget(self.mat_browse)
-        self.main_layout.addLayout(self.mat_row)
+        # create the Reflection file row
+        self.reflection_row = QtWidgets.QHBoxLayout()
+        self.reflection_label = QtWidgets.QLabel("Mat File:")
+        self.reflection_textbox = QtWidgets.QLineEdit()
+        self.reflection_textbox.setReadOnly(True)
+        self.reflection_browse = QtWidgets.QPushButton("Browse")
+        self.reflection_browse.clicked.connect(self.browse_reflection)
+        self.reflection_row.addWidget(self.reflection_label)
+        self.reflection_row.addWidget(self.reflection_textbox)
+        self.reflection_row.addWidget(self.reflection_browse)
+        self.main_layout.addLayout(self.reflection_row)
 
         # create the warping type row
         self.warping_type_row = QtWidgets.QHBoxLayout()
@@ -292,12 +292,12 @@ class MainWindow(QtWidgets.QMainWindow):
             else:
                 self.affine_textbox.setText(affine_file)
             # change deformed.nii.gz to .mat
-            mat_file = target_file.replace("_deformed.nii.gz", ".mat")
+            reflection_file = target_file.replace("_deformed.nii.gz", ".mat")
             # check if the mat file exists
-            if not os.path.exists(mat_file):
-                QtWidgets.QMessageBox.warning(self, "Warning", "Mat file does not exist. Please change the target file for autofill or add the mat file manually.")
+            if not os.path.exists(reflection_file):
+                QtWidgets.QMessageBox.warning(self, "Warning", "Reflection file does not exist. Please change the target file for autofill or add the mat file manually.")
             else:
-                self.mat_textbox.setText(mat_file)
+                self.reflection_textbox.setText(reflection_file)
 
 
     # function to browse for the output directory
@@ -345,15 +345,15 @@ class MainWindow(QtWidgets.QMainWindow):
         self.affine_textbox.setText(filename)
 
     # function to browse for the mat file
-    def browse_mat(self):
+    def browse_reflection(self):
         # open a file dialog
-        open_folder = os.getcwd() if self.mat_textbox.text() == "" else os.path.dirname(self.mat_textbox.text())
+        open_folder = os.getcwd() if self.reflection_textbox.text() == "" else os.path.dirname(self.reflection_textbox.text())
         filename = QtWidgets.QFileDialog.getOpenFileName(self, 'Open Mat File', open_folder, 'MAT Files (*.mat)')[0]
         # make sure there are no spaces in the filename and alert the user to change it if there are
         if self.verify_no_spaces(filename) is False:
             return
         # set the textbox to the filename
-        self.mat_textbox.setText(filename)
+        self.reflection_textbox.setText(filename)
         
 
     # function to set the warping type
@@ -432,19 +432,16 @@ class MainWindow(QtWidgets.QMainWindow):
         debug_mode = self.debug_mode_checkbox.isChecked()
 
         intermediate_files = []
-        flip_input_commands = []
+        flip_brain_commands = []
 
         if flip_brain:
 
             flipped_input_file = output_directory + os.path.splitext(input_filename)[0]+"_flipped"+os.path.splitext(input_filename)[1]
-            # mirror_file = output_directory + ((input_filename[:-5] if input_filename.endswith(".nrrd") else input_filename[:-7]) + '.mat')
-            mirror_file = self.mat_textbox.text()
-            # flip_input_commands.append("ImageMath 3 {} ReflectionMatrix {} 0 >{}_out.log 2>{}_err.log".format(mirror_file, input_file, mirror_file[:-4], mirror_file[:-4]))
-            flip_input_commands.append("antsApplyTransforms -d 3 -i {} -o {} -t {} -r {} --float {} >{}_out.log 2>{}_err.log".format(input_file, flipped_input_file, mirror_file, input_file, low_memory, flipped_input_file[:-5], flipped_input_file[:-5]))
+            mirror_file = self.reflection_textbox.text()
+            flip_brain_commands.append("antsApplyTransforms -d 3 -i {} -o {} -t {} -r {} --float {} >{}_out.log 2>{}_err.log".format(input_file, flipped_input_file, mirror_file, input_file, low_memory, flipped_input_file[:-5], flipped_input_file[:-5]))
             input_file = flipped_input_file
 
             # intermediate files
-            # intermediate_files.append(mirror_file)
             intermediate_files.append(flipped_input_file)
             intermediate_files.append(mirror_file[:-4]+"_out.log")
             intermediate_files.append(mirror_file[:-4]+"_err.log")
@@ -485,24 +482,6 @@ class MainWindow(QtWidgets.QMainWindow):
         
         # save the output file
         self.out_file = out_file
-
-        # flip the brain back if it was flipped
-        flip_output_commands = []
-
-        # if flip_brain:
-            
-            # flipped_out_file = output_directory + os.path.splitext(input_filename)[0]+"_fixed"+os.path.splitext(input_filename)[1]
-            # mirror_reverse_file = output_directory + ((input_filename[:-5] if input_filename.endswith(".nrrd") else input_filename[:-7]) + '_reverse.mat')
-            #flip_output_commands.append("ImageMath 3 {} ReflectionMatrix {} 0 >{}_out.log 2>{}_err.log".format(mirror_reverse_file, out_file, mirror_reverse_file[:-4], mirror_reverse_file[:-4]))
-            #flip_output_commands.append("antsApplyTransforms -d 3 -i {} -o {} -t {} -r {} --float {} >{}_out.log 2>{}_err.log".format(out_file, flipped_out_file, mirror_reverse_file, out_file, low_memory, flipped_out_file[:-5], flipped_out_file[:-5]))
-            #flip_output_commands.append("PermuteFlipImageOrientationAxes 3 {} {} 0 1 2 1 0 0".format(flipped_out_file, flipped_out_file))
-            # intermediate files
-            #intermediate_files.append(out_file)
-            #intermediate_files.append(mirror_reverse_file)
-            #intermediate_files.append(mirror_reverse_file[:-4]+"_out.log")
-            #intermediate_files.append(mirror_reverse_file[:-4]+"_err.log")
-            #intermediate_files.append(flipped_out_file[:-5]+"_out.log")
-            #intermediate_files.append(flipped_out_file[:-5]+"_err.log")
         
         if debug_mode:
             intermediate_files = []
@@ -529,7 +508,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # create a new thread to run the warping command
         self.warping_thread = QtCore.QThread()
-        self.warping_worker = WarpingWorker(warping_command, flip_input_commands, flip_output_commands, intermediate_files)
+        self.warping_worker = WarpingWorker(warping_command, flip_brain_commands, intermediate_files)
         self.warping_worker.moveToThread(self.warping_thread)
         self.warping_thread.started.connect(self.warping_worker.run_warping)
         self.warping_worker.finished.connect(self.warping_thread.quit)
@@ -574,19 +553,18 @@ class WarpingWorker(QtCore.QObject):
     finished = QtCore.pyqtSignal()
     progress = QtCore.pyqtSignal(str)
 
-    def __init__(self, warping_command, flip_input_commands, flip_output_commands, intermediate_files):
+    def __init__(self, warping_command, flip_brain_commands, intermediate_files):
         super().__init__()
         self.warping_command = warping_command
-        self.flip_input_commands = flip_input_commands
-        self.flip_output_commands = flip_output_commands
+        self.flip_brain_commands = flip_brain_commands
         self.intermediate_files = intermediate_files
 
     def run_warping(self):
-        if len(self.flip_input_commands) > 0:
+        if len(self.flip_brain_commands) > 0:
             self.progress.emit("Flipping brain...")
             self.progress.emit("")
             # run the flip brain command
-            for command in self.flip_input_commands:
+            for command in self.flip_brain_commands:
                 self.progress.emit(command)
                 os.system(command)
                 self.progress.emit("")
@@ -596,15 +574,6 @@ class WarpingWorker(QtCore.QObject):
         self.progress.emit("")
         self.progress.emit(self.warping_command)
         os.system(self.warping_command)
-
-        if len(self.flip_output_commands) > 0:
-            self.progress.emit("Flipping brain back...")
-            self.progress.emit("")
-            # run the flip brain command
-            for command in self.flip_output_commands:
-                self.progress.emit(command)
-                os.system(command)
-                self.progress.emit("")
 
         # remove all empty log/error files
         if len(self.intermediate_files) > 0:
