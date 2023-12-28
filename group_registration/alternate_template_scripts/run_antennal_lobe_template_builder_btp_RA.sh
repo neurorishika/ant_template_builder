@@ -16,7 +16,7 @@ THREADS_AFFINE=12
 THREADS_SYN=12
 
 # Setup the number of iterations to be used
-ITERATIONS_AFFINE=2
+ITERATIONS_AFFINE=4
 ITERATIONS_SYN=6
 
 # Create a directory for the template building in the current directory
