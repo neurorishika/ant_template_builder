@@ -461,9 +461,9 @@ class MainWindow(QtWidgets.QMainWindow):
             
             flipped_out_file = output_directory + os.path.splitext(input_filename)[0]+"_fixed"+os.path.splitext(input_filename)[1]
             mirror_reverse_file = output_directory + ((input_filename[:-5] if input_filename.endswith(".nrrd") else input_filename[:-7]) + '_reverse.mat')
-            flip_output_commands.append("ImageMath 3 {} ReflectionMatrix {} 0 >{}_out.log 2>{}_err.log".format(mirror_reverse_file, out_file, mirror_reverse_file[:-4], mirror_reverse_file[:-4]))
-            flip_output_commands.append("antsApplyTransforms -d 3 -i {} -o {} -t {} -r {} --float {} >{}_out.log 2>{}_err.log".format(out_file, flipped_out_file, mirror_reverse_file, out_file, low_memory, flipped_out_file[:-5], flipped_out_file[:-5]))
-            flip_output_commands.append("PermuteFlipImageOrientationAxes 3 {} {} 0 1 2 1 0 0".format(flipped_out_file, flipped_out_file))
+            #flip_output_commands.append("ImageMath 3 {} ReflectionMatrix {} 0 >{}_out.log 2>{}_err.log".format(mirror_reverse_file, out_file, mirror_reverse_file[:-4], mirror_reverse_file[:-4]))
+            #flip_output_commands.append("antsApplyTransforms -d 3 -i {} -o {} -t {} -r {} --float {} >{}_out.log 2>{}_err.log".format(out_file, flipped_out_file, mirror_reverse_file, out_file, low_memory, flipped_out_file[:-5], flipped_out_file[:-5]))
+            #flip_output_commands.append("PermuteFlipImageOrientationAxes 3 {} {} 0 1 2 1 0 0".format(flipped_out_file, flipped_out_file))
             # intermediate files
             intermediate_files.append(out_file)
             intermediate_files.append(mirror_reverse_file)
