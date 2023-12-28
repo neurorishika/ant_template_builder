@@ -284,7 +284,7 @@ class MainWindow(QtWidgets.QMainWindow):
     # function to browse for the output directory
     def browse_output(self):
         # open a file dialog
-        open_folder = os.cwd() if self.output_textbox.text() == "" else self.output_textbox.text()
+        open_folder = os.getcwd() if self.output_textbox.text() == "" else self.output_textbox.text()
         filename = QtWidgets.QFileDialog.getExistingDirectory(self, 'Open Output Directory', open_folder)
         # make sure there are no spaces in the filename and alert the user to change it if there are
         if self.verify_no_spaces(filename) is False:
