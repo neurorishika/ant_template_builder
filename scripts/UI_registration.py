@@ -531,41 +531,50 @@ class RegistrationWorker(QtCore.QObject):
         self.progress.emit(self.registration_command)
         current_time = time.time()
         os.system(self.registration_command)
-        # # move tmp files
-        # self.progress.emit("Move temporary files...")
-        # cwd = os.getcwd()
-        # tmp_folder = filter(lambda x: os.path.isdir(x) and x.startswith("tmp"), os.listdir(cwd))
-        # # get the time of the tmp folder creation
-        # tmp_folder = filter(lambda x: os.stat(x).st_ctime > current_time, tmp_folder)
-        # # sort the tmp folders by creation time (earliest first)
-        # tmp_folder = sorted(tmp_folder, key=lambda x: os.stat(x).st_ctime)
-        # # get the first tmp folder
-        # if len(tmp_folder) > 0:
-        #     tmp_folder = tmp_folder[0]
-        # self.progress.emit("mv "+tmp_folder+" "+self.output_directory)
-        # os.system("mv "+tmp_folder+" "+self.output_directory)
-        # if len(self.intermediate_files) > 0:
-        #     self.intermediate_files.append(os.path.join(self.output_directory, tmp_folder))
-        # self.progress.emit("")
-        # # move the additional output files to the output directory
-        # self.progress.emit("Moving additional output files...")
-        # cwd = os.getcwd()
-        # # get .cfg and .nii.gz files
-        # cfg_files = filter(lambda x: os.path.isfile(x) and x.endswith(".cfg"), os.listdir(cwd))
-        # nii_files = filter(lambda x: os.path.isfile(x) and x.endswith(".nii.gz"), os.listdir(cwd))
-        # # move the files
-        # for file in cfg_files:
-        #     self.progress.emit("mv "+file+" "+self.output_directory)
-        #     os.system("mv "+file+" "+self.output_directory)
-        #     if len(self.intermediate_files) > 0:
-        #         self.intermediate_files.append(os.path.join(self.output_directory, file))
-        # self.progress.emit("")
-        # for file in nii_files:
-        #     self.progress.emit("mv "+file+" "+self.output_directory)
-        #     os.system("mv "+file+" "+self.output_directory)
-        #     if len(self.intermediate_files) > 0:
-        #         self.intermediate_files.append(os.path.join(self.output_directory, file))
-        # self.progress.emit("")
+        # move tmp files
+        self.progress.emit("Move temporary files...")
+        cwd = os.getcwd()
+        tmp_folder = filter(lambda x: os.path.isdir(x) and x.startswith("tmp"), os.listdir(cwd))
+        # get the time of the tmp folder creation
+        tmp_folder = filter(lambda x: os.stat(x).st_ctime > current_time, tmp_folder)
+        # sort the tmp folders by creation time (earliest first)
+        tmp_folder = sorted(tmp_folder, key=lambda x: os.stat(x).st_ctime)
+        # get the first tmp folder
+        if len(tmp_folder) > 0:
+            tmp_folder = tmp_folder[0]
+            self.progress.emit("mv "+tmp_folder+" "+self.output_directory)
+            os.system("mv "+tmp_folder+" "+self.output_directory)
+            if len(self.intermediate_files) > 0:
+                self.intermediate_files.append(os.path.join(self.output_directory, tmp_folder))
+            self.progress.emit("")
+        # move the additional output files to the output directory
+        self.progress.emit("Moving additional output files...")
+        cwd = os.getcwd()
+        # get .cfg and .nii.gz files
+        cfg_files = filter(lambda x: os.path.isfile(x) and x.endswith(".cfg"), os.listdir(cwd))
+        nii_files = filter(lambda x: os.path.isfile(x) and x.endswith(".nii.gz"), os.listdir(cwd))
+        # sort the files by creation time (earliest first)
+        cfg_files = filter(lambda x: os.stat(x).st_ctime > current_time, cfg_files)
+        cfg_files = sorted(cfg_files, key=lambda x: os.stat(x).st_ctime)
+        nii_files = filter(lambda x: os.stat(x).st_ctime > current_time, nii_files)
+        nii_files = sorted(nii_files, key=lambda x: os.stat(x).st_ctime)
+        # get the first file
+        if len(cfg_files) > 0:
+            cfg_files = cfg_files[0]
+            # move the files
+            self.progress.emit("mv "+cfg_files+" "+self.output_directory)
+            os.system("mv "+cfg_files+" "+self.output_directory)
+            if len(self.intermediate_files) > 0:
+                self.intermediate_files.append(os.path.join(self.output_directory, cfg_files))
+            self.progress.emit("")
+        if len(nii_files) > 0:
+            nii_files = nii_files[0]
+            # move the files
+            self.progress.emit("mv "+nii_files+" "+self.output_directory)
+            os.system("mv "+nii_files+" "+self.output_directory)
+            if len(self.intermediate_files) > 0:
+                self.intermediate_files.append(os.path.join(self.output_directory, nii_files))
+            self.progress.emit("")
 
         # remove the intermediate files
         if len(self.intermediate_files) > 0:
