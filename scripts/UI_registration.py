@@ -396,7 +396,6 @@ class MainWindow(QtWidgets.QMainWindow):
             input_file = flipped_input_file
 
             # add the intermediate files to the list (log files included)
-            intermediate_files.append(mirror_file)
             intermediate_files.append(flipped_input_file)
             intermediate_files.append(mirror_file[:-4]+"_out.log")
             intermediate_files.append(mirror_file[:-4]+"_err.log")
@@ -548,7 +547,7 @@ class RegistrationWorker(QtCore.QObject):
         # if len(self.intermediate_files) > 0:
         #     self.intermediate_files.append(os.path.join(self.output_directory, tmp_folder))
         # self.progress.emit("")
-        # # move the additional output files to the output directory
+        # move the additional output files to the output directory
         # self.progress.emit("Moving additional output files...")
         # cwd = os.getcwd()
         # # get .cfg and .nii.gz files
@@ -561,7 +560,6 @@ class RegistrationWorker(QtCore.QObject):
         #     if len(self.intermediate_files) > 0:
         #         self.intermediate_files.append(os.path.join(self.output_directory, file))
         # self.progress.emit("")
-
         # for file in nii_files:
         #     self.progress.emit("mv "+file+" "+self.output_directory)
         #     os.system("mv "+file+" "+self.output_directory)

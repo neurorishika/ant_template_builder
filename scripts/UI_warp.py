@@ -129,6 +129,18 @@ class MainWindow(QtWidgets.QMainWindow):
         self.affine_row.addWidget(self.affine_browse)
         self.main_layout.addLayout(self.affine_row)
 
+        # create the Mat file row
+        self.mat_row = QtWidgets.QHBoxLayout()
+        self.mat_label = QtWidgets.QLabel("Mat File:")
+        self.mat_textbox = QtWidgets.QLineEdit()
+        self.mat_textbox.setReadOnly(True)
+        self.mat_browse = QtWidgets.QPushButton("Browse")
+        self.mat_browse.clicked.connect(self.browse_mat)
+        self.mat_row.addWidget(self.mat_label)
+        self.mat_row.addWidget(self.mat_textbox)
+        self.mat_row.addWidget(self.mat_browse)
+        self.main_layout.addLayout(self.mat_row)
+
         # create the warping type row
         self.warping_type_row = QtWidgets.QHBoxLayout()
         self.warping_type_label = QtWidgets.QLabel("Warping Type:")
@@ -279,6 +291,13 @@ class MainWindow(QtWidgets.QMainWindow):
                 QtWidgets.QMessageBox.warning(self, "Warning", "Affine file does not exist. Please change the target file for autofill or add the affine file manually.")
             else:
                 self.affine_textbox.setText(affine_file)
+            # change deformed.nii.gz to .mat
+            mat_file = target_file.replace("deformed.nii.gz", ".mat")
+            # check if the mat file exists
+            if not os.path.exists(mat_file):
+                QtWidgets.QMessageBox.warning(self, "Warning", "Mat file does not exist. Please change the target file for autofill or add the mat file manually.")
+            else:
+                self.mat_textbox.setText(mat_file)
 
 
     # function to browse for the output directory
@@ -324,6 +343,18 @@ class MainWindow(QtWidgets.QMainWindow):
             return
         # set the textbox to the filename
         self.affine_textbox.setText(filename)
+
+    # function to browse for the mat file
+    def browse_mat(self):
+        # open a file dialog
+        open_folder = os.getcwd() if self.mat_textbox.text() == "" else os.path.dirname(self.mat_textbox.text())
+        filename = QtWidgets.QFileDialog.getOpenFileName(self, 'Open Mat File', open_folder, 'MAT Files (*.mat)')[0]
+        # make sure there are no spaces in the filename and alert the user to change it if there are
+        if self.verify_no_spaces(filename) is False:
+            return
+        # set the textbox to the filename
+        self.mat_textbox.setText(filename)
+        
 
     # function to set the warping type
     def set_warping_type(self):
