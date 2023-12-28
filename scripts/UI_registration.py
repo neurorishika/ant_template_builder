@@ -397,6 +397,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
             # add the intermediate files to the list (log files included)
             intermediate_files.append(flipped_input_file)
+            # intermediate_files.append(mirror_file)
             intermediate_files.append(mirror_file[:-4]+"_out.log")
             intermediate_files.append(mirror_file[:-4]+"_err.log")
             intermediate_files.append(flipped_input_file[:-5]+"_out.log")

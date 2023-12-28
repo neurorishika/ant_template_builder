@@ -437,13 +437,14 @@ class MainWindow(QtWidgets.QMainWindow):
         if flip_brain:
 
             flipped_input_file = output_directory + os.path.splitext(input_filename)[0]+"_flipped"+os.path.splitext(input_filename)[1]
-            mirror_file = output_directory + ((input_filename[:-5] if input_filename.endswith(".nrrd") else input_filename[:-7]) + '.mat')
-            flip_input_commands.append("ImageMath 3 {} ReflectionMatrix {} 0 >{}_out.log 2>{}_err.log".format(mirror_file, input_file, mirror_file[:-4], mirror_file[:-4]))
+            # mirror_file = output_directory + ((input_filename[:-5] if input_filename.endswith(".nrrd") else input_filename[:-7]) + '.mat')
+            mirror_file = self.mat_textbox.text()
+            # flip_input_commands.append("ImageMath 3 {} ReflectionMatrix {} 0 >{}_out.log 2>{}_err.log".format(mirror_file, input_file, mirror_file[:-4], mirror_file[:-4]))
             flip_input_commands.append("antsApplyTransforms -d 3 -i {} -o {} -t {} -r {} --float {} >{}_out.log 2>{}_err.log".format(input_file, flipped_input_file, mirror_file, input_file, low_memory, flipped_input_file[:-5], flipped_input_file[:-5]))
             input_file = flipped_input_file
 
             # intermediate files
-            intermediate_files.append(mirror_file)
+            # intermediate_files.append(mirror_file)
             intermediate_files.append(flipped_input_file)
             intermediate_files.append(mirror_file[:-4]+"_out.log")
             intermediate_files.append(mirror_file[:-4]+"_err.log")
@@ -488,10 +489,10 @@ class MainWindow(QtWidgets.QMainWindow):
         # flip the brain back if it was flipped
         flip_output_commands = []
 
-        if flip_brain:
+        # if flip_brain:
             
-            flipped_out_file = output_directory + os.path.splitext(input_filename)[0]+"_fixed"+os.path.splitext(input_filename)[1]
-            mirror_reverse_file = output_directory + ((input_filename[:-5] if input_filename.endswith(".nrrd") else input_filename[:-7]) + '_reverse.mat')
+            # flipped_out_file = output_directory + os.path.splitext(input_filename)[0]+"_fixed"+os.path.splitext(input_filename)[1]
+            # mirror_reverse_file = output_directory + ((input_filename[:-5] if input_filename.endswith(".nrrd") else input_filename[:-7]) + '_reverse.mat')
             #flip_output_commands.append("ImageMath 3 {} ReflectionMatrix {} 0 >{}_out.log 2>{}_err.log".format(mirror_reverse_file, out_file, mirror_reverse_file[:-4], mirror_reverse_file[:-4]))
             #flip_output_commands.append("antsApplyTransforms -d 3 -i {} -o {} -t {} -r {} --float {} >{}_out.log 2>{}_err.log".format(out_file, flipped_out_file, mirror_reverse_file, out_file, low_memory, flipped_out_file[:-5], flipped_out_file[:-5]))
             #flip_output_commands.append("PermuteFlipImageOrientationAxes 3 {} {} 0 1 2 1 0 0".format(flipped_out_file, flipped_out_file))
