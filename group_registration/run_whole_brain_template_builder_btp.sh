@@ -71,7 +71,7 @@ echo "Affine registration completed"
 # Things to move: affine_* stdout-affine-template.txt, stderr-affine-template.txt, *.cfg, job*.* and GR* folders
 
 mv affine_* obiroi_cns_btp_$DATE/affine
-mv rigid_* obiroi_cns_btp_$DATE/affine
+mv rigid obiroi_cns_btp_$DATE/affine
 mv stdout-affine-template.txt obiroi_cns_btp_$DATE/affine
 mv stderr-affine-template.txt obiroi_cns_btp_$DATE/affine
 mv *.cfg obiroi_cns_btp_$DATE/affine
