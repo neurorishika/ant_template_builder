@@ -115,13 +115,22 @@ poetry run python scripts/reset_symmetry.py --help
 The bash script for running the registration is in the `group_registration` folder. To run the script, navigate to the `group_registration` folder and run the following command:
 
 ```
-./run_whole_brain_registration.sh
+./run_whole_brain_registration_mtc.sh
 ```
 
-Once the registration is complete, the final results will be in the 'results/obiroi_brain_YYYYMMDD_HHMM' folder, all intermediate information will be inside the 'affine' and  'syn' subfolders. The final template will be in the 'results/obiroi_brain_YYYYMMDD_HHMM/complete_template.nrrd' file. Note that this template will be in the same orientation and resolution as the input images. To generate videos or a higher resolution template, please see the next section.
+for using the more updated antsMultivariateTemplateConstruction.sh script from ANTs. Alternatively, you can run:
+
+```
+./run_whole_brain_registration_btp.sh
+```
+to use the legacy buildtemplateparallel.sh which is now quasi-deprecated (see:[https://github.com/ANTsX/ANTs/issues/791](https://github.com/ANTsX/ANTs/issues/791)).
+
+As of right now, both codes generate are set up to generate virtually identical results.
+
+Once the registration is complete, the final results will be in the 'results/obiroi_cns_<mtc/btp>_YYYYMMDD_HHMM' folder, all intermediate information will be inside the 'affine' and  'syn' subfolders. The final template will be in the 'results/obiroi_cns_<mtc/btp>_YYYYMMDD_HHMM/complete_template<0>.nrrd' file. Note that this template will be in the same orientation and resolution as the input images. To generate videos or a higher resolution template, please see the next section.
 
 
-### Generate a different resolution template from a generated template
+## Generate a different resolution template from a generated template
 
 To generate a different resolution template from a generated template, you can use the `template_resample.py` script. To run the script, navigate to the `ant_template_builder` folder and run the following command:
 
@@ -136,12 +145,19 @@ poetry run python scripts/template_resample.py --help
 
 ```
 
+## Using the generated template
+
+A tutorial for registration and warping is available on [YouTube](https://www.youtube.com/watch?v=u3zFSthJ0VI).
+
+[![Watch the video](https://img.youtube.com/vi/u3zFSthJ0VI/maxresdefault.jpg)](https://youtu.be/u3zFSthJ0VI)
+
+
 ### Register a new brain to the template
 
 To register a new brain, we have provided a GUI that can be used to register a new brain to the template. To run the GUI, navigate to the `ant_template_builder` folder and run the following command:
 
 ```
-poetry run python scripts/UI_registration.py
+./run_registration_gui.sh
 ```
 
 ### Warp a Segmentation Label / Point Set / Different Channel to the Template
@@ -149,7 +165,7 @@ poetry run python scripts/UI_registration.py
 To warp a segmentation label, point set or a different channel to the template, we have provided a GUI that can be used to warp the segmentation label, point set or a different channel to the template. To run the GUI, navigate to the `ant_template_builder` folder and run the following command:
 
 ```
-poetry run python scripts/UI_warp.py
+./run_warping_gui.sh
 ```
 
 ### (Optional) Generate a video of the final template
@@ -378,12 +394,17 @@ FOR TEMPLATE SEGMENTATION:
 ## Determining the Asymmetry of the Brain
 
 ### When it is clearly Asymmetric
+
+![Clearly Asymmetric](https://raw.githubusercontent.com/neurorishika/ant_template_builder/main/tutorial/clearly_asymmetric.png)
  
-Look at the point where the two hemispheres of the mushroom body meet. If there is an apparent tilt towards the allocentric left/right (from your viewpoint in the stack) due to one hemisphere of the Medial Lobe being larger and dominating the other, mark them as egocentric right/left accordingly (since we are looking from the front of the animal, anterior to posterior, the egocentric leaning is the opposite of what we see). 
+Look at the point where the two hemispheres of the mushroom body meet. If there is an apparent tilt towards the left/right (from your viewpoint in the stack) due to one hemisphere of the Medial Lobe being larger and more dorsal to the other, mark them as egocentric right/left accordingly (since we are looking from the front of the animal, anterior to posterior, the egocentric leaning is the opposite of what we see). 
+
+![Clearly Asymmetric Labelled](https://raw.githubusercontent.com/neurorishika/ant_template_builder/main/tutorial/clearly_asymmetric_labelled.png)
 
 ### When it is hard to identify the Asymmetry
 
-Sometimes, the leaning/dominance of the hemisphere is a little unclear; at that point, you can adjust the brightness using the Fiji brightness/contrast tool to see if the tilt is more evident. Focus on the area slightly posterior to the first point of contact when going from anterior to posterior. Two sub-lobe-like structures can be seen at this point. Note that the one that is higher up at the dorsal edge of the mushroom body's medial lobe, right under the central body, is the dominant lobe. If the allocentric left side is more prominent and higher up, the effective leaning is allocentric right, and therefore, the brain is egocentric left-leaning and vice versa. 
+![Barely Asymmetric](https://raw.githubusercontent.com/neurorishika/ant_template_builder/main/tutorial/barely_asymmetric.png)
 
+Sometimes, the leaning/dominance of the hemisphere is a little unclear; at that point, you can adjust the brightness using the Fiji brightness/contrast tool to see if the tilt is more evident. Focus on the area slightly posterior to the first point of contact when going from anterior to posterior. Two sub-lobe-like structures can be seen at this point. Note that the one that is higher up at the dorsal edge of the mushroom body's medial lobe, right under the central body, is likely the dominant lobe. Another way to look at it is the boundary of the sub-lobes on the less dominant side meets the other hemisphere on the L/R boundary. If the left side is more prominent and higher up from your viewpoint, the effective leaning is right-leaning, and therefore, the brain is egocentric left-leaning and vice versa.
 
-
+![Barely Asymmetric Labelled](https://raw.githubusercontent.com/neurorishika/ant_template_builder/main/tutorial/barely_asymmetric_labelled.png)
